@@ -1,0 +1,30 @@
+@startuml
+
+participant 数据源 as producer
+participant "数据服务(compose)" as compose
+participant 分销搜索 as dist_search
+participant 搜索 as search
+
+note left of producer #aqua
+	数据流
+end note
+
+group 方案一(由搜索管理，业务方提供数据)
+producer -> search : 代码埋点,消息本地入库后发送 搜索消费
+search -> compose : 搜索通过条件，获取核心数据
+search -> dist_search : 对分销搜索进行CRUD操作
+end
+'group 方案二(由友品管理)
+'producer -> dist_search : 代码埋点,消息本地入库后,直接对分销搜索进行CRUD操作
+'end
+
+@enduml
+
+
+
+
+
+
+
+
+

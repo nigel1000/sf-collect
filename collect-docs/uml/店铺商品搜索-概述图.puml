@@ -1,0 +1,29 @@
+@startuml
+
+actor 消费者 as customer
+participant "分销入口(web)" as web
+participant 分销搜索 as dist_search
+participant 搜索 as search
+
+note left of customer #aqua
+	请求概述图
+end note
+
+customer -> web : 发起搜索请求
+group 获取相关类目补充搜索请求
+web -> search : 根据搜索条件获取相关类目
+web <- search : 返回相关类目
+web -> dist_search : 把相关类目当条件填充后向分销搜索发起请求
+end
+web <- dist_search : 返回搜索到的商品ID
+
+@enduml
+
+
+
+
+
+
+
+
+

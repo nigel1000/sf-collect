@@ -1,0 +1,16 @@
+.classpath
+.project
+.idea/
+.settings/
+*.iml
+
+.DS_Store
+*/.settings/
+**/target/
+**/logs/
+**/log/
+bin/
+.DS_Store
+.npm-debug
+
+.flattened-pom.xml

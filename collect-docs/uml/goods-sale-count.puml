@@ -1,0 +1,49 @@
+@startuml
+
+'X人已买获取逻辑
+start
+note right
+  //<b>X人已买获取逻辑</b>//
+  缓存失效时间 49小时
+end note
+
+:前台获取X人已买;
+partition 获取main和app销量 {
+    split
+    if (从缓存获取获取main销量) then (no)
+      :从main获取销量并存入缓存;
+    endif
+    split again
+    if (从缓存获取获取app销量?) then (no)
+      :count订单获取app销量并存入缓存;
+    endif
+    end split
+}
+: 获取 main 和 app 已买系数;
+: 返回 main系数*main销量+app系数*app销量;
+stop
+
+start
+note right
+  //<b>定时任务逻辑</b>//
+  每天凌晨全量同步main销量和app销量保证最终一致性
+end note
+fork
+:获取main销量并存入缓存;
+fork again
+:count订单获取app销量并存入缓存;
+end fork
+stop
+
+start
+note right
+  //<b>实时更新逻辑</b>//
+  app销量原子+1,main销量不变
+end note
+:接受支付成功消息;
+:app销量缓存+1;
+stop
+
+@enduml
+
+
