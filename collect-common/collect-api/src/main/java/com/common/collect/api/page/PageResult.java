@@ -2,7 +2,6 @@ package com.common.collect.api.page;
 
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.ToString;
 
 import java.io.Serializable;
 import java.util.ArrayList;

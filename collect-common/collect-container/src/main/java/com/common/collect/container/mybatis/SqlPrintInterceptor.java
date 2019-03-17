@@ -2,6 +2,8 @@ package com.common.collect.container.mybatis;
 
 import com.common.collect.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -12,8 +14,6 @@ import org.apache.ibatis.reflection.SystemMetaObject;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 import java.sql.Statement;
 import java.util.*;
@@ -81,9 +81,14 @@ public class SqlPrintInterceptor implements Interceptor {
                     }
                 }
             }
-            if (needShowSql) {
+            if (needShowSql || MybatisContext.getEnableSqlRecord()) {
                 String sql = showSql(mappedStatement, boundSql);
-                log.debug("SQL 执行耗时[{}ms],sqlId:[{}],sql:[{}]", sqlCost, mappedStatement.getId(), sql);
+                if (needShowSql) {
+                    log.debug("SQL 执行耗时[{}ms],sqlId:[{}],sql:[{}]", sqlCost, mappedStatement.getId(), sql);
+                }
+                if (MybatisContext.getEnableSqlRecord()) {
+                    MybatisContext.setSqlRecord(sql);
+                }
             }
         }
     }

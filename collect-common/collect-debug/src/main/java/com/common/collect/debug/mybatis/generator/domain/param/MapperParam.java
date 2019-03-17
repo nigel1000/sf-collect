@@ -16,11 +16,15 @@ public class MapperParam {
 
     private GlobalParam globalParam;
 
+    // 文件生成位置
     private String daoPrefixPath;
+    // 文件生成位置
     private String mapperPrefixPath;
     private List<String> tableNames;
 
+    // java 文件
     private boolean genDao = true;
+    // xml 文件
     private boolean genMapper = true;
 
     // 包路径
@@ -40,6 +44,14 @@ public class MapperParam {
     }
 
     public void validSelf() {
+        if (genDao && StringUtils.isBlank(daoPrefixPath)) {
+            throw UnifiedException.gen("daoPrefixPath 文件位置 不能为空");
+        }
+
+        if (genMapper && StringUtils.isBlank(mapperPrefixPath)) {
+            throw UnifiedException.gen("mapperPrefixPath 文件位置 不能为空");
+        }
+
         if (StringUtils.isBlank(daoPackagePath)) {
             throw UnifiedException.gen("daoPackagePath 不能为空");
         }

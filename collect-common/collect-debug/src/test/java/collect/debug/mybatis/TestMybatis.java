@@ -1,51 +1,27 @@
 package collect.debug.mybatis;
 
-import collect.debug.mybatis.test.dao.TestDao;
-import collect.debug.mybatis.test.dao.TestMapper;
-import collect.debug.mybatis.test.domain.Test;
+import collect.debug.mybatis.dao.TestDao;
+import collect.debug.mybatis.dao.TestMapper;
+import collect.debug.mybatis.domain.Test;
 import com.common.collect.container.BeanUtil;
 import com.common.collect.container.TransactionHelper;
-import com.common.collect.debug.mybatis.DBUtil;
-import com.common.collect.debug.mybatis.generator.core.DB2Domain;
-import com.common.collect.debug.mybatis.generator.core.DB2Mapper;
-import com.common.collect.debug.mybatis.generator.domain.param.DomainParam;
-import com.common.collect.debug.mybatis.generator.domain.param.GlobalParam;
-import com.common.collect.debug.mybatis.generator.domain.param.MapperParam;
 import com.common.collect.util.IdUtil;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.core.io.support.PropertiesLoaderUtils;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.Properties;
 
 /**
  * Created by hznijianfeng on 2019/3/14.
  */
 
 @Slf4j
-public class MybatisTest {
-
-    public static String path;
-
-    static {
-        path = MybatisTest.class.getResource("/").getPath();
-        if (path.contains(":/")) {
-            path = path.substring(1, path.indexOf("target")) + "src/test/";
-        } else {
-            path = path.substring(0, path.indexOf("target")) + "src/test/";
-        }
-    }
+public class TestMybatis {
 
     public static void main(String[] args) throws Exception {
-//        generatorFile();
-        validFile();
-    }
-
-    private static void validFile() {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("application-context.xml");
         TestMapper testMapper = (TestMapper) applicationContext.getBean("testMapper");
 
@@ -113,41 +89,6 @@ public class MybatisTest {
             log.info("loads -> return:{}", testDao.loads(Lists.newArrayList(id1, id2)));
 
         });
-
-    }
-
-    private static void generatorFile() throws Exception {
-        Properties properties = PropertiesLoaderUtils.loadAllProperties("db.properties");
-
-        GlobalParam globalParam = new GlobalParam();
-        globalParam.setDbSchema("test_base_mapper");
-        globalParam.setDbUrl(properties.get("url").toString());
-        globalParam.setDbUser(properties.get("name").toString());
-        globalParam.setDbPwd(properties.get("password").toString());
-        globalParam.setAuthor("hznijianfeng");
-        globalParam.setPrefixPath(path);
-        globalParam.setTableNames(Lists.newArrayList("test"));
-        globalParam.validSelf();
-
-        DomainParam domainParam = new DomainParam(globalParam);
-        domainParam.setPrefixPath(path + "java/collect/debug/mybatis/test/domain/");
-        domainParam.setPackagePath("collect.debug.mybatis.test.domain");
-        domainParam.validSelf();
-        DB2Domain.genDomain(domainParam);
-
-        MapperParam mapperParam = new MapperParam(globalParam);
-        mapperParam.setGenMapper(true);
-        mapperParam.setGenDao(false);
-        mapperParam.setDaoSuffixName("dao");
-        mapperParam.setDaoPrefixPath(path + "java/collect/debug/mybatis/test/dao/");
-        mapperParam.setMapperPrefixPath(path + "resources/mybatis/");
-        mapperParam.setDaoPackagePath("collect.debug.mybatis.test.dao");
-        mapperParam.setDomainPackagePath(domainParam.getPackagePath());
-        mapperParam.validSelf();
-        DB2Mapper.genMapper(mapperParam);
-
-        DBUtil.releaseResource();
-
     }
 
 }

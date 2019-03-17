@@ -1,6 +1,6 @@
-package collect.debug.mybatis.test.dao;
+package collect.debug.mybatis.dao;
 
-import collect.debug.mybatis.test.domain.Test;
+import collect.debug.mybatis.domain.Test;
 import com.common.collect.container.mybatis.BaseDao;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.stereotype.Repository;

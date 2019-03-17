@@ -1,12 +1,12 @@
-package collect.debug.mybatis.test.dao;
+package collect.debug.mybatis.dao;
 
-import collect.debug.mybatis.test.domain.Test;
+import collect.debug.mybatis.domain.Test;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
 /**
- * Created by hznijianfeng on 2019/03/14.
+ * Created by hznijianfeng on 2019/03/17.
  */
 
 public interface TestMapper {

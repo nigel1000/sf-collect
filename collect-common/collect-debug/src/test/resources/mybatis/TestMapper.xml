@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="collect.debug.mybatis.test.dao.TestMapper">
+<mapper namespace="collect.debug.mybatis.dao.TestMapper">
 
     <sql id="tb">
         `test`
@@ -65,8 +65,7 @@
         <if test="item.updateAt !=null">`update_at` = #{item.updateAt},</if>
     </sql>
 
-    <insert id="create" parameterType="collect.debug.mybatis.test.domain.Test" keyProperty="item.id"
-            useGeneratedKeys="true">
+    <insert id="create" parameterType="collect.debug.mybatis.domain.Test" keyProperty="item.id" useGeneratedKeys="true">
         INSERT INTO
         <include refid="tb"/>
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -88,7 +87,7 @@
         </foreach>
     </insert>
 
-    <select id="load" parameterType="long" resultType="collect.debug.mybatis.test.domain.Test">
+    <select id="load" parameterType="long" resultType="collect.debug.mybatis.domain.Test">
         SELECT
         <include refid="cols_all"/>
         FROM
@@ -96,7 +95,7 @@
         WHERE id = #{id}
     </select>
 
-    <select id="loads" resultType="collect.debug.mybatis.test.domain.Test" parameterType="list">
+    <select id="loads" resultType="collect.debug.mybatis.domain.Test" parameterType="list">
         SELECT
         <include refid="cols_all"/>
         FROM
@@ -122,7 +121,7 @@
         </foreach>
     </delete>
 
-    <update id="update" parameterType="collect.debug.mybatis.test.domain.Test">
+    <update id="update" parameterType="collect.debug.mybatis.domain.Test">
         UPDATE
         <include refid="tb"/>
         <set>

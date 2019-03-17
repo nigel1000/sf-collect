@@ -1,11 +1,11 @@
-package collect.debug.mybatis.test.domain;
+package collect.debug.mybatis.domain;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * Created by hznijianfeng on 2019/03/17.

@@ -25,6 +25,10 @@
             <groupId>com.common.collect</groupId>
             <artifactId>collect-container</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.common.collect</groupId>
+            <artifactId>collect-model</artifactId>
+        </dependency>
         <!-- 日志依赖 -->
         <dependency>
             <groupId>org.slf4j</groupId>

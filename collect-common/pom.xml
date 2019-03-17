@@ -14,6 +14,7 @@
         <module>collect-util</module>
         <module>collect-debug</module>
         <module>collect-container</module>
+        <module>collect-model</module>
     </modules>
     <!--变量管理-->
     <properties>
@@ -74,6 +75,11 @@
             <dependency>
                 <groupId>com.common.collect</groupId>
                 <artifactId>collect-container</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.common.collect</groupId>
+                <artifactId>collect-model</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <!-- servlet-api -->

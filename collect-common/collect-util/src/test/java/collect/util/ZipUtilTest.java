@@ -31,9 +31,6 @@ public class ZipUtilTest {
 
         log.info("path:\t" + path);
 
-        // log.info("{}",FileUtil.getFileNameSuffix(new File(path + "/zip/zip1.txt")));
-        // log.info("{}",FileUtil.getFileNamePrefix(new File(path + "/zip/zip1.txt")));
-
         ZipUtil.ZipModel model1 = ZipUtil.ZipModel.builder().prefixPath("temp").fileName("1.xls")
                 .fileBytes(FileUtil.getBytes(new FileInputStream(path + "/zip/zip1.txt"))).build();
         ZipUtil.ZipModel model2 = ZipUtil.ZipModel.builder().prefixPath("temp/temp1/").fileName("2.xls")
