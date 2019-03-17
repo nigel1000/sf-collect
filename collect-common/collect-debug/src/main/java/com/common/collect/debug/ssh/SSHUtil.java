@@ -144,7 +144,6 @@ public class SSHUtil {
     }
 
     @Data
-    @ToString(exclude = {"privateKey", "publicKey"})
     public static class SSHInfo {
 
         // 账号密码方式

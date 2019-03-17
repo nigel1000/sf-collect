@@ -65,7 +65,7 @@ public class RedisClientFactory {
         return new JedisOperator() {
             @Override
             public void init() {
-                JedisPoolConfig poolConfig = BeanUtil.genBean(this, JedisPoolConfig.class);
+                JedisPoolConfig poolConfig = BeanUtil.genBean(this.getRedisConfig(), JedisPoolConfig.class);
                 pool = new JedisPool(poolConfig, getHostName(), getPort(), getTimeout());
 
                 // 关闭 oss 客户端
@@ -88,7 +88,7 @@ public class RedisClientFactory {
         return new JedisOperator() {
             @Override
             public void init() {
-                GenericObjectPoolConfig genericObjectPoolConfig = BeanUtil.genBean(this, GenericObjectPoolConfig.class);
+                GenericObjectPoolConfig genericObjectPoolConfig = BeanUtil.genBean(this.getRedisConfig(), GenericObjectPoolConfig.class);
                 pool = new JedisSentinelPool(getMasterName(), Sets.newHashSet(getSentinels()),
                         genericObjectPoolConfig, getConnectTimeout());
 
@@ -102,14 +102,14 @@ public class RedisClientFactory {
         };
     }
 
-    public IJedisOperator newClusterClient(List<String> nodes, Integer connectTimeout, Integer soTimeout, Integer maxAttempts) {
+    public IJedisOperator newClusterClient() {
         if (CollectionUtils.isEmpty(nodes)) {
             throw UnifiedException.gen(RedisConstants.MODULE, "cluster 节点信息不能为空");
         }
         return new JedisClusterOperator() {
             @Override
             public void init() {
-                GenericObjectPoolConfig genericObjectPoolConfig = BeanUtil.genBean(this, GenericObjectPoolConfig.class);
+                GenericObjectPoolConfig genericObjectPoolConfig = BeanUtil.genBean(this.getRedisConfig(), GenericObjectPoolConfig.class);
                 cluster = new JedisCluster(FunctionUtil.valueSet(getNodes(), HostAndPort::parseString),
                         getConnectTimeout(), getSoTimeout(), getMaxAttempts(), genericObjectPoolConfig);
 

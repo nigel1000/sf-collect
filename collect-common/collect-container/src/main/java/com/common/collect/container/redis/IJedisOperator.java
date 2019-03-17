@@ -13,6 +13,10 @@ import java.util.Map;
 
 public interface IJedisOperator {
 
+    default RedisConfig getRedisConfig() {
+        return new RedisConfig();
+    }
+
     JedisCommands pull();
 
     default void push(JedisCommands commands) {

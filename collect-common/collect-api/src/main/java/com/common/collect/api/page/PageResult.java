@@ -14,7 +14,6 @@ import java.util.Objects;
  */
 
 @Getter
-@ToString
 public class PageResult<T> implements Serializable {
 
     /**

@@ -29,12 +29,13 @@ public class DB2Mapper {
             Table table = tableEntry.getValue();
             String tableName = tableEntry.getKey();
             String className = ConvertUtil.firstUpper(ConvertUtil.underline2Camel(tableName));
+            String daoSuffixName = ConvertUtil.firstUpper(mapperParam.getDaoSuffixName());
             Map<String, Object> tplMap = Maps.newHashMap();
             tplMap.put("author", globalParam.getAuthor());
             tplMap.put("date", globalParam.getDate());
             tplMap.put("daoPackagePath", mapperParam.getDaoPackagePath());
             tplMap.put("domainPackagePath", mapperParam.getDomainPackagePath());
-            tplMap.put("daoSuffixName", mapperParam.getDaoSuffixName());
+            tplMap.put("daoSuffixName", daoSuffixName);
             tplMap.put("tableName", tableName);
             tplMap.put("className", className);
             tplMap.put("sqlIds", mapperParam.getSqlIds());
@@ -49,7 +50,7 @@ public class DB2Mapper {
             }
             tplMap.put("fieldInfos", fieldInfos);
 
-            String fileName = className + "Mapper.xml";
+            String fileName = className + daoSuffixName + ".xml";
             String dirPath = mapperParam.getMapperPrefixPath();
             String filePath = dirPath + fileName;
             String fileContent = TemplateUtil.genTemplate("/tpl", "mapper.tpl", tplMap);
@@ -58,7 +59,7 @@ public class DB2Mapper {
                 TemplateUtil.genFile(dirPath, fileName, fileContent);
             }
 
-            fileName = className + mapperParam.getDaoSuffixName() + ".java";
+            fileName = className + daoSuffixName + ".java";
             dirPath = mapperParam.getDaoPrefixPath();
             filePath = dirPath + fileName;
             fileContent = TemplateUtil.genTemplate("/tpl", "dao.tpl", tplMap);

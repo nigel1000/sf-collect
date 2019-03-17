@@ -1,5 +1,6 @@
 package collect.debug.mybatis;
 
+import collect.debug.mybatis.test.dao.TestDao;
 import collect.debug.mybatis.test.dao.TestMapper;
 import collect.debug.mybatis.test.domain.Test;
 import com.common.collect.container.BeanUtil;
@@ -65,9 +66,10 @@ public class MybatisTest {
 
         TransactionHelper transactionHelper = (TransactionHelper) applicationContext.getBean("transactionHelper");
         transactionHelper.aroundBiz(() -> {
+            log.info("################################ testMapper #################################");
             log.info("create -> return:{},id:{}", testMapper.create(test), test.getId());
             log.info("load -> return:{},id:{}", testMapper.load(test.getId()), test.getId());
-            test.setStringType("测试 更新");
+            test.setStringType("测试 更新 testMapper");
             log.info("update -> return:{},id:{}", testMapper.update(test), test.getId());
             log.info("load -> return:{},id:{}", testMapper.load(test.getId()), test.getId());
             log.info("delete -> return:{},id:{}", testMapper.delete(test.getId()), test.getId());
@@ -84,6 +86,31 @@ public class MybatisTest {
             log.info("loads -> return:{}", testMapper.loads(Lists.newArrayList(id1, id2)));
             log.info("deletes -> return:{}", testMapper.deletes(Lists.newArrayList(id1, id2)));
             log.info("loads -> return:{}", testMapper.loads(Lists.newArrayList(id1, id2)));
+
+        });
+
+        TestDao testDao = (TestDao) applicationContext.getBean("testDao");
+        transactionHelper.aroundBiz(() -> {
+            log.info("################################ testDao #################################");
+            log.info("create -> return:{},id:{}", testDao.create(test), test.getId());
+            log.info("load -> return:{},id:{}", testDao.load(test.getId()), test.getId());
+            test.setStringType("测试 更新 testDao");
+            log.info("update -> return:{},id:{}", testDao.update(test), test.getId());
+            log.info("load -> return:{},id:{}", testDao.load(test.getId()), test.getId());
+            log.info("delete -> return:{},id:{}", testDao.delete(test.getId()), test.getId());
+            log.info("load -> return:{},id:{}", testDao.load(test.getId()), test.getId());
+
+            Long id1 = IdUtil.snowflakeId();
+            Long id2 = IdUtil.snowflakeId();
+            Test test1 = BeanUtil.genBean(test, Test.class);
+            test1.setId(id1);
+            Test test2 = BeanUtil.genBean(test, Test.class);
+            test2.setId(id2);
+
+            log.info("create -> return:{}", testDao.creates(Lists.newArrayList(test1, test2)));
+            log.info("loads -> return:{}", testDao.loads(Lists.newArrayList(id1, id2)));
+            log.info("deletes -> return:{}", testDao.deletes(Lists.newArrayList(id1, id2)));
+            log.info("loads -> return:{}", testDao.loads(Lists.newArrayList(id1, id2)));
 
         });
 
@@ -109,6 +136,9 @@ public class MybatisTest {
         DB2Domain.genDomain(domainParam);
 
         MapperParam mapperParam = new MapperParam(globalParam);
+        mapperParam.setGenMapper(true);
+        mapperParam.setGenDao(false);
+        mapperParam.setDaoSuffixName("dao");
         mapperParam.setDaoPrefixPath(path + "java/collect/debug/mybatis/test/dao/");
         mapperParam.setMapperPrefixPath(path + "resources/mybatis/");
         mapperParam.setDaoPackagePath("collect.debug.mybatis.test.dao");

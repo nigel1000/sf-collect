@@ -4,7 +4,7 @@ import com.common.collect.container.elastic.AbstractElasticMapper;
 import com.common.collect.container.elastic.ElasticClient;
 import com.common.collect.container.elastic.JoinField;
 import lombok.Data;
-import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.client.RestHighLevelClient;
 
 import java.util.List;
@@ -13,6 +13,7 @@ import java.util.List;
  * Created by hznijianfeng on 2019/2/22.
  */
 
+@Slf4j
 public class ElasticTest {
 
     public static void main(String[] args) {
@@ -48,11 +49,10 @@ public class ElasticTest {
 
         };
 
-        System.out.println(goodsElasticMapper.get("59142660"));
+        log.info("goodsElasticMapper.get:{}", goodsElasticMapper.get("59142660"));
         System.exit(-1);
     }
 
-    @ToString
     @Data
     public static class GoodsElastic {
         private Long goodsId;

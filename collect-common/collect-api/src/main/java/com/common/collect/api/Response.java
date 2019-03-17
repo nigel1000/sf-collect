@@ -1,11 +1,9 @@
 package com.common.collect.api;
 
 import lombok.Data;
-import lombok.ToString;
 
 import java.io.Serializable;
 
-@ToString(callSuper = true)
 @Data
 public class Response<T> implements Serializable {
 

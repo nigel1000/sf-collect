@@ -57,6 +57,7 @@ public class RedisClientUtil {
         // 从底层取数据并放入缓存
         if (CollectionUtils.isNotEmpty(unCacheKeys)) {
             Map bizMap = function.apply(unCacheKeys);
+            fromBiz(unCacheKeys);
             Map<RedisKey, Object> putMap = Maps.newHashMap();
             for (Object unCacheKey : unCacheKeys) {
                 Object bizObj = bizMap.get(unCacheKey);
@@ -113,6 +114,10 @@ public class RedisClientUtil {
         redisKey.setExpireTime(expire);
         jedisOperator.setWithExpire(RedisKey.createKey(key), value);
         logUpsert(Lists.newArrayList(key));
+    }
+
+    private static void fromBiz(List<Object> keys) {
+        log.debug("[from biz] [key:{}] ", keys);
     }
 
     private static void logGet(List<Object> keys) {

@@ -16,7 +16,7 @@ import java.util.List;
  * Created by hznijianfeng on 2018/9/6.
  */
 
-public abstract class JedisClusterOperator extends PoolConfig implements IJedisOperator {
+public abstract class JedisClusterOperator implements IJedisOperator {
 
     @Getter
     @Setter
@@ -32,7 +32,7 @@ public abstract class JedisClusterOperator extends PoolConfig implements IJedisO
     @Override
     public <T> boolean setIfNotExist(RedisKey redisKey, T object) {
         JedisCluster jedis = pull();
-        String ret = jedis.set(redisKey.getKey().getBytes(), SerializeHelper.serialize(object, getSerializeEnum()),
+        String ret = jedis.set(redisKey.getKey().getBytes(), SerializeHelper.serialize(object, getRedisConfig().getSerializeEnum()),
                 NXXXEnum.NX.getCode().getBytes(), EXPXEnum.EX.getCode().getBytes(), redisKey.getExpireTime());
         push(jedis);
         if (RedisConstants.RETURN_OK.equals(ret)) {
@@ -44,7 +44,7 @@ public abstract class JedisClusterOperator extends PoolConfig implements IJedisO
     @Override
     public <T> void setWithExpire(RedisKey redisKey, T object) {
         JedisCluster jedis = pull();
-        jedis.setex(redisKey.getKey().getBytes(), redisKey.getExpireTime(), SerializeHelper.serialize(object, getSerializeEnum()));
+        jedis.setex(redisKey.getKey().getBytes(), redisKey.getExpireTime(), SerializeHelper.serialize(object, getRedisConfig().getSerializeEnum()));
         push(jedis);
     }
 
@@ -52,7 +52,7 @@ public abstract class JedisClusterOperator extends PoolConfig implements IJedisO
     public <T> T get(RedisKey redisKey) {
         JedisCluster jedis = pull();
         byte[] object = jedis.get(redisKey.getKey().getBytes());
-        T result = SerializeHelper.deserialize(object, getSerializeEnum());
+        T result = SerializeHelper.deserialize(object, getRedisConfig().getSerializeEnum());
         push(jedis);
         return result;
     }

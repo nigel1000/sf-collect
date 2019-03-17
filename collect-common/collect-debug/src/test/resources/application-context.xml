@@ -18,7 +18,7 @@
     <!-- 启动@AspectJ支持 -->
     <aop:aspectj-autoproxy/>
 
-    <context:component-scan base-package="com.common.collect"/>
+    <context:component-scan base-package="com.common.collect,collect.debug"/>
 
     <!-- 引入db.properties -->
     <context:property-placeholder location="classpath:db.properties"/>

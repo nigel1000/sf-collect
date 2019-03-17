@@ -10,7 +10,6 @@ import java.io.Serializable;
  * Created by nijianfeng on 2018/8/14.
  */
 
-@ToString
 @NoArgsConstructor
 @Data
 public class PageParam implements Serializable {

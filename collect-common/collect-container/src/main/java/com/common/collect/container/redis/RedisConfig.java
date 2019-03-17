@@ -8,7 +8,7 @@ import lombok.Data;
  */
 
 @Data
-public abstract class PoolConfig {
+public class RedisConfig {
 
     // 序列化方式
     private SerializeEnum serializeEnum = SerializeEnum.HESSIAN;

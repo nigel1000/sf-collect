@@ -24,7 +24,7 @@ public class RedisTest {
 
         RedisClientFactory redisClientFactory = new RedisClientFactory();
         JedisOperator jedisOperator = (JedisOperator) redisClientFactory.newSingleClient();
-        jedisOperator.setSerializeEnum(SerializeEnum.HESSIAN);
+        jedisOperator.getRedisConfig().setSerializeEnum(SerializeEnum.HESSIAN);
         jedisOperator.init();
 
         new RedisClientUtil();
@@ -34,7 +34,6 @@ public class RedisTest {
         //放入缓存 11L, 22L, 33L
         Map<Long, Long> cacheRet = RedisClientUtil.batchGetPut(jedisOperator, "collect.container",
                 Lists.newArrayList(11L, 22L, 33L), expire, (keys) -> {
-                    log.info("fromBiz:{}", keys);
                     Map ret = Maps.newHashMap();
                     for (Object key : keys) {
                         ret.put(key, key);
@@ -48,7 +47,6 @@ public class RedisTest {
         //放入缓存 11L, 22L, 33L, 44L
         cacheRet = RedisClientUtil.batchGetPut(jedisOperator, "collect.container",
                 Lists.newArrayList(11L, 22L, 33L, 44L), 10, (keys) -> {
-                    log.info("fromBiz:{}", keys);
                     Map ret = Maps.newHashMap();
                     for (Object key : keys) {
                         ret.put(key, key);

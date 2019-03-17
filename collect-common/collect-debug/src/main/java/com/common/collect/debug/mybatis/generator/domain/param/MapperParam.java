@@ -27,7 +27,7 @@ public class MapperParam {
     private String daoPackagePath;
     private String domainPackagePath;
     // dao class 后缀 默认Mapper
-    private String daoSuffixName = "Mapper";
+    private String daoSuffixName = "mapper";
 
     private List<String> sqlIds = Lists.newArrayList("create", "creates", "update", "load", "loads", "delete", "deletes");
     private List<String> insertDate2Now = Lists.newArrayList("createdAt", "updatedAt", "createAt", "updateAt");
