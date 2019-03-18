@@ -1,9 +1,4 @@
 
-drop database if exists `test_base_mapper`;
-create database test_base_mapper;
-
-use test_base_mapper;
-
 drop table if exists `test`;
 create table `test` (
   `id` bigint(20) not null auto_increment,

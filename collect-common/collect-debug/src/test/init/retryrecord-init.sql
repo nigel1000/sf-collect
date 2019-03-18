@@ -1,3 +1,4 @@
+
 drop table if exists `retry_record`;
 create table `retry_record` (
   `id` bigint(20) not null auto_increment,

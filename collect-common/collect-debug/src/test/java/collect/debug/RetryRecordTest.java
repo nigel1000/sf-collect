@@ -72,6 +72,11 @@ public class RetryRecordTest {
             this.msgType = msgType;
             this.msgKey = msgKey;
         }
+
+        @Override
+        public String getTableName() {
+            return "retry_record";
+        }
     }
 
 }

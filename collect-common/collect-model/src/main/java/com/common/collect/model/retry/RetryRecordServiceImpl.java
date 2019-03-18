@@ -19,7 +19,7 @@ public class RetryRecordServiceImpl implements RetryRecordService {
 
     @Override
     public Integer record(RetryRecord retryRecord, IMetaConfig metaConfig) {
-        if (retryRecord == null || metaConfig == null ||
+        if (retryRecord == null || metaConfig == null || metaConfig.getTableName() == null ||
                 metaConfig.getBizType() == null || metaConfig.getMsgKey() == null || metaConfig.getMsgType() == null) {
             throw UnifiedException.gen("重试纪录参数不合法");
         }

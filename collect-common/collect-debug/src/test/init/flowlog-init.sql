@@ -1,3 +1,4 @@
+
 drop table if exists `flow_log`;
 create table `flow_log` (
   `id` bigint(20) not null auto_increment,

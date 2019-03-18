@@ -1,5 +1,8 @@
 package com.common.collect.container.mybatis;
 
+import com.google.common.collect.Lists;
+
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -30,5 +33,16 @@ public class MybatisContext {
 
     public static void setSqlRecord(String sql) {
         sqlRecord.set(sql);
+    }
+
+    static List<String> logFilterKeys = Lists.newArrayList();
+
+    public static void addLogFilterKey(String addKey, String delKey) {
+        if (addKey != null) {
+            logFilterKeys.add(addKey);
+        }
+        if (delKey != null) {
+            logFilterKeys.remove(delKey);
+        }
     }
 }

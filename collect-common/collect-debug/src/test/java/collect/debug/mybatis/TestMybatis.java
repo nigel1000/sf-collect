@@ -5,7 +5,9 @@ import collect.debug.mybatis.dao.TestMapper;
 import collect.debug.mybatis.domain.Test;
 import com.common.collect.container.BeanUtil;
 import com.common.collect.container.TransactionHelper;
+import com.common.collect.container.mybatis.MybatisContext;
 import com.common.collect.util.IdUtil;
+import com.common.collect.util.log4j.Slf4jUtil;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
@@ -89,6 +91,15 @@ public class TestMybatis {
             log.info("loads -> return:{}", testDao.loads(Lists.newArrayList(id1, id2)));
 
         });
+
+        Slf4jUtil.setLogLevel("debug");
+        // 获取执行 sql
+        MybatisContext.setEnableSqlRecord(true);
+        testDao.load(IdUtil.snowflakeId());
+        String sql = MybatisContext.getSqlRecord(true);
+        log.info("execute sql -> return:{}", sql);
+        MybatisContext.addLogFilterKey("test", null);
+        testDao.load(IdUtil.snowflakeId());
     }
 
 }

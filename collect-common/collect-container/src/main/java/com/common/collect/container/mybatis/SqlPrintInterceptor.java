@@ -3,7 +3,6 @@ package com.common.collect.container.mybatis;
 import com.common.collect.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -16,7 +15,9 @@ import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
 import java.sql.Statement;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * Created by nijianfeng on 2018/10/28.
@@ -58,7 +59,7 @@ import java.util.*;
 @Slf4j
 public class SqlPrintInterceptor implements Interceptor {
 
-    private List<String> tableNames = new ArrayList<>();
+    private boolean enableShowSql;
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
@@ -66,28 +67,31 @@ public class SqlPrintInterceptor implements Interceptor {
         try {
             return invocation.proceed();
         } finally {
-            long sqlCost = System.currentTimeMillis() - startTime;
+            if (enableShowSql) {
+                long sqlCost = System.currentTimeMillis() - startTime;
 
-            MetaObject statementHandler = SystemMetaObject.forObject(invocation.getTarget());
-            MappedStatement mappedStatement = (MappedStatement) statementHandler.getValue("delegate.mappedStatement");
-            BoundSql boundSql = (BoundSql) statementHandler.getValue("delegate.boundSql");
-            boolean needShowSql = false;
-            if (!CollectionUtils.isEmpty(tableNames)) {
-                String sql = boundSql.getSql();
-                for (String tableName : tableNames) {
-                    if (sql.contains(tableName)) {
-                        needShowSql = true;
-                        break;
+                MetaObject statementHandler = SystemMetaObject.forObject(invocation.getTarget());
+                MappedStatement mappedStatement = (MappedStatement) statementHandler.getValue("delegate.mappedStatement");
+                BoundSql boundSql = (BoundSql) statementHandler.getValue("delegate.boundSql");
+                boolean needShowSql = false;
+                List<String> logFilterKeys = MybatisContext.logFilterKeys;
+                if (CollectionUtils.isNotEmpty(logFilterKeys)) {
+                    String sql = boundSql.getSql();
+                    for (String logFilterKey : logFilterKeys) {
+                        if (sql.contains(logFilterKey)) {
+                            needShowSql = true;
+                            break;
+                        }
                     }
                 }
-            }
-            if (needShowSql || MybatisContext.getEnableSqlRecord()) {
-                String sql = showSql(mappedStatement, boundSql);
-                if (needShowSql) {
-                    log.debug("SQL 执行耗时[{}ms],sqlId:[{}],sql:[{}]", sqlCost, mappedStatement.getId(), sql);
-                }
-                if (MybatisContext.getEnableSqlRecord()) {
-                    MybatisContext.setSqlRecord(sql);
+                if (needShowSql || MybatisContext.getEnableSqlRecord()) {
+                    String sql = showSql(mappedStatement, boundSql);
+                    if (needShowSql) {
+                        log.debug("SQL 执行耗时[{}ms],sqlId:[{}],sql:[{}]", sqlCost, mappedStatement.getId(), sql);
+                    }
+                    if (MybatisContext.getEnableSqlRecord()) {
+                        MybatisContext.setSqlRecord(sql);
+                    }
                 }
             }
         }
@@ -102,11 +106,11 @@ public class SqlPrintInterceptor implements Interceptor {
     // 所有的配置属性会在形参Properties中，setProperties方法可以拿到配置的属性进行需要的处理。
     @Override
     public void setProperties(Properties properties) {
-        String tableName = properties.getProperty("tableNameList");
-        if (StringUtils.isEmpty(tableName)) {
-            return;
+        if ("true".equals(properties.getProperty("enableShowSql"))) {
+            enableShowSql = true;
+        } else {
+            enableShowSql = false;
         }
-        tableNames = Arrays.asList(tableName.trim().split(","));
     }
 
     private String getParameterValue(Object obj) {

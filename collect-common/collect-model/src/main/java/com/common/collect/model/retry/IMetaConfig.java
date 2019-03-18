@@ -11,4 +11,5 @@ public interface IMetaConfig {
 
     String getMsgKey();
 
+    String getTableName();
 }
