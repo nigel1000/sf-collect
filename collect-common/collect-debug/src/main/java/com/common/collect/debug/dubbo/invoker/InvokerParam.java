@@ -14,6 +14,10 @@ import java.util.Map;
 @Data
 public class InvokerParam {
 
+    // 指定服务机器 id
+    public static String serviceDubboIp;
+    public static String serviceDubboPort;
+
     private String zkAddress;
 
     private Class mockClass;

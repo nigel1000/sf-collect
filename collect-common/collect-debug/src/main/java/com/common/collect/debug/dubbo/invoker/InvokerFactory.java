@@ -2,6 +2,7 @@ package com.common.collect.debug.dubbo.invoker;
 
 import com.alibaba.dubbo.common.URL;
 import com.alibaba.dubbo.common.extension.ExtensionLoader;
+import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.common.utils.UrlUtils;
 import com.alibaba.dubbo.config.ApplicationConfig;
 import com.alibaba.dubbo.config.ReferenceConfig;
@@ -31,10 +32,16 @@ public class InvokerFactory {
         log.info("url:[{}]", url.toFullString());
         try {
             List<URL> providerUrls = registry.lookup(url);
-            log.info("providerUrls:{}", providerUrls);
             if (providerUrls != null && providerUrls.size() > 0) {
                 for (int i = 0; i < providerUrls.size(); i++) {
                     URL providerUrl = providerUrls.get(i);
+                    if (StringUtils.isNotEmpty(InvokerParam.serviceDubboIp)) {
+                        providerUrl = providerUrl.setHost(InvokerParam.serviceDubboIp);
+                    }
+                    if (StringUtils.isNotEmpty(InvokerParam.serviceDubboPort)) {
+                        providerUrl = providerUrl.setPort(Integer.valueOf(InvokerParam.serviceDubboPort));
+                    }
+                    log.info("providerUrl:{}", providerUrl);
                     try {
                         ApplicationConfig applicationConfig = new ApplicationConfig();
                         applicationConfig.setName(invokerParam.getApplication());

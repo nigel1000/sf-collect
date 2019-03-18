@@ -18,7 +18,7 @@ import java.util.List;
 @Slf4j
 public class ExcelSessionTest {
 
-    public static String path;
+    private static String path;
 
     static {
         path = ExcelSessionTest.class.getResource("/").getPath();
