@@ -20,7 +20,7 @@ public class ZipUtilTest {
 
     static {
         path = ZipUtilTest.class.getResource("/").getPath();
-        if (path.contains("C:")) {
+        if (path.contains(":/")) {
             path = path.substring(1, path.indexOf("target")) + "src/test/resources";
         } else {
             path = path.substring(0, path.indexOf("target")) + "src/test/resources";

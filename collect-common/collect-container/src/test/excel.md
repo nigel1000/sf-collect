@@ -263,7 +263,7 @@ public class ExcelSessionTest {
 
     static {
         path = ExcelSessionTest.class.getResource("/").getPath();
-        if (path.contains("C:")) {
+        if (path.contains(":/")) {
             path = path.substring(1, path.indexOf("target")) + "src/test/resources";
         } else {
             path = path.substring(0, path.indexOf("target")) + "src/test/resources";
