@@ -29,7 +29,7 @@ public class DubboTest {
         group = "env_machine";
 
 //        InvokerParam.serviceDubboIp = properties.getProperty("env_machine" + ".ip.hz");
-//        InvokerParam.serviceDubboPort = properties.getProperty("env_machine" + ".dubbo.port");
+//        InvokerParam.serviceDubboPort = "20880";
 
     }
 
