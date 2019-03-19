@@ -20,16 +20,16 @@ public class DubboTest {
     static {
         Properties properties;
         try {
-            properties = PropertiesLoaderUtils.loadAllProperties("app_env.properties");
+            properties = PropertiesLoaderUtils.loadAllProperties("app_machine.properties");
         } catch (IOException e) {
             throw UnifiedException.gen("属性文件获取失败", e);
         }
 
         zkAddress = properties.getProperty("zk." + "testjd");
-        group = "env_jd";
+        group = "env_machine";
 
-//        InvokerParam.serviceDubboIp = properties.getProperty("env_jd" + ".ip.hz");
-//        InvokerParam.serviceDubboPort = properties.getProperty("env_jd" + ".dubbo.port");
+//        InvokerParam.serviceDubboIp = properties.getProperty("env_machine" + ".ip.hz");
+//        InvokerParam.serviceDubboPort = properties.getProperty("env_machine" + ".dubbo.port");
 
     }
 

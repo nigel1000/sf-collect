@@ -65,7 +65,9 @@ public interface IJedisOperator {
     void release(RedisKey redisKey);
 
     // 解锁和获取的 bizCode 必须一样
-    boolean lockWithBiz(RedisKey redisKey, String bizCode);
+    default boolean lockWithBiz(RedisKey redisKey, String bizCode){
+        return setIfNotExist(redisKey, bizCode);
+    }
 
     void releaseWithBiz(RedisKey redisKey, String bizCode);
 

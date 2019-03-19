@@ -80,11 +80,6 @@ public abstract class JedisOperator implements IJedisOperator {
     }
 
     @Override
-    public boolean lockWithBiz(RedisKey redisKey, String bizCode) {
-        return setIfNotExist(redisKey, bizCode);
-    }
-
-    @Override
     public void releaseWithBiz(RedisKey redisKey, String bizCode) {
         String script = "if redis.call('get', KEYS[1]) == ARGV[1] " + "then return redis.call('del', KEYS[1]) "
                 + "else return 0 end";
