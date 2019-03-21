@@ -5,6 +5,9 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Created by hznijianfeng on 2018/8/20.
@@ -62,16 +65,68 @@ public class FileUtil {
         if (file == null) {
             return "";
         }
-        String fileName = file.getName();
-        return fileName.substring(0, fileName.lastIndexOf("."));
+        return getFileNamePrefix(file.getName());
     }
 
     public static String getFileNameSuffix(File file) {
         if (file == null) {
             return "";
         }
-        String fileName = file.getName();
-        return fileName.substring(fileName.lastIndexOf("."));
+        return getFileNameSuffix(file.getName());
     }
 
+    public static String getFileNamePrefix(String fileName) {
+        if (fileName == null) {
+            return "";
+        }
+        int index = fileName.lastIndexOf(".");
+        if (index < 0) {
+            return fileName;
+        }
+        return fileName.substring(0, index);
+    }
+
+    public static String getFileNameSuffix(String fileName) {
+        if (fileName == null) {
+            return "";
+        }
+        int index = fileName.lastIndexOf(".");
+        if (index < 0) {
+            return "";
+        }
+        return fileName.substring(index);
+    }
+
+    public static void createFile(String path, boolean isDir, byte[] contents, boolean isCover) {
+        Path dirPath;
+        if (isDir) {
+            dirPath = Paths.get(path);
+        } else {
+            dirPath = Paths.get(path).getParent();
+        }
+        // 创建目录
+        File dir = dirPath.toFile();
+        if (!dir.exists()) {
+            if (!dir.mkdirs()) {
+                throw UnifiedException.gen("目录生成失败");
+            }
+        }
+        if (!isDir) {
+            File file = Paths.get(path).toFile();
+            if (file.exists()) {
+                if (isCover) {
+                    if (!file.delete()) {
+                        throw UnifiedException.gen(path + "文件删除失败");
+                    }
+                } else {
+                    throw UnifiedException.gen(path + "文件已存在");
+                }
+            }
+            try {
+                Files.write(Files.createFile(Paths.get(path)), contents);
+            } catch (IOException e) {
+                throw UnifiedException.gen("生成文件失败", e);
+            }
+        }
+    }
 }

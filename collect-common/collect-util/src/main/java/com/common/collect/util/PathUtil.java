@@ -12,9 +12,6 @@ import java.util.regex.Pattern;
 public class PathUtil {
 
     public static boolean hasPathSpecial(String path) {
-        if (path == null || "".equals(path.trim())) {
-            return true;
-        }
         if (path.contains("..") ||
                 path.contains(File.separator + '.') ||
                 path.contains('.' + File.separator) ||

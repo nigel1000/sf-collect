@@ -7,6 +7,7 @@ import com.common.collect.debug.mybatis.generator.domain.db.Table;
 import com.common.collect.debug.mybatis.generator.domain.param.DomainParam;
 import com.common.collect.debug.mybatis.generator.domain.param.GlobalParam;
 import com.common.collect.util.ConvertUtil;
+import com.common.collect.util.FileUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
@@ -50,7 +51,7 @@ public class DB2Domain {
             String filePath = dirPath + fileName;
             String fileContent = TemplateUtil.genTemplate("/tpl", "domain.tpl", tplMap);
             log.info("DB2Domain:filePath:{},args:{},tplMap:{}", filePath, domainParam, tplMap);
-            TemplateUtil.genFile(dirPath, fileName, fileContent);
+            FileUtil.createFile(filePath,false, fileContent.getBytes(),true);
         }
     }
 

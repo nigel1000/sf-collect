@@ -9,8 +9,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Map;
 
 /**
@@ -35,17 +33,6 @@ public class TemplateUtil {
             return new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
         } catch (Exception ex) {
             throw UnifiedException.gen("TemplateUtil 模板生成有问题!", ex);
-        }
-    }
-
-    public static void genFile(String dirPath, String fileName, String content) {
-        try {
-            String filePath = dirPath + "/" + fileName;
-            Paths.get(dirPath).toFile().mkdirs();
-            Paths.get(filePath).toFile().delete();
-            Files.write(Files.createFile(Paths.get(filePath)), content.getBytes());
-        } catch (Exception ex) {
-            throw UnifiedException.gen("生成文件失败", ex);
         }
     }
 

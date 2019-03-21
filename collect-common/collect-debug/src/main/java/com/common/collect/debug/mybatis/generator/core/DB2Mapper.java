@@ -7,6 +7,7 @@ import com.common.collect.debug.mybatis.generator.domain.db.Table;
 import com.common.collect.debug.mybatis.generator.domain.param.GlobalParam;
 import com.common.collect.debug.mybatis.generator.domain.param.MapperParam;
 import com.common.collect.util.ConvertUtil;
+import com.common.collect.util.FileUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
@@ -56,7 +57,7 @@ public class DB2Mapper {
             String fileContent = TemplateUtil.genTemplate("/tpl", "mapper.tpl", tplMap);
             if (mapperParam.isGenMapper()) {
                 log.info("DB2Mapper mapper:filePath:{},args:{},tplMap:{}", filePath, mapperParam, tplMap);
-                TemplateUtil.genFile(dirPath, fileName, fileContent);
+                FileUtil.createFile(filePath,false, fileContent.getBytes(),true);
             }
 
             fileName = className + daoSuffixName + ".java";
@@ -65,7 +66,7 @@ public class DB2Mapper {
             fileContent = TemplateUtil.genTemplate("/tpl", "dao.tpl", tplMap);
             if (mapperParam.isGenDao()) {
                 log.info("DB2Mapper dao:filePath:{},args:{},tplMap:{}", filePath, mapperParam, tplMap);
-                TemplateUtil.genFile(dirPath, fileName, fileContent);
+                FileUtil.createFile(filePath,false, fileContent.getBytes(),true);
             }
         }
     }

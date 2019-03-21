@@ -67,7 +67,18 @@ public class ExcelSession {
     ///////////////////////////////// sheet////////////////////////////////
     // 创建sheet
     public Sheet createSheet(@NonNull String name) {
-        return this.getWorkbook().createSheet(name);
+        Sheet tmp = this.getWorkbook().getSheet(name);
+        if (tmp == null) {
+            tmp = this.getWorkbook().createSheet(name);
+        }
+        return tmp;
+    }
+
+    public void removeSheet(@NonNull String name) {
+        int sheetIndex = this.getWorkbook().getSheetIndex(name);
+        if (sheetIndex >= 0) {
+            this.getWorkbook().removeSheetAt(this.getWorkbook().getSheetIndex(name));
+        }
     }
 
     // 根据名称获取或者创建sheet
@@ -289,6 +300,20 @@ public class ExcelSession {
         return row;
     }
 
+    // 删除一行 不保留位置
+    public void removeRow(Sheet sheet, int rowIndex) {
+        int lastRowNum = sheet.getLastRowNum();
+        if (rowIndex >= 0 && rowIndex < lastRowNum) {
+            // 将行号为rowIndex+1一直到行号为lastRowNum的单元格全部上移一行，以便删除rowIndex行
+            sheet.shiftRows(rowIndex + 1, lastRowNum, -1);
+        } else if (rowIndex == lastRowNum) {
+            Row removingRow = sheet.getRow(rowIndex);
+            if (removingRow != null) {
+                sheet.removeRow(removingRow);
+            }
+        }
+    }
+
     public boolean isEmptyRow(@NonNull Row row) {
         Iterator<Cell> cellIter = row.cellIterator();
         boolean isRowEmpty = true;
@@ -313,11 +338,16 @@ public class ExcelSession {
     }
 
     // sheet 间拷贝合并区域
-    public void copyMergeRegion(Sheet fromSheet, Sheet toSheet) {
-        int sheetMergerCount = fromSheet.getNumMergedRegions();
-        for (int i = 0; i < sheetMergerCount; i++) {
-            CellRangeAddress mergedRegionAt = fromSheet.getMergedRegion(i);
-            toSheet.addMergedRegion(mergedRegionAt);
+    private static void copyMergeRegion(Sheet fromSheet, Sheet toSheet, int startRowNum) {
+        int num = fromSheet.getNumMergedRegions();
+        if (startRowNum > 0) {
+            startRowNum++;
+        }
+        for (int i = 0; i < num; i++) {
+            CellRangeAddress cellRangeAddress = fromSheet.getMergedRegion(i);
+            cellRangeAddress.setFirstRow(startRowNum + cellRangeAddress.getFirstRow());
+            cellRangeAddress.setLastRow(startRowNum + cellRangeAddress.getLastRow());
+            toSheet.addMergedRegion(cellRangeAddress);
         }
     }
 
@@ -352,97 +382,81 @@ public class ExcelSession {
 
     ///////////////////////////////// compose////////////////////////////////
 
-    // 复制单元格
-    public void copyCell(int fromRowIndex, int fromColIndex, int toRowIndex, int toColIndex) {
-        Cell toCell = getCell(toRowIndex, toColIndex);
-        setCellWidth(toCell.getColumnIndex(), getCellWidth(fromColIndex));
-        setCellStyle(toCell.getRowIndex(), toCell.getColumnIndex(), getCellStyle(fromRowIndex, fromColIndex));
-        setRowHeight(toCell.getRowIndex(), getRowHeight(fromRowIndex));
-        setHiddenColumn(toCell.getColumnIndex(), isHiddenColumn(fromColIndex));
-        setCellComment(toCell.getRowIndex(), toCell.getColumnIndex(), getCellComment(fromRowIndex, fromColIndex));
-    }
-
-    // 在某行后插入若干行 带样式
-    public void insertRows(int starRow, int rowCount) {
-        this.getSheet().shiftRows(starRow + 1, this.getLastRowNum(), rowCount, true, false);
-        starRow = starRow - 1;
+    // 在 startRow -1 行后插入若干行 带样式 带行高
+    public void insertRows(int startRow, int rowCount) {
+        if (getSheet().getRow(startRow - 1) == null) {
+            throw UnifiedException.gen(startRow - 1 + " 行不存在");
+        }
+        Row fromRow = getRow(startRow - 1);
         for (int i = 0; i < rowCount; i++) {
-            Row sourceRow;
-            Row targetRow;
-            Cell sourceCell;
-            Cell targetCell;
-            short m;
-            starRow = starRow + 1;
-            sourceRow = getRow(starRow);
-            targetRow = getRow(starRow + 1);
-            setRowHeight(targetRow.getRowNum(), getRowHeight(sourceRow.getRowNum()));
-            for (m = sourceRow.getFirstCellNum(); m < sourceRow.getLastCellNum(); m++) {
-                sourceCell = getCell(sourceRow.getRowNum(), m);
-                targetCell = getCell(targetRow.getRowNum(), m);
-                copyCol(this.getSheet(), this.getSheet(), sourceCell, targetCell, false);
-            }
+            Row toRow = getRow(startRow + i);
+            copyRow(fromRow, toRow, false, true, true, false);
         }
     }
 
     // 复制列
-    public void copyCol(Sheet fromSheet, Sheet toSheet, Cell fromCell, Cell toCell, boolean isCopyValue) {
-        // 设置列宽和是否隐藏
-        int fromColIndex = fromCell.getColumnIndex();
-        int toColIndex = toCell.getColumnIndex();
-        toSheet.setColumnWidth(toColIndex, fromSheet.getColumnWidth(fromColIndex));
-        toSheet.setColumnHidden(toColIndex, fromSheet.isColumnHidden(fromColIndex));
-        // 样式
-        toCell.setCellStyle(fromCell.getCellStyle());
-        // 不同数据类型处理
+    public void copyCellValue(@NonNull Cell fromCell, @NonNull Cell toCell) {
         CellType srcCellType = fromCell.getCellTypeEnum();
         toCell.setCellType(srcCellType);
-        if (isCopyValue) {
-            // 评论
-            toCell.setCellComment(fromCell.getCellComment());
-            if (srcCellType == CellType.NUMERIC) {
-                if (DateUtil.isCellDateFormatted(fromCell)) {
-                    toCell.setCellValue(fromCell.getDateCellValue());
-                } else {
-                    toCell.setCellValue(fromCell.getNumericCellValue());
-                }
-            } else if (srcCellType == CellType.STRING) {
-                toCell.setCellValue(fromCell.getRichStringCellValue());
-            } else if (srcCellType == CellType.BLANK) {
-                toCell.setCellValue(fromCell.getStringCellValue());
-            } else if (srcCellType == CellType.BOOLEAN) {
-                toCell.setCellValue(fromCell.getBooleanCellValue());
-            } else if (srcCellType == CellType.ERROR) {
-                toCell.setCellErrorValue(fromCell.getErrorCellValue());
-            } else if (srcCellType == CellType.FORMULA) {
-                toCell.setCellFormula(fromCell.getCellFormula());
+        if (srcCellType == CellType.NUMERIC) {
+            if (DateUtil.isCellDateFormatted(fromCell)) {
+                toCell.setCellValue(fromCell.getDateCellValue());
             } else {
-                toCell.setCellValue(fromCell.getRichStringCellValue());
+                toCell.setCellValue(fromCell.getNumericCellValue());
+            }
+        } else if (srcCellType == CellType.STRING) {
+            toCell.setCellValue(fromCell.getRichStringCellValue());
+        } else if (srcCellType == CellType.BLANK) {
+            toCell.setCellValue(fromCell.getStringCellValue());
+        } else if (srcCellType == CellType.BOOLEAN) {
+            toCell.setCellValue(fromCell.getBooleanCellValue());
+        } else if (srcCellType == CellType.ERROR) {
+            toCell.setCellErrorValue(fromCell.getErrorCellValue());
+        } else if (srcCellType == CellType.FORMULA) {
+            toCell.setCellFormula(fromCell.getCellFormula());
+        } else {
+            toCell.setCellValue(fromCell.getRichStringCellValue());
+        }
+    }
+
+    public void copyRow(@NonNull Row fromRow, @NonNull Row toRow,
+                        boolean isCopyCellValue, boolean isCopyRowHeight,
+                        boolean isCopyCellStyle, boolean isCopyCellComment) {
+        // 设置行高
+        if (isCopyRowHeight) {
+            toRow.setHeight(fromRow.getHeight());
+        }
+        for (Iterator<Cell> cellIt = fromRow.cellIterator(); cellIt.hasNext(); ) {
+            Cell fromCell = cellIt.next();
+            Cell toCell = toRow.createCell(fromCell.getColumnIndex());
+            // 样式
+            if (isCopyCellStyle) {
+                toCell.setCellStyle(fromCell.getCellStyle());
+            }
+            if (isCopyCellComment) {
+                // 评论
+                toCell.setCellComment(fromCell.getCellComment());
+            }
+            // 不同数据类型处理
+            if (isCopyCellValue) {
+                copyCellValue(fromCell, toCell);
             }
         }
     }
 
     // 复制sheet
-    public void copy2Sheet(String name) {
-        Sheet fromSheet = this.getSheet();
-        Sheet toSheet = createSheet(name);
+    public void copySheetFollow(Sheet fromSheet, String toSheetName) {
+        Sheet toSheet = createSheet(toSheetName);
         // 合并区域处理
-        copyMergeRegion(fromSheet, toSheet);
-        for (Iterator rowIt = fromSheet.rowIterator(); rowIt.hasNext(); ) {
-            Row fromRow = (Row) rowIt.next();
-            Row toRow = toSheet.createRow(fromRow.getRowNum());
-            // 行复制
-            copyRow(fromSheet, toSheet, fromRow, toRow, true);
+        int startRowNum = toSheet.getLastRowNum();
+        copyMergeRegion(fromSheet, toSheet, startRowNum);
+        if (startRowNum != 0) {
+            startRowNum++;
         }
-    }
-
-    // 复制行
-    public void copyRow(Sheet fromSheet, Sheet toSheet, Row fromRow, Row toRow, boolean isCopyValue) {
-        // 设置行高
-        toRow.setHeight(fromRow.getHeight());
-        for (Iterator cellIt = fromRow.cellIterator(); cellIt.hasNext(); ) {
-            Cell fromCell = (Cell) cellIt.next();
-            Cell toCell = toRow.createCell(fromCell.getColumnIndex());
-            copyCol(fromSheet, toSheet, fromCell, toCell, isCopyValue);
+        for (Iterator<Row> rowIt = fromSheet.rowIterator(); rowIt.hasNext(); ) {
+            Row fromRow = rowIt.next();
+            Row toRow = toSheet.createRow(startRowNum + fromRow.getRowNum());
+            copyRow(fromRow, toRow, true, true, true, true);
         }
     }
 
