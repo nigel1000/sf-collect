@@ -77,7 +77,7 @@ public class ExcelSession {
     public void removeSheet(@NonNull String name) {
         int sheetIndex = this.getWorkbook().getSheetIndex(name);
         if (sheetIndex >= 0) {
-            this.getWorkbook().removeSheetAt(this.getWorkbook().getSheetIndex(name));
+            this.getWorkbook().removeSheetAt(sheetIndex);
         }
     }
 
