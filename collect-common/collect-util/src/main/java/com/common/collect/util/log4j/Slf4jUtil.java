@@ -76,6 +76,7 @@ public class Slf4jUtil {
         if (loggerLevel == null) {
             return;
         }
+        initAndSync();
         for (Map.Entry<String, Object> entry : loggerMap.entrySet()) {
             setLogLevel(entry.getKey(), loggerLevel.toLowerCase());
         }

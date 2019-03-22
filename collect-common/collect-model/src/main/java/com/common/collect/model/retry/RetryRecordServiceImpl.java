@@ -30,7 +30,7 @@ public class RetryRecordServiceImpl implements RetryRecordService {
     }
 
     @Override
-    public List<RetryRecord> loadNeedRetryMsg(IMetaConfig metaConfig) {
+    public List<RetryRecord> loadNeedRetryRecord(IMetaConfig metaConfig) {
         return retryRecordMapper.loadNeedRetryRecord(metaConfig);
     }
 

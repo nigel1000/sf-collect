@@ -8,14 +8,14 @@ import java.util.List;
 
 public interface RetryRecordService {
 
-    Integer record(RetryRecord retryMsg, IMetaConfig retryMeta);
+    Integer record(RetryRecord retryMsg, IMetaConfig metaConfig);
 
-    List<RetryRecord> loadNeedRetryMsg(IMetaConfig retryMeta);
+    List<RetryRecord> loadNeedRetryRecord(IMetaConfig metaConfig);
 
-    Integer fail(Long id, IMetaConfig retryMeta);
+    Integer fail(Long id, IMetaConfig metaConfig);
 
-    Integer failExp(Long id, Exception ex, IMetaConfig retryMeta);
+    Integer failExp(Long id, Exception ex, IMetaConfig metaConfig);
 
-    Integer success(Long id, IMetaConfig retryMeta);
+    Integer success(Long id, IMetaConfig metaConfig);
 
 }

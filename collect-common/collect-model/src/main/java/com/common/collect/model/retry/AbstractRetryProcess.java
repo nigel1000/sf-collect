@@ -17,7 +17,7 @@ public abstract class AbstractRetryProcess {
     public abstract void init();
 
     public void handleRetry() {
-        List<RetryRecord> retryRecords = retryRecordService.loadNeedRetryMsg(metaConfig);
+        List<RetryRecord> retryRecords = retryRecordService.loadNeedRetryRecord(metaConfig);
         for (RetryRecord retryRecord : retryRecords) {
             try {
                 if (bizExecute(retryRecord)) {

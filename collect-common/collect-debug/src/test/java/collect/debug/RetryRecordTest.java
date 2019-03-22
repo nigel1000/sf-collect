@@ -30,7 +30,7 @@ public class RetryRecordTest {
         transactionHelper.aroundBiz(() -> {
             retryRecordService.record(RetryRecord.gen("测试", UnifiedException.gen("测试错误")), RetryRecordConfig.DEMO);
 
-            List<RetryRecord> retryRecordList = retryRecordService.loadNeedRetryMsg(RetryRecordConfig.DEMO);
+            List<RetryRecord> retryRecordList = retryRecordService.loadNeedRetryRecord(RetryRecordConfig.DEMO);
             log.info("loadNeedRetryMsg -> return:{}", retryRecordList);
             AbstractRetryProcess retryProcess = new AbstractRetryProcess() {
                 @Override
@@ -48,7 +48,7 @@ public class RetryRecordTest {
 
             while (CollectionUtils.isNotEmpty(retryRecordList)) {
                 retryProcess.handleRetry();
-                retryRecordList = retryRecordService.loadNeedRetryMsg(RetryRecordConfig.DEMO);
+                retryRecordList = retryRecordService.loadNeedRetryRecord(RetryRecordConfig.DEMO);
                 log.info("loadNeedRetryMsg -> return:{}", retryRecordList);
             }
 
