@@ -27,20 +27,7 @@ public class TestMybatis {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("application-context.xml");
         TestMapper testMapper = (TestMapper) applicationContext.getBean("testMapper");
 
-        Test test = new Test();
-        test.setBigintType(1L);
-        test.setBitType(Boolean.FALSE);
-        test.setCharType("char");
-        test.setDatetimeType(new Date());
-        test.setDateType(new Date());
-        test.setDecimalType(new BigDecimal(1));
-        test.setDoubleType(new BigDecimal("11.11"));
-        test.setIntType(3);
-        test.setMediumintType(23L);
-        test.setMediumtextType("你好");
-        test.setSmallintType(23);
-        test.setStringType("测试");
-        test.setTinyintType(3);
+        Test test = genTest();
 
         TransactionHelper transactionHelper = (TransactionHelper) applicationContext.getBean("transactionHelper");
         transactionHelper.aroundBiz(() -> {
@@ -100,6 +87,24 @@ public class TestMybatis {
         log.info("execute sql -> return:{}", sql);
         MybatisContext.addLogFilterKey("test", null);
         testDao.load(IdUtil.snowflakeId());
+    }
+
+    public static Test genTest(){
+        Test test = new Test();
+        test.setBigintType(1L);
+        test.setBitType(Boolean.FALSE);
+        test.setCharType("char");
+        test.setDatetimeType(new Date());
+        test.setDateType(new Date());
+        test.setDecimalType(new BigDecimal(1));
+        test.setDoubleType(new BigDecimal("11.11"));
+        test.setIntType(3);
+        test.setMediumintType(23L);
+        test.setMediumtextType("你好");
+        test.setSmallintType(23);
+        test.setStringType("测试");
+        test.setTinyintType(3);
+        return test;
     }
 
 }
