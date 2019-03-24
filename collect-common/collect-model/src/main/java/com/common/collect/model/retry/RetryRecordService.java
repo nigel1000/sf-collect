@@ -8,9 +8,11 @@ import java.util.List;
 
 public interface RetryRecordService {
 
-    Integer record(RetryRecord retryMsg, IMetaConfig metaConfig);
+    Integer record(RetryRecord retryRecord, IMetaConfig metaConfig);
 
     List<RetryRecord> loadNeedRetryRecord(IMetaConfig metaConfig);
+
+    List<RetryRecord> loadNeedRetryRecordByBizId(String bizId, IMetaConfig metaConfig);
 
     Integer fail(Long id, IMetaConfig metaConfig);
 

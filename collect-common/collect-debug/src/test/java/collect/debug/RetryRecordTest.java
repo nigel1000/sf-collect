@@ -31,7 +31,7 @@ public class RetryRecordTest {
             retryRecordService.record(RetryRecord.gen("测试", UnifiedException.gen("测试错误")), RetryRecordConfig.DEMO);
 
             List<RetryRecord> retryRecordList = retryRecordService.loadNeedRetryRecord(RetryRecordConfig.DEMO);
-            log.info("loadNeedRetryMsg -> return:{}", retryRecordList);
+            log.info("loadNeedRetryRecord -> return:{}", retryRecordList);
             AbstractRetryProcess retryProcess = new AbstractRetryProcess() {
                 @Override
                 public void init() {
@@ -49,7 +49,7 @@ public class RetryRecordTest {
             while (CollectionUtils.isNotEmpty(retryRecordList)) {
                 retryProcess.handleRetry();
                 retryRecordList = retryRecordService.loadNeedRetryRecord(RetryRecordConfig.DEMO);
-                log.info("loadNeedRetryMsg -> return:{}", retryRecordList);
+                log.info("loadNeedRetryRecord -> return:{}", retryRecordList);
             }
 
             throw UnifiedException.gen("回滚测试数据");

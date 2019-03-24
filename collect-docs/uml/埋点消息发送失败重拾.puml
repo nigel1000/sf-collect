@@ -1,0 +1,28 @@
+@startuml
+start
+:开启事务;
+:收集数据 业务执行前的快照 __beforeContext__;
+:执行业务逻辑 (譬如驳回，发布);
+:收集业务执行后的数据与 __beforeContext__ 对比;
+if (是否需要发送消息?) then (yes)
+  :根据变化填充消息数据 __EventData__ （譬如模块id，活动id，驳回提报数据量，消息接受人等）;
+  :消息数据入 __重试__ 库,状态为未处理，以确保至少发送一次;
+  if (是否立刻发送消息?) then (yes)
+    :发送消息;
+    if (发送消息是否成功?) then (yes)
+      :更新消息数据为已处理;
+      :提交事务;
+      end
+    else (no)
+      :回滚事务;
+      end
+    endif
+  else (no)
+    :提交事务\n一小时内此业务若连续变更，则更新消息数据\n通过kschdule平台，每小时轮询 __重试__ 库进行消息发送，发送失败预警;
+    end
+  endif
+else (no)
+  :提交事务;
+  end
+endif
+@enduml

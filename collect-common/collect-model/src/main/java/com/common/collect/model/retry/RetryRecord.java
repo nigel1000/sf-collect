@@ -31,6 +31,11 @@ public class RetryRecord implements Serializable {
     private String msgKey;
 
     /**
+     * 业务 Id
+     */
+    private String bizId;
+
+    /**
      * 譬如tag，key，集群ip，port等 供你确认是否是被需要重试的消息
      */
     private String extra;
@@ -73,18 +78,23 @@ public class RetryRecord implements Serializable {
     }
 
     public static RetryRecord gen(Object body, Exception ex) {
-        return gen(body, null, ex);
+        return gen(null, body, null, ex);
     }
 
-    public static RetryRecord gen(Object body, Integer maxTryTimes, Exception ex) {
-        RetryRecord retryMsg = new RetryRecord();
+    public static RetryRecord gen(String bizId, Object body, Exception ex) {
+        return gen(bizId, body, null, ex);
+    }
+
+    public static RetryRecord gen(String bizId, Object body, Integer maxTryTimes, Exception ex) {
+        RetryRecord retryRecord = new RetryRecord();
         String temp = JsonUtil.bean2json(body);
-        retryMsg.body = temp.length() > 2000 ? temp.substring(0, 2000) : temp;
-        retryMsg.status = YesNoEnum.NO.getCode();
-        retryMsg.tryTimes = 0;
-        retryMsg.maxTryTimes = Optional.ofNullable(maxTryTimes).orElse(3);
-        retryMsg.initErrorMessage = subErrorMessage(ex);
-        return retryMsg;
+        retryRecord.body = temp.length() > 2000 ? temp.substring(0, 2000) : temp;
+        retryRecord.status = YesNoEnum.NO.getCode();
+        retryRecord.tryTimes = 0;
+        retryRecord.maxTryTimes = Optional.ofNullable(maxTryTimes).orElse(3);
+        retryRecord.bizId = Optional.ofNullable(bizId).orElse("");
+        retryRecord.initErrorMessage = subErrorMessage(ex);
+        return retryRecord;
     }
 
     public static String subErrorMessage(Exception ex) {

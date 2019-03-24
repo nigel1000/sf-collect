@@ -5,6 +5,7 @@ create table `retry_record` (
   `biz_type` varchar(32) not null comment '业务类型',
   `msg_type` varchar(32) not null comment '消息类型 rabbitmq kafka',
   `msg_key` varchar(127) not null comment '消息名称: rabbitmq queue 主题名称 kafka topic',
+  `biz_id` varchar(127) not null comment '业务 id',
   `extra` varchar(511) comment '譬如tag，key，集群ip，port等 供你确认是否是被需要重试的消息',
   `body` varchar(2047) comment '消息体',
   `try_times` tinyint(3) not null comment '尝试次数',

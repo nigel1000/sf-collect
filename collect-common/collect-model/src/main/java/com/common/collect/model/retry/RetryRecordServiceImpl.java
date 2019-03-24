@@ -2,6 +2,7 @@ package com.common.collect.model.retry;
 
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.model.retry.mapper.RetryRecordMapper;
+import lombok.NonNull;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -32,6 +33,11 @@ public class RetryRecordServiceImpl implements RetryRecordService {
     @Override
     public List<RetryRecord> loadNeedRetryRecord(IMetaConfig metaConfig) {
         return retryRecordMapper.loadNeedRetryRecord(metaConfig);
+    }
+
+    @Override
+    public List<RetryRecord> loadNeedRetryRecordByBizId(@NonNull String bizId, IMetaConfig metaConfig) {
+        return retryRecordMapper.loadNeedRetryRecordByBizId(bizId, metaConfig);
     }
 
     @Override
