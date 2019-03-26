@@ -1,9 +1,9 @@
 package com.common.collect.debug.mybatis.generator.domain.param;
 
 import com.common.collect.api.excps.UnifiedException;
+import com.common.collect.util.EmptyUtil;
 import com.google.common.collect.Lists;
 import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
@@ -44,19 +44,19 @@ public class MapperParam {
     }
 
     public void validSelf() {
-        if (genDao && StringUtils.isBlank(daoPrefixPath)) {
+        if (genDao && EmptyUtil.isBlank(daoPrefixPath)) {
             throw UnifiedException.gen("daoPrefixPath 文件位置 不能为空");
         }
 
-        if (genMapper && StringUtils.isBlank(mapperPrefixPath)) {
+        if (genMapper && EmptyUtil.isBlank(mapperPrefixPath)) {
             throw UnifiedException.gen("mapperPrefixPath 文件位置 不能为空");
         }
 
-        if (StringUtils.isBlank(daoPackagePath)) {
+        if (EmptyUtil.isBlank(daoPackagePath)) {
             throw UnifiedException.gen("daoPackagePath 不能为空");
         }
 
-        if (StringUtils.isBlank(domainPackagePath)) {
+        if (EmptyUtil.isBlank(domainPackagePath)) {
             throw UnifiedException.gen("domainPackagePath 不能为空");
         }
 

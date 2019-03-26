@@ -7,10 +7,10 @@ import com.common.collect.container.excel.define.check.MaxCheckImportHandler;
 import com.common.collect.container.excel.define.check.RegexCheckImportHandler;
 import com.common.collect.container.excel.define.check.RequireCheckImportHandler;
 import com.common.collect.util.CollectionUtil;
+import com.common.collect.util.EmptyUtil;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.NonNull;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -55,7 +55,7 @@ public class ExcelCheckModel {
         if (excelCheck.max() != Long.MIN_VALUE && !handlers.contains(MaxCheckImportHandler.class)) {
             checkHandlers.add(beanFactory.getBean(MaxCheckImportHandler.class));
         }
-        if (StringUtils.isNotEmpty(excelCheck.regex()) && !handlers.contains(RegexCheckImportHandler.class)) {
+        if (EmptyUtil.isNotEmpty(excelCheck.regex()) && !handlers.contains(RegexCheckImportHandler.class)) {
             checkHandlers.add(beanFactory.getBean(RegexCheckImportHandler.class));
         }
         excelCheckModel.setCheckImportHandlersList(CollectionUtil.removeDuplicate(checkHandlers));

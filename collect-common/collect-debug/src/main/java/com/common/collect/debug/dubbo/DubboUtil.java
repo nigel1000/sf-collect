@@ -1,7 +1,6 @@
 package com.common.collect.debug.dubbo;
 
 import com.alibaba.dubbo.common.URL;
-import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.config.ApplicationConfig;
 import com.alibaba.dubbo.config.ReferenceConfig;
 import com.alibaba.dubbo.config.RegistryConfig;
@@ -11,6 +10,7 @@ import com.alibaba.dubbo.rpc.protocol.dubbo.DubboProtocol;
 import com.alibaba.dubbo.rpc.service.GenericService;
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.debug.telnet.TelnetUtil;
+import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.SplitUtil;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -43,10 +43,10 @@ public class DubboUtil {
         referenceConfig.setInterface(className);
         referenceConfig.setRetries(0);
         referenceConfig.setTimeout(1000);
-        if (StringUtils.isNotEmpty(group)) {
+        if (EmptyUtil.isNotEmpty(group)) {
             referenceConfig.setGroup(group);
         }
-        if (StringUtils.isNotEmpty(version)) {
+        if (EmptyUtil.isNotEmpty(version)) {
             referenceConfig.setVersion(version);
         }
         // 调用远程服务

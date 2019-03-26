@@ -5,7 +5,7 @@ import com.common.collect.container.excel.annotations.model.ExcelCheckModel;
 import com.common.collect.container.excel.base.ExcelConstants;
 import com.common.collect.container.excel.define.ICheckImportHandler;
 import com.common.collect.container.excel.pojo.ExcelImportParam;
-import org.apache.commons.lang3.StringUtils;
+import com.common.collect.util.EmptyUtil;
 
 /**
  * Created by nijianfeng on 2018/8/26.
@@ -19,7 +19,7 @@ public class RequireCheckImportHandler implements ICheckImportHandler {
         }
         ExcelCheckModel excelCheckModel = importInfo.getExcelCheckModel();
         boolean required = excelCheckModel.isRequired();
-        if (required && (value == null || (value instanceof String && StringUtils.isBlank(String.valueOf(value))))) {
+        if (required && (value == null || (value instanceof String && EmptyUtil.isBlank(String.valueOf(value))))) {
             String tips = excelCheckModel.getRequiredTips();
             throw UnifiedException.gen(ExcelConstants.MODULE, tips);
         }

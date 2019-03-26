@@ -5,8 +5,8 @@ import com.alibaba.dubbo.rpc.RpcException;
 import com.common.collect.api.Response;
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.aops.LogConstant;
+import com.common.collect.util.EmptyUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -49,7 +49,7 @@ public class ControllerErrorHandler {
     public Response processControllerError(NativeWebRequest request, BindException ex) {
         printLogInfo(request, ex);
         List<FieldError> fieldErrors = ex.getFieldErrors();
-        if (CollectionUtils.isEmpty(fieldErrors)) {
+        if (EmptyUtil.isEmpty(fieldErrors)) {
             return Response.fail(HttpStatus.BAD_REQUEST.value(), PARAM_ERROR_MESSAGE);
         }
         FieldError fieldError = fieldErrors.get(0);
@@ -64,7 +64,7 @@ public class ControllerErrorHandler {
     public Response processControllerError(NativeWebRequest request, ConstraintViolationException ex) {
         printLogInfo(request, ex);
         Set<ConstraintViolation<?>> constraintViolations = ex.getConstraintViolations();
-        if (CollectionUtils.isEmpty(constraintViolations)) {
+        if (EmptyUtil.isEmpty(constraintViolations)) {
             return Response.fail(HttpStatus.BAD_REQUEST.value(), PARAM_ERROR_MESSAGE);
         }
         ConstraintViolation<?> next = constraintViolations.iterator().next();
@@ -89,7 +89,7 @@ public class ControllerErrorHandler {
     public Response processJsr303ValidatorError(NativeWebRequest request, MethodArgumentNotValidException ex) {
         printLogInfo(request, ex);
         BindingResult errors = ex.getBindingResult();
-        if (CollectionUtils.isEmpty(errors.getFieldErrors())) {
+        if (EmptyUtil.isEmpty(errors.getFieldErrors())) {
             return Response.fail(HttpStatus.BAD_REQUEST.value(), PARAM_ERROR_MESSAGE);
         }
         FieldError fieldError = errors.getFieldErrors().get(0);

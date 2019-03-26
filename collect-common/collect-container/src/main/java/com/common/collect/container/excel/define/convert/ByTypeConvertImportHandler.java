@@ -7,7 +7,7 @@ import com.common.collect.container.excel.base.ExcelConstants;
 import com.common.collect.container.excel.define.IConvertImportHandler;
 import com.common.collect.container.excel.pojo.ExcelImportParam;
 import com.common.collect.util.DateUtil;
-import org.apache.commons.lang3.StringUtils;
+import com.common.collect.util.EmptyUtil;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -39,8 +39,8 @@ public class ByTypeConvertImportHandler implements IConvertImportHandler {
         } else if (fieldTypeClass == Boolean.class || fieldTypeClass == boolean.class) {
             result = Boolean.valueOf(value);
         } else if (fieldTypeClass == Date.class) {
-            if (StringUtils.isNotBlank(value)) {
-                if (StringUtils.isNotEmpty(excelConvertModel.getDateParse())) {
+            if (EmptyUtil.isNotBlank(value)) {
+                if (EmptyUtil.isNotEmpty(excelConvertModel.getDateParse())) {
                     try {
                         result = DateUtil.parseDate(value, excelConvertModel.getDateParse());
                     } catch (Exception ex) {

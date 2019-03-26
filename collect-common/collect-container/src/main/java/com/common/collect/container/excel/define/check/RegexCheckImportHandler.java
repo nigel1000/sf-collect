@@ -5,7 +5,7 @@ import com.common.collect.container.excel.annotations.model.ExcelCheckModel;
 import com.common.collect.container.excel.base.ExcelConstants;
 import com.common.collect.container.excel.define.ICheckImportHandler;
 import com.common.collect.container.excel.pojo.ExcelImportParam;
-import org.apache.commons.lang3.StringUtils;
+import com.common.collect.util.EmptyUtil;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,7 +23,7 @@ public class RegexCheckImportHandler implements ICheckImportHandler {
         ExcelCheckModel excelCheckModel = importInfo.getExcelCheckModel();
         // 校验日期格式
         String regex = excelCheckModel.getRegex();
-        if (value.getClass() == String.class && StringUtils.isNotBlank(regex)) {
+        if (value.getClass() == String.class && EmptyUtil.isNotBlank(regex)) {
             Pattern pattern = Pattern.compile(regex);
             Matcher matcher = pattern.matcher(value.toString());
             if (!matcher.matches()) {

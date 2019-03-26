@@ -2,9 +2,9 @@ package com.common.collect.container.redis;
 
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.redis.base.RedisConstants;
+import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.constant.Constants;
 import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 
@@ -44,7 +44,7 @@ public class RedisKey implements Serializable {
     }
 
     public void validSelf() {
-        if (StringUtils.isBlank(prefixKey) && StringUtils.isBlank(suffixKey)) {
+        if (EmptyUtil.isBlank(prefixKey) && EmptyUtil.isBlank(suffixKey)) {
             throw UnifiedException.gen(RedisConstants.MODULE, "缓存 key 不能为空");
         }
         if (expireTime == null) {

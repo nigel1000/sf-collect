@@ -2,8 +2,8 @@ package com.common.collect.debug.mybatis.generator.domain.param;
 
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.util.DateUtil;
+import com.common.collect.util.EmptyUtil;
 import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
@@ -32,10 +32,10 @@ public class GlobalParam {
     private List<String> tableNames;
 
     public void validSelf() {
-        if (StringUtils.isBlank(dbSchema)
-                || StringUtils.isBlank(dbUrl)
-                || StringUtils.isBlank(dbUser)
-                || StringUtils.isBlank(dbPwd)) {
+        if (EmptyUtil.isBlank(dbSchema)
+                || EmptyUtil.isBlank(dbUrl)
+                || EmptyUtil.isBlank(dbUser)
+                || EmptyUtil.isBlank(dbPwd)) {
             throw UnifiedException.gen("db 配置不能为空");
         }
     }

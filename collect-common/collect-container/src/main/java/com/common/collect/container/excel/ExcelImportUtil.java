@@ -9,12 +9,12 @@ import com.common.collect.container.excel.excps.ExcelImportException;
 import com.common.collect.container.excel.pojo.ExcelImportParam;
 import com.common.collect.container.excel.pojo.ExcelSheetInfo;
 import com.common.collect.util.CollectionUtil;
+import com.common.collect.util.EmptyUtil;
 import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 
 import java.io.InputStream;
@@ -126,7 +126,7 @@ public class ExcelImportUtil extends ExcelSession {
             for (Integer colIndex : colIndexes) {
                 Object value = null;
                 String currentValue = rowMap.get(colIndex);
-                if (StringUtils.isNotBlank(currentValue)) {
+                if (EmptyUtil.isNotBlank(currentValue)) {
                     boolean isConvertSuccess = true;
                     // 后面加的可以覆盖默认 转换 以最后一个为准
                     for (IConvertImportHandler convertHandler : importInfo.getExcelConvertModel()

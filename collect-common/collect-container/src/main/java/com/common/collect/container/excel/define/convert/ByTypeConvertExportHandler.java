@@ -4,7 +4,7 @@ import com.common.collect.container.excel.annotations.model.ExcelConvertModel;
 import com.common.collect.container.excel.define.IConvertExportHandler;
 import com.common.collect.container.excel.pojo.ExcelExportParam;
 import com.common.collect.util.DateUtil;
-import org.apache.commons.lang3.StringUtils;
+import com.common.collect.util.EmptyUtil;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -32,7 +32,7 @@ public class ByTypeConvertExportHandler implements IConvertExportHandler {
         } else if (fieldTypeClass == Boolean.class || fieldTypeClass == boolean.class) {
             result = String.valueOf(value);
         } else if (fieldTypeClass == Date.class) {
-            if (StringUtils.isNotEmpty(excelConvertModel.getDateFormat())) {
+            if (EmptyUtil.isNotEmpty(excelConvertModel.getDateFormat())) {
                 result = DateUtil.format((Date) value, excelConvertModel.getDateFormat());
             } else {
                 result = DateUtil.format((Date) value, "yyyy-MM-dd HH:mm:ss");

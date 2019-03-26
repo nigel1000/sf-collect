@@ -1,7 +1,7 @@
 package com.common.collect.container.elastic;
 
-import com.alibaba.dubbo.common.utils.StringUtils;
 import com.common.collect.api.excps.UnifiedException;
+import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.SplitUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -108,7 +108,7 @@ public class ElasticClient {
     }
 
     public void clearCache(String key) {
-        if (StringUtils.isBlank(key)) {
+        if (EmptyUtil.isBlank(key)) {
             return;
         }
         RestHighLevelClient client = clientMap.get(key);

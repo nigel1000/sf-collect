@@ -1,8 +1,8 @@
 package com.common.collect.debug.mybatis.generator.domain.param;
 
 import com.common.collect.api.excps.UnifiedException;
+import com.common.collect.util.EmptyUtil;
 import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
@@ -29,11 +29,11 @@ public class DomainParam {
     }
 
     public void validSelf() {
-        if (StringUtils.isBlank(prefixPath)) {
+        if (EmptyUtil.isBlank(prefixPath)) {
             throw UnifiedException.gen("Domain 文件导出路径不能为空");
         }
 
-        if (StringUtils.isBlank(packagePath)) {
+        if (EmptyUtil.isBlank(packagePath)) {
             throw UnifiedException.gen("Domain 包路径配置不能为空");
         }
     }

@@ -1,8 +1,8 @@
 package com.common.collect.container.mybatis;
 
 import com.common.collect.util.DateUtil;
+import com.common.collect.util.EmptyUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -75,7 +75,7 @@ public class SqlPrintInterceptor implements Interceptor {
                 BoundSql boundSql = (BoundSql) statementHandler.getValue("delegate.boundSql");
                 boolean needShowSql = false;
                 List<String> logFilterKeys = MybatisContext.logFilterKeys;
-                if (CollectionUtils.isNotEmpty(logFilterKeys)) {
+                if (EmptyUtil.isNotEmpty(logFilterKeys)) {
                     String sql = boundSql.getSql();
                     for (String logFilterKey : logFilterKeys) {
                         if (sql.contains(logFilterKey)) {

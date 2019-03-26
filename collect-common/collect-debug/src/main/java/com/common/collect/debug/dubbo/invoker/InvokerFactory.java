@@ -2,13 +2,13 @@ package com.common.collect.debug.dubbo.invoker;
 
 import com.alibaba.dubbo.common.URL;
 import com.alibaba.dubbo.common.extension.ExtensionLoader;
-import com.alibaba.dubbo.common.utils.StringUtils;
 import com.alibaba.dubbo.common.utils.UrlUtils;
 import com.alibaba.dubbo.config.ApplicationConfig;
 import com.alibaba.dubbo.config.ReferenceConfig;
 import com.alibaba.dubbo.registry.Registry;
 import com.alibaba.dubbo.registry.RegistryFactory;
 import com.common.collect.api.excps.UnifiedException;
+import com.common.collect.util.EmptyUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -35,10 +35,10 @@ public class InvokerFactory {
             if (providerUrls != null && providerUrls.size() > 0) {
                 for (int i = 0; i < providerUrls.size(); i++) {
                     URL providerUrl = providerUrls.get(i);
-                    if (StringUtils.isNotEmpty(InvokerParam.serviceDubboIp)) {
+                    if (EmptyUtil.isNotEmpty(InvokerParam.serviceDubboIp)) {
                         providerUrl = providerUrl.setHost(InvokerParam.serviceDubboIp);
                     }
-                    if (StringUtils.isNotEmpty(InvokerParam.serviceDubboPort)) {
+                    if (EmptyUtil.isNotEmpty(InvokerParam.serviceDubboPort)) {
                         providerUrl = providerUrl.setPort(Integer.valueOf(InvokerParam.serviceDubboPort));
                     }
                     log.info("providerUrl:{}", providerUrl);

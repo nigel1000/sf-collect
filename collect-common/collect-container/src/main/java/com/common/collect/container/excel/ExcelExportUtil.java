@@ -6,11 +6,11 @@ import com.common.collect.container.excel.base.ExcelConstants;
 import com.common.collect.container.excel.define.ICellConfig;
 import com.common.collect.container.excel.define.IConvertExportHandler;
 import com.common.collect.container.excel.pojo.ExcelExportParam;
+import com.common.collect.util.EmptyUtil;
 import com.google.common.collect.Maps;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -168,7 +168,7 @@ public class ExcelExportUtil extends ExcelSession {
 
     // 导出 一行数据 到 excel
     public void exportData(List<Object> data, List<Integer> colIndex, int rowIndex) {
-        if (CollectionUtils.isEmpty(data) || CollectionUtils.isEmpty(colIndex) || data.size() != colIndex.size()) {
+        if (EmptyUtil.isEmpty(data) || EmptyUtil.isEmpty(colIndex) || data.size() != colIndex.size()) {
             throw UnifiedException.gen(ExcelConstants.MODULE, "data和colIndex 必须不为空并且size相等");
         }
         // 组装数据

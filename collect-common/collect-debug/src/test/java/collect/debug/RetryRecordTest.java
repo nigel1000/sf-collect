@@ -6,9 +6,9 @@ import com.common.collect.model.retry.AbstractRetryProcess;
 import com.common.collect.model.retry.IMetaConfig;
 import com.common.collect.model.retry.RetryRecord;
 import com.common.collect.model.retry.RetryRecordService;
+import com.common.collect.util.EmptyUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -46,7 +46,7 @@ public class RetryRecordTest {
             };
             retryProcess.init();
 
-            while (CollectionUtils.isNotEmpty(retryRecordList)) {
+            while (EmptyUtil.isNotEmpty(retryRecordList)) {
                 retryProcess.handleRetry();
                 retryRecordList = retryRecordService.loadNeedRetryRecord(RetryRecordConfig.DEMO);
                 log.info("loadNeedRetryRecord -> return:{}", retryRecordList);

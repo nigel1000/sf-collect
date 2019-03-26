@@ -5,6 +5,7 @@ import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.debug.mybatis.generator.domain.db.Field;
 import com.common.collect.debug.mybatis.generator.domain.db.Table;
 import com.common.collect.debug.mybatis.generator.domain.param.GlobalParam;
+import com.common.collect.util.EmptyUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
@@ -86,7 +87,7 @@ public class DBUtil {
     }
 
     public static Map<String, Table> getTables(GlobalParam globalParam, List<String> tableNames) {
-        if (tableNames == null || tableNames.isEmpty()) {
+        if (EmptyUtil.isEmpty(tableNames )) {
             tableNames = getTableNamesBySchema(globalParam);
         }
         Map<String, Table> tableMap = Maps.newHashMap();

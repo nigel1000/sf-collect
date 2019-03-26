@@ -26,10 +26,6 @@ public class Slf4jUtil {
     private final static String LOGBACK = "ch.qos.logback.classic.util.ContextSelectorStaticBinder";
     private final static List<String> levels = Arrays.asList(null, "off", "fatal", "error", "warn", "info", "debug", "trace", "all");
 
-    static {
-        initAndSync();
-    }
-
     @SuppressWarnings("unchecked")
     private synchronized static void initAndSync() {
         if (LOG4J12.equals(currentLog4jName)) {

@@ -1,5 +1,6 @@
 package com.common.collect.container.mybatis;
 
+import com.common.collect.util.EmptyUtil;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -39,7 +40,7 @@ public abstract class BaseDao<T> extends SqlSessionDaoSupport {
     }
 
     public Integer creates(List<T> ts) {
-        if (ts == null || ts.isEmpty()) {
+        if (EmptyUtil.isEmpty(ts)) {
             return 0;
         }
         return this.getSqlSession().insert(this.sqlId(CREATES), ts);
@@ -54,7 +55,7 @@ public abstract class BaseDao<T> extends SqlSessionDaoSupport {
     }
 
     public Integer deletes(@NonNull List<Long> ids) {
-        if (ids == null || ids.isEmpty()) {
+        if (EmptyUtil.isEmpty(ids)) {
             return 0;
         }
         return this.getSqlSession().delete(this.sqlId(DELETES), ids);
@@ -69,7 +70,7 @@ public abstract class BaseDao<T> extends SqlSessionDaoSupport {
     }
 
     public List<T> loads(@NonNull List<Long> ids) {
-        if (ids == null || ids.isEmpty()) {
+        if (EmptyUtil.isEmpty(ids)) {
             return new ArrayList<>();
         }
         return this.getSqlSession().selectList(this.sqlId(LOADS), ids);

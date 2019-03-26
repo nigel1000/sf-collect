@@ -6,13 +6,12 @@ import com.common.collect.container.redis.IJedisOperator;
 import com.common.collect.container.redis.JedisClusterOperator;
 import com.common.collect.container.redis.JedisOperator;
 import com.common.collect.container.redis.base.RedisConstants;
+import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.FunctionUtil;
 import com.google.common.collect.Sets;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
-import org.springframework.util.StringUtils;
 import redis.clients.jedis.*;
 
 import java.io.IOException;
@@ -59,7 +58,7 @@ public class RedisClientFactory {
     private int timeout = 30000;
 
     public IJedisOperator newSingleClient() {
-        if (StringUtils.isEmpty(getHostName())) {
+        if (EmptyUtil.isEmpty(getHostName())) {
             throw UnifiedException.gen(RedisConstants.MODULE, "主机名不能为空");
         }
         return new JedisOperator() {
@@ -79,10 +78,10 @@ public class RedisClientFactory {
     }
 
     public IJedisOperator newSentinelClient() {
-        if (StringUtils.isEmpty(getMasterName())) {
+        if (EmptyUtil.isEmpty(getMasterName())) {
             throw UnifiedException.gen(RedisConstants.MODULE, "主节点名不能为空");
         }
-        if (CollectionUtils.isEmpty(getSentinels())) {
+        if (EmptyUtil.isEmpty(getSentinels())) {
             throw UnifiedException.gen(RedisConstants.MODULE, "哨兵节点不能为空");
         }
         return new JedisOperator() {
@@ -103,7 +102,7 @@ public class RedisClientFactory {
     }
 
     public IJedisOperator newClusterClient() {
-        if (CollectionUtils.isEmpty(nodes)) {
+        if (EmptyUtil.isEmpty(nodes)) {
             throw UnifiedException.gen(RedisConstants.MODULE, "cluster 节点信息不能为空");
         }
         return new JedisClusterOperator() {

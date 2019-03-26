@@ -2,6 +2,7 @@ package com.common.collect.container.excel.excps;
 
 import com.common.collect.container.JsonUtil;
 import com.common.collect.container.excel.pojo.ExcelSheetInfo;
+import com.common.collect.util.EmptyUtil;
 import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +46,7 @@ public class ExcelImportException extends RuntimeException {
     }
 
     public boolean isEmptyInfo() {
-        return infoList.isEmpty();
+        return EmptyUtil.isEmpty(infoList);
     }
 
     @Override

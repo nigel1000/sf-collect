@@ -2,12 +2,12 @@ package com.common.collect.debug.ssh;
 
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.trace.TraceIdUtil;
+import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.FileUtil;
 import com.jcraft.jsch.*;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
@@ -179,7 +179,7 @@ public class SSHUtil {
             JSch jsch = new JSch();
             //秘钥方式连接
             if (this.getPrivateKey() != null) {
-                if (StringUtils.isNotBlank(this.getPassphrase())) {
+                if (EmptyUtil.isNotBlank(this.getPassphrase())) {
                     //设置带口令的密钥
                     jsch.addIdentity(null, this.getPrivateKey(), this.getPublicKey(), this.getPassphrase().getBytes());
                 } else {
@@ -194,7 +194,7 @@ public class SSHUtil {
                 throw UnifiedException.gen("获取 ssh 会话失败");
             }
             //如果密码方式连接  session传入密码
-            if (StringUtils.isNotBlank(this.getPassword())) {
+            if (EmptyUtil.isNotBlank(this.getPassword())) {
                 session.setPassword(this.getPassword());
             }
             // 可选配置

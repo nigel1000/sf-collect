@@ -3,12 +3,11 @@ package com.common.collect.container.redis.client;
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.redis.IJedisOperator;
 import com.common.collect.container.redis.RedisKey;
+import com.common.collect.util.EmptyUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -23,7 +22,7 @@ public class RedisClientUtil {
     @SuppressWarnings("unchecked")
     public static Map batchGetPut(@NonNull IJedisOperator jedisOperator, String keyPrefix, List<Object> keys, int expire,
                                   Function<List<Object>, Map> function) {
-        if (CollectionUtils.isEmpty(keys)) {
+        if (EmptyUtil.isEmpty(keys)) {
             return Maps.newHashMap();
         }
         if (keyPrefix == null) {
@@ -55,7 +54,7 @@ public class RedisClientUtil {
         }
         logGet(cacheKeys);
         // 从底层取数据并放入缓存
-        if (CollectionUtils.isNotEmpty(unCacheKeys)) {
+        if (EmptyUtil.isNotEmpty(unCacheKeys)) {
             Map bizMap = function.apply(unCacheKeys);
             fromBiz(unCacheKeys);
             Map<RedisKey, Object> putMap = Maps.newHashMap();
@@ -65,7 +64,7 @@ public class RedisClientUtil {
                     putMap.putIfAbsent(RedisKey.createKey(keyPrefix + unCacheKey, expire), bizObj);
                 }
             }
-            if (MapUtils.isNotEmpty(putMap)) {
+            if (EmptyUtil.isNotEmpty(putMap)) {
                 jedisOperator.batchSetWithExpire(putMap);
             }
             result.putAll(bizMap);
@@ -74,7 +73,7 @@ public class RedisClientUtil {
     }
 
     public static void batchDelete(@NonNull IJedisOperator jedisOperator, String keyPrefix, List<Object> keys) {
-        if (CollectionUtils.isEmpty(keys)) {
+        if (EmptyUtil.isEmpty(keys)) {
             return;
         }
         if (keyPrefix == null) {

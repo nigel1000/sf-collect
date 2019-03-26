@@ -9,13 +9,13 @@ import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.api.page.PageParam;
 import com.common.collect.api.page.PageResult;
 import com.common.collect.util.ConvertUtil;
+import com.common.collect.util.EmptyUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
@@ -179,7 +179,7 @@ public abstract class AbstractElasticMapper<T> implements IElasticMapper<T>, IEl
         if (fetchSource != null) {
             sourceBuilder.fetchSource(fetchSource, null);
         }
-        if (CollectionUtils.isNotEmpty(sortBuilders)) {
+        if (EmptyUtil.isNotEmpty(sortBuilders)) {
             for (SortBuilder sortBuilder : sortBuilders) {
                 sourceBuilder.sort(sortBuilder);
             }

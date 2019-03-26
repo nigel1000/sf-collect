@@ -8,11 +8,11 @@ import com.common.collect.container.excel.annotations.model.ExcelCheckModel;
 import com.common.collect.container.excel.annotations.model.ExcelConvertModel;
 import com.common.collect.container.excel.annotations.model.ExcelImportModel;
 import com.common.collect.container.excel.base.ExcelConstants;
+import com.common.collect.util.EmptyUtil;
 import com.google.common.collect.Maps;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NonNull;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -70,7 +70,7 @@ public class ExcelImportParam<C> extends ExcelParam<C> {
             importInfo.setClassInfo(getClassInfo());
             ExcelImport excelImport = importInfo.getExcelImport();
             String colIndex = excelImport.colIndex();
-            if (StringUtils.isBlank(colIndex)) {
+            if (EmptyUtil.isBlank(colIndex)) {
                 throw UnifiedException.gen(ExcelConstants.MODULE, "colIndex不能为空");
             }
             // 赋值注解
