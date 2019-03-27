@@ -23,7 +23,7 @@ public class StringUtil {
 
     public static String replaceAll(String regex, String oldString, String newString) {
         if (regex == null || newString == null || oldString == null) {
-            return newString;
+            return oldString;
         }
         return oldString.replaceAll(regex, newString);
     }
