@@ -1,6 +1,7 @@
 package com.common.collect.model.retry;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
@@ -9,6 +10,7 @@ import java.util.List;
  */
 
 @Data
+@Slf4j
 public abstract class AbstractRetryProcess {
 
     private IMetaConfig metaConfig;
@@ -23,15 +25,19 @@ public abstract class AbstractRetryProcess {
                 if (bizExecute(retryRecord)) {
                     retryRecordService.success(retryRecord.getId(), metaConfig);
                 } else {
+                    failExecute(retryRecord);
                     retryRecordService.fail(retryRecord.getId(), metaConfig);
                 }
             } catch (Exception ex) {
+                failExecute(retryRecord);
+                log.error("重试记录 id:{} 失败异常。", retryRecord.getId(), ex);
                 retryRecordService.failExp(retryRecord.getId(), ex, metaConfig);
             }
         }
     }
 
-    public abstract boolean bizExecute(RetryRecord retryRecord) throws Exception;
+    public void failExecute(RetryRecord retryRecord) {}
 
+    public abstract boolean bizExecute(RetryRecord retryRecord) throws Exception;
 
 }

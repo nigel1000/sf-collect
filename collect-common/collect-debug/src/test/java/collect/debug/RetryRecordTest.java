@@ -28,7 +28,7 @@ public class RetryRecordTest {
 
         TransactionHelper transactionHelper = (TransactionHelper) applicationContext.getBean("transactionHelper");
         transactionHelper.aroundBiz(() -> {
-            retryRecordService.record(RetryRecord.gen("测试", UnifiedException.gen("测试错误")), RetryRecordConfig.DEMO);
+            retryRecordService.record(RetryRecord.gen("测试", null), RetryRecordConfig.DEMO);
 
             List<RetryRecord> retryRecordList = retryRecordService.loadNeedRetryRecord(RetryRecordConfig.DEMO);
             log.info("loadNeedRetryRecord -> return:{}", retryRecordList);
@@ -37,6 +37,11 @@ public class RetryRecordTest {
                 public void init() {
                     this.setMetaConfig(RetryRecordConfig.DEMO);
                     this.setRetryRecordService(retryRecordService);
+                }
+
+                @Override
+                public void failExecute(RetryRecord retryRecord) {
+                    log.error("fail bizExecute retryRecord:{}", retryRecord.getId());
                 }
 
                 @Override

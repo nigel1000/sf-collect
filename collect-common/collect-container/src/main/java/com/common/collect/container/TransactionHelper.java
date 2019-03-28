@@ -1,5 +1,6 @@
 package com.common.collect.container;
 
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,8 +30,8 @@ public class TransactionHelper {
         return biz.get();
     }
 
-    public void afterCommit(Runnable biz) {
-        AfterTransactionCommitExecutor.SingletonInstance.INSTANCE.executeAfterCommit(biz);
+    public void afterCommit(@NonNull String taskName, Runnable biz) {
+        AfterTransactionCommitExecutor.SingletonInstance.INSTANCE.executeAfterCommit(taskName, biz);
     }
 
     @Slf4j
@@ -43,45 +44,53 @@ public class TransactionHelper {
         }
 
         private final ThreadLocal<List<Runnable>> runnableTasks = new ThreadLocal<>();
+        private final ThreadLocal<List<String>> taskNames = new ThreadLocal<>();
 
-        private void executeAfterCommit(Runnable biz) {
+        private void executeAfterCommit(String taskName, Runnable biz) {
             if (biz == null) {
                 return;
             }
             if (!TransactionSynchronizationManager.isSynchronizationActive()) {
-                log.info("transaction synchronization is NOT ACTIVE. Executing right now runnable!");
+                log.info("transaction synchronization is not active. executing right now runnable! taskName:{}",
+                        taskName);
                 ThreadPoolUtil.exec(biz);
                 return;
             }
-            List<Runnable> threadRunnable = runnableTasks.get();
-            if (threadRunnable == null) {
-                threadRunnable = new ArrayList<>();
-                runnableTasks.set(threadRunnable);
+            List<Runnable> runnableList = runnableTasks.get();
+            List<String> taskNameList = taskNames.get();
+            if (runnableList == null) {
+                runnableList = new ArrayList<>();
+                taskNameList = new ArrayList<>();
+                runnableTasks.set(runnableList);
+                taskNames.set(taskNameList);
                 TransactionSynchronizationManager.registerSynchronization(this);
             }
-            threadRunnable.add(biz);
+            runnableList.add(biz);
+            taskNameList.add(taskName);
         }
 
         @Override
         public void afterCommit() {
-            List<Runnable> threadRunnable = runnableTasks.get();
-            log.info("transaction successfully committed, executing {} runnables", threadRunnable.size());
-            for (int i = 0; i < threadRunnable.size(); i++) {
-                Runnable biz = threadRunnable.get(i);
-                log.info("executing runnable:{}", i);
+            List<Runnable> runnableList = runnableTasks.get();
+            List<String> taskNameList = taskNames.get();
+            log.info("transaction successfully committed, executing taskNames:{}", taskNameList);
+            for (int i = 0; i < runnableList.size(); i++) {
+                Runnable biz = runnableList.get(i);
+                log.info("executing taskName:{}", taskNameList.get(i));
                 try {
                     ThreadPoolUtil.exec(biz);
                 } catch (Exception ex) {
-                    log.error("Failed to execute runnable:{}, Exception :", i, ex);
+                    log.error("failed to execute taskName:{}, Exception :", taskNameList.get(i), ex);
                 }
             }
         }
 
+        //  在 afterCommit 之后执行，哪怕 afterCommit 抛出异常也会执行
         @Override
         public void afterCompletion(int status) {
-            log.info("transaction completed with status {}",
-                    status == STATUS_COMMITTED ? "COMMITTED" : "ROLLED_BACK");
+            log.info("transaction completed with status {}", status == STATUS_COMMITTED ? "COMMITTED" : "ROLLED_BACK");
             runnableTasks.remove();
+            taskNames.remove();
         }
     }
 }
