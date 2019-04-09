@@ -1,6 +1,5 @@
 package collect.util;
 
-import com.common.collect.util.FileUtil;
 import com.common.collect.util.ZipUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,11 +31,11 @@ public class ZipUtilTest {
         log.info("path:\t" + path);
 
         ZipUtil.ZipModel model1 = ZipUtil.ZipModel.builder().prefixPath("temp").fileName("1.xls")
-                .fileBytes(FileUtil.getBytes(new FileInputStream(path + "/zip/zip1.txt"))).build();
+                .fileBytes(new FileInputStream(path + "/zip/zip1.txt")).build();
         ZipUtil.ZipModel model2 = ZipUtil.ZipModel.builder().prefixPath("temp/temp1/").fileName("2.xls")
-                .fileBytes(FileUtil.getBytes(new FileInputStream(path + "/zip/zip2.txt"))).build();
+                .fileBytes(new FileInputStream(path + "/zip/zip2.txt")).build();
         ZipUtil.ZipModel model3 = ZipUtil.ZipModel.builder().prefixPath("temp3/temp2/temp1").fileName("3.xls")
-                .fileBytes(FileUtil.getBytes(new FileInputStream(path + "/zip/zip3.txt"))).build();
+                .fileBytes(new FileInputStream(path + "/zip/zip3.txt")).build();
 
         byte[] ret = ZipUtil.zip(Arrays.asList(model1, model2, model3));
 

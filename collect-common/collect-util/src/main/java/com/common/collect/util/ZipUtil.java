@@ -6,10 +6,7 @@ import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -27,7 +24,7 @@ public class ZipUtil {
     @Data
     @Builder
     public static class ZipModel {
-        private byte[] fileBytes;
+        private InputStream fileBytes;
         private String fileName;
         private String prefixPath;
 
@@ -47,9 +44,7 @@ public class ZipUtil {
         List<ZipUtil.ZipModel> zipModels = new ArrayList<>();
         for (File file : files) {
             try {
-                ZipUtil.ZipModel zipModel = ZipUtil.ZipModel.builder()
-                        .fileBytes(com.common.collect.util.FileUtil
-                                .getBytes(new FileInputStream(file)))
+                ZipUtil.ZipModel zipModel = ZipUtil.ZipModel.builder().fileBytes(new FileInputStream(file))
                         .fileName(file.getName()).build();
                 zipModels.add(zipModel);
             } catch (IOException e) {
@@ -67,8 +62,7 @@ public class ZipUtil {
             for (ZipModel zipModel : zipModels) {
                 String prefixPath = zipModel.getPrefixPath();
                 String absolutePath = zipModel.getAbsolutePath();
-                if (PathUtil.hasPathSpecial(prefixPath)
-                        || PathUtil.hasFileSpecial(zipModel.getFileName())) {
+                if (PathUtil.hasPathSpecial(prefixPath) || PathUtil.hasFileSpecial(zipModel.getFileName())) {
                     log.info("此文件路径有特殊字符 absolutePath:{}", absolutePath);
                     continue;
                 }
@@ -77,7 +71,7 @@ public class ZipUtil {
                     _zipOut.closeEntry();
                     zipPaths.add(prefixPath);
                 }
-                byte[] _byte = zipModel.getFileBytes();
+                byte[] _byte = FileUtil.getBytes(zipModel.getFileBytes());
                 if (_byte != null && !zipPaths.contains(absolutePath)) {
                     _zipOut.putNextEntry(new ZipEntry(absolutePath));
                     _zipOut.write(_byte, 0, _byte.length);
