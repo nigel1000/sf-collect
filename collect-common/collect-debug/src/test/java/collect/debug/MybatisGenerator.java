@@ -71,6 +71,7 @@ public class MybatisGenerator {
         globalParam.setDbUrl(properties.get("url").toString());
         globalParam.setDbUser(properties.get("name").toString());
         globalParam.setDbPwd(properties.get("password").toString());
+        globalParam.setDbDriver(properties.get("driver").toString());
         globalParam.setAuthor("hznijianfeng");
         globalParam.setPrefixPath(path);
         globalParam.setTableNames(Lists.newArrayList("test"));

@@ -12,6 +12,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +23,8 @@ import java.util.Map;
 @Slf4j
 public class DB2Mapper {
 
-    public static void genMapper(MapperParam mapperParam) {
+    public static List<File> genMapper(MapperParam mapperParam) {
+        List<File> files = Lists.newArrayList();
 
         GlobalParam globalParam = mapperParam.getGlobalParam();
         Map<String, Table> tableMap = DBUtil.getTables(globalParam, mapperParam.getTableNames());
@@ -57,7 +59,8 @@ public class DB2Mapper {
             String fileContent = TemplateUtil.genTemplate("/tpl", "mapper.tpl", tplMap);
             if (mapperParam.isGenMapper()) {
                 log.info("DB2Mapper mapper:filePath:{},args:{},tplMap:{}", filePath, mapperParam, tplMap);
-                FileUtil.createFile(filePath,false, fileContent.getBytes(),true);
+                FileUtil.createFile(filePath, false, fileContent.getBytes(), true);
+                files.add(new File(filePath));
             }
 
             fileName = className + daoSuffixName + ".java";
@@ -66,9 +69,11 @@ public class DB2Mapper {
             fileContent = TemplateUtil.genTemplate("/tpl", "dao.tpl", tplMap);
             if (mapperParam.isGenDao()) {
                 log.info("DB2Mapper dao:filePath:{},args:{},tplMap:{}", filePath, mapperParam, tplMap);
-                FileUtil.createFile(filePath,false, fileContent.getBytes(),true);
+                FileUtil.createFile(filePath, false, fileContent.getBytes(), true);
+                files.add(new File(filePath));
             }
         }
+        return files;
     }
 
 }

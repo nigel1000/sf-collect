@@ -19,6 +19,7 @@ public class GlobalParam {
     private String dbUrl;
     private String dbUser;
     private String dbPwd;
+    private String dbDriver;
 
     /**
      * Created by ${author} on ${date}.
@@ -33,6 +34,7 @@ public class GlobalParam {
 
     public void validSelf() {
         if (EmptyUtil.isBlank(dbSchema)
+                || EmptyUtil.isBlank(dbDriver)
                 || EmptyUtil.isBlank(dbUrl)
                 || EmptyUtil.isBlank(dbUser)
                 || EmptyUtil.isBlank(dbPwd)) {

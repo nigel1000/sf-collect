@@ -58,7 +58,7 @@ public class DBUtil {
             String key = globalParam.getDbUrl();
             Connection connection = connectionMap.get(key);
             if (connection == null || connection.isClosed()) {
-                Class.forName("com.mysql.jdbc.Driver");
+                Class.forName(globalParam.getDbDriver());
                 connection = DriverManager.getConnection(globalParam.getDbUrl(), globalParam.getDbUser(), globalParam.getDbPwd());
                 connectionMap.put(key, connection);
             }

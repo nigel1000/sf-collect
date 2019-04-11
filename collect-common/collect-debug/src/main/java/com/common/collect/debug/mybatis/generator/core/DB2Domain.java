@@ -12,6 +12,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +23,8 @@ import java.util.Map;
 @Slf4j
 public class DB2Domain {
 
-    public static void genDomain(DomainParam domainParam) {
+    public static List<File> genDomain(DomainParam domainParam) {
+        List<File> files = Lists.newArrayList();
 
         GlobalParam globalParam = domainParam.getGlobalParam();
         Map<String, Table> tableMap = DBUtil.getTables(globalParam, domainParam.getTableNames());
@@ -51,8 +53,10 @@ public class DB2Domain {
             String filePath = dirPath + fileName;
             String fileContent = TemplateUtil.genTemplate("/tpl", "domain.tpl", tplMap);
             log.info("DB2Domain:filePath:{},args:{},tplMap:{}", filePath, domainParam, tplMap);
-            FileUtil.createFile(filePath,false, fileContent.getBytes(),true);
+            FileUtil.createFile(filePath, false, fileContent.getBytes(), true);
+            files.add(new File(filePath));
         }
+        return files;
     }
 
 }

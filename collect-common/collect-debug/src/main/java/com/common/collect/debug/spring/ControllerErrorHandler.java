@@ -78,7 +78,7 @@ public class ControllerErrorHandler {
     @ResponseStatus(HttpStatus.OK)
     public Response processControllerError(NativeWebRequest request, MissingServletRequestParameterException ex) {
         printLogInfo(request, ex);
-        return Response.fail(HttpStatus.BAD_REQUEST.value(), "缺少必要参数");
+        return Response.fail(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
     }
 
     /**
