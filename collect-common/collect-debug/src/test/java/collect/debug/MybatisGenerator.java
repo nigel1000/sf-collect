@@ -1,6 +1,7 @@
 package collect.debug;
 
 import collect.debug.mybatis.TestMybatis;
+import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.debug.mybatis.DBUtil;
 import com.common.collect.debug.mybatis.generator.core.DB2Domain;
 import com.common.collect.debug.mybatis.generator.core.DB2Mapper;
@@ -20,31 +21,36 @@ import java.util.Properties;
 @Slf4j
 public class MybatisGenerator {
 
-    public static String path;
+    private static String path;
+    private static Properties properties;
 
     static {
         path = TestMybatis.class.getResource("/").getPath();
         if (path.contains(":/")) {
-            path = path.substring(1, path.indexOf("target")) + "src/";
+            path = path.substring(1, path.indexOf("target")) + "logs/";
         } else {
-            path = path.substring(0, path.indexOf("target")) + "src/";
+            path = path.substring(0, path.indexOf("target")) + "logs/";
+        }
+        try {
+            properties = PropertiesLoaderUtils.loadAllProperties("db.properties");
+        } catch (Exception ex) {
+            throw UnifiedException.gen("属性读取失败");
         }
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         genTest();
         genFlowLog();
     }
 
-    private static void genFlowLog() throws Exception {
-        String path = MybatisGenerator.path.replaceAll("collect-debug", "collect-model");
+    private static void genFlowLog() {
 
-        Properties properties = PropertiesLoaderUtils.loadAllProperties("db.properties");
         GlobalParam globalParam = new GlobalParam();
         globalParam.setDbSchema("test_base_mapper");
         globalParam.setDbUrl(properties.get("url").toString());
         globalParam.setDbUser(properties.get("name").toString());
         globalParam.setDbPwd(properties.get("password").toString());
+        globalParam.setDbDriver(properties.get("driver").toString());
         globalParam.setAuthor("hznijianfeng");
         globalParam.setPrefixPath(path);
         globalParam.setTableNames(Lists.newArrayList("flow_log"));
@@ -54,7 +60,7 @@ public class MybatisGenerator {
         mapperParam.setGenMapper(true);
         mapperParam.setGenDao(false);
         mapperParam.setDaoSuffixName("mapper");
-        mapperParam.setMapperPrefixPath(path + "main/resources/mapper/");
+        mapperParam.setMapperPrefixPath(path);
         mapperParam.setDaoPackagePath("com.common.collect.model.flowlog.mapper");
         mapperParam.setDomainPackagePath("com.common.collect.model.flowlog");
         mapperParam.validSelf();
@@ -63,8 +69,7 @@ public class MybatisGenerator {
         DBUtil.releaseResource();
     }
 
-    private static void genTest() throws Exception {
-        Properties properties = PropertiesLoaderUtils.loadAllProperties("db.properties");
+    private static void genTest() {
 
         GlobalParam globalParam = new GlobalParam();
         globalParam.setDbSchema("test_base_mapper");
@@ -78,7 +83,7 @@ public class MybatisGenerator {
         globalParam.validSelf();
 
         DomainParam domainParam = new DomainParam(globalParam);
-        domainParam.setPrefixPath(path + "test/java/collect/debug/mybatis/domain/");
+        domainParam.setPrefixPath(path);
         domainParam.setPackagePath("collect.debug.mybatis.domain");
         domainParam.validSelf();
         DB2Domain.genDomain(domainParam);
@@ -87,22 +92,12 @@ public class MybatisGenerator {
         mapperParam.setGenMapper(true);
         mapperParam.setGenDao(true);
         mapperParam.setDaoSuffixName("mapper");
-        mapperParam.setDaoPrefixPath(path + "test/java/collect/debug/mybatis/dao/");
-        mapperParam.setMapperPrefixPath(path + "test/resources/mybatis/");
+        mapperParam.setDaoPrefixPath(path);
+        mapperParam.setMapperPrefixPath(path);
         mapperParam.setDaoPackagePath("collect.debug.mybatis.dao");
         mapperParam.setDomainPackagePath(domainParam.getPackagePath());
         mapperParam.validSelf();
         DB2Mapper.genMapper(mapperParam);
-
-        MapperParam daoParam = new MapperParam(globalParam);
-        daoParam.setGenMapper(true);
-        daoParam.setGenDao(false);
-        daoParam.setDaoSuffixName("dao");
-        daoParam.setMapperPrefixPath(path + "test/resources/mybatis/");
-        daoParam.setDaoPackagePath("collect.debug.mybatis.dao");
-        daoParam.setDomainPackagePath(domainParam.getPackagePath());
-        daoParam.validSelf();
-        DB2Mapper.genMapper(daoParam);
 
         DBUtil.releaseResource();
     }
