@@ -460,6 +460,26 @@ public class ExcelSession {
         }
     }
 
+    public void copySheetFollowIgnoreEmptyRow(Sheet fromSheet, String toSheetName) {
+        Sheet toSheet = createSheet(toSheetName);
+        // 合并区域处理
+        int startRowNum = toSheet.getLastRowNum();
+        copyMergeRegion(fromSheet, toSheet, startRowNum);
+        if (startRowNum != 0) {
+            startRowNum++;
+        }
+        int fromRowNum = 0;
+        for (Iterator<Row> rowIt = fromSheet.rowIterator(); rowIt.hasNext();) {
+            Row fromRow = rowIt.next();
+            if (isEmptyRow(fromRow)) {
+                continue;
+            }
+            Row toRow = toSheet.createRow(startRowNum + fromRowNum);
+            copyRow(fromRow, toRow, true, true, true, true);
+            fromRowNum++;
+        }
+    }
+
     ///////////////////////////////// compose////////////////////////////////
 
     ///////////////////////////////// 智能////////////////////////////////
