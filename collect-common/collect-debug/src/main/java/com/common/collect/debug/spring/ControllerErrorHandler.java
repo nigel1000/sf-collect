@@ -27,16 +27,12 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Created by nijianfeng on 2018/8/14.
- */
 @ControllerAdvice
 @ResponseBody
 @Slf4j
 public class ControllerErrorHandler {
 
     private static final String PARAM_ERROR_MESSAGE = "输入参数不合法";
-    private static final String RPC_TIMEOUT_EXCEPTION = "rpc 服务连接超时";
     private static final String RPC_EXCEPTION = "rpc 服务调用失败";
     private static final String DB_EXCEPTION = "数据库异常";
     private static final String INTERNAL_EXCEPTION = "发生未知错误，请联系技术人员排查!";
@@ -50,10 +46,10 @@ public class ControllerErrorHandler {
         printLogInfo(request, ex);
         List<FieldError> fieldErrors = ex.getFieldErrors();
         if (EmptyUtil.isEmpty(fieldErrors)) {
-            return Response.fail(HttpStatus.BAD_REQUEST.value(), PARAM_ERROR_MESSAGE);
+            return Response.fail(PARAM_ERROR_MESSAGE);
         }
         FieldError fieldError = fieldErrors.get(0);
-        return Response.fail(HttpStatus.BAD_REQUEST.value(), fieldError.getDefaultMessage());
+        return Response.fail(fieldError.getDefaultMessage());
     }
 
     /**
@@ -65,10 +61,10 @@ public class ControllerErrorHandler {
         printLogInfo(request, ex);
         Set<ConstraintViolation<?>> constraintViolations = ex.getConstraintViolations();
         if (EmptyUtil.isEmpty(constraintViolations)) {
-            return Response.fail(HttpStatus.BAD_REQUEST.value(), PARAM_ERROR_MESSAGE);
+            return Response.fail(PARAM_ERROR_MESSAGE);
         }
         ConstraintViolation<?> next = constraintViolations.iterator().next();
-        return Response.fail(HttpStatus.BAD_REQUEST.value(), next.getMessage());
+        return Response.fail(next.getMessage());
     }
 
     /**
@@ -78,7 +74,7 @@ public class ControllerErrorHandler {
     @ResponseStatus(HttpStatus.OK)
     public Response processControllerError(NativeWebRequest request, MissingServletRequestParameterException ex) {
         printLogInfo(request, ex);
-        return Response.fail(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+        return Response.fail(ex.getMessage());
     }
 
     /**
@@ -90,10 +86,10 @@ public class ControllerErrorHandler {
         printLogInfo(request, ex);
         BindingResult errors = ex.getBindingResult();
         if (EmptyUtil.isEmpty(errors.getFieldErrors())) {
-            return Response.fail(HttpStatus.BAD_REQUEST.value(), PARAM_ERROR_MESSAGE);
+            return Response.fail(PARAM_ERROR_MESSAGE);
         }
         FieldError fieldError = errors.getFieldErrors().get(0);
-        return Response.fail(HttpStatus.BAD_REQUEST.value(), fieldError.getDefaultMessage());
+        return Response.fail(fieldError.getDefaultMessage());
     }
 
     /**
@@ -103,27 +99,17 @@ public class ControllerErrorHandler {
     @ResponseStatus(HttpStatus.OK)
     public Response processControllerError(NativeWebRequest request, HttpMessageNotReadableException ex) {
         printLogInfo(request, ex);
-        return Response.fail(HttpStatus.BAD_REQUEST.value(), PARAM_ERROR_MESSAGE);
+        return Response.fail(PARAM_ERROR_MESSAGE);
     }
 
     /**
-     * rpc 连接超时
+     * rpc 连接超时 rpc 异常
      */
-    @ExceptionHandler(TimeoutException.class)
-    @ResponseStatus(HttpStatus.OK)
-    public Response processControllerError(NativeWebRequest request, TimeoutException ex) {
-        printLogInfo(request, ex);
-        return Response.fail(HttpStatus.INTERNAL_SERVER_ERROR.value(), RPC_TIMEOUT_EXCEPTION);
-    }
-
-    /**
-     * rpc 异常
-     */
-    @ExceptionHandler(RpcException.class)
+    @ExceptionHandler({RpcException.class, TimeoutException.class})
     @ResponseStatus(HttpStatus.OK)
     public Response processControllerError(NativeWebRequest request, RpcException ex) {
         printLogInfo(request, ex);
-        return Response.fail(HttpStatus.INTERNAL_SERVER_ERROR.value(), RPC_EXCEPTION);
+        return Response.fail(RPC_EXCEPTION);
     }
 
     /**
@@ -134,27 +120,17 @@ public class ControllerErrorHandler {
     public Response processControllerError(NativeWebRequest request, UnifiedException ex) {
         String message = ex.getErrorMessage();
         printLogInfo(request, ex);
-        return Response.fail(HttpStatus.BAD_REQUEST.value(), message);
+        return Response.fail(message);
     }
 
     /**
-     * spring 封装的数据库异常
+     * spring 封装的数据库异常 spring未捕获的数据库异常
      */
-    @ExceptionHandler(DataAccessException.class)
-    @ResponseStatus(HttpStatus.OK)
-    public Response processControllerError(NativeWebRequest request, DataAccessException ex) {
-        printLogInfo(request, ex);
-        return Response.fail(HttpStatus.INTERNAL_SERVER_ERROR.value(), DB_EXCEPTION);
-    }
-
-    /**
-     * spring未捕获的数据库异常
-     */
-    @ExceptionHandler(SQLException.class)
+    @ExceptionHandler({SQLException.class, DataAccessException.class})
     @ResponseStatus(HttpStatus.OK)
     public Response processControllerError(NativeWebRequest request, SQLException ex) {
         printLogInfo(request, ex);
-        return Response.fail(HttpStatus.INTERNAL_SERVER_ERROR.value(), DB_EXCEPTION);
+        return Response.fail(DB_EXCEPTION);
     }
 
     /**
@@ -164,7 +140,7 @@ public class ControllerErrorHandler {
     @ResponseStatus(HttpStatus.OK)
     public Response processControllerError(NativeWebRequest request, RuntimeException ex) {
         printLogInfo(request, ex);
-        return Response.fail(HttpStatus.INTERNAL_SERVER_ERROR.value(), INTERNAL_EXCEPTION);
+        return Response.fail(INTERNAL_EXCEPTION);
     }
 
     /**
