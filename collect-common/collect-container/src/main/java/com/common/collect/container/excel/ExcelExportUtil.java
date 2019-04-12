@@ -217,7 +217,7 @@ public class ExcelExportUtil extends ExcelSession {
     public <C> void exportForward(@NonNull List<C> data, Class<C> type) {
         // 导出数据
         int startRowIndex = this.getLastRowNum();
-        if (startRowIndex != 0 || !this.isEmptyRow(getRow(0))) {
+        if (startRowIndex != 0 || !this.isEmptyRow(0)) {
             startRowIndex++;
         }
         export(data, type, startRowIndex);

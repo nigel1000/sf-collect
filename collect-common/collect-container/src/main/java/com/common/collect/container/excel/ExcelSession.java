@@ -33,8 +33,7 @@ public class ExcelSession {
     protected Workbook workbook;
     protected Sheet sheet;
 
-    protected ExcelSession() {
-    }
+    protected ExcelSession() {}
 
     public ExcelSession(@NonNull Workbook workbook, Sheet sheet) {
         setWorkbook(workbook);
@@ -301,7 +300,7 @@ public class ExcelSession {
     }
 
     // 删除一行 不保留位置
-    public void removeRow(Sheet sheet, int rowIndex) {
+    public void removeRow(int rowIndex) {
         int lastRowNum = sheet.getLastRowNum();
         if (rowIndex >= 0 && rowIndex < lastRowNum) {
             // 将行号为rowIndex+1一直到行号为lastRowNum的单元格全部上移一行，以便删除rowIndex行
@@ -314,8 +313,8 @@ public class ExcelSession {
         }
     }
 
-    public boolean isEmptyRow(@NonNull Row row) {
-        Iterator<Cell> cellIter = row.cellIterator();
+    public boolean isEmptyRow(int rowIndex) {
+        Iterator<Cell> cellIter = getRow(rowIndex).cellIterator();
         boolean isRowEmpty = true;
         while (cellIter.hasNext()) {
             Cell cell = cellIter.next();
@@ -337,8 +336,22 @@ public class ExcelSession {
         this.getSheet().createFreezePane(colSplit, rowSplit, leftmostColumn, topRow);
     }
 
-    // sheet 间拷贝合并区域
-    private static void copyMergeRegion(Sheet fromSheet, Sheet toSheet, int startRowNum) {
+    // 当前 sheet 拷贝到 toSheet，toSheet 的 startRowNum
+    public void copyMergeRegionToTargetSheet(Sheet toSheet, int startRowNum) {
+        int num = getSheet().getNumMergedRegions();
+        if (startRowNum > 0) {
+            startRowNum++;
+        }
+        for (int i = 0; i < num; i++) {
+            CellRangeAddress cellRangeAddress = getSheet().getMergedRegion(i);
+            cellRangeAddress.setFirstRow(startRowNum + cellRangeAddress.getFirstRow());
+            cellRangeAddress.setLastRow(startRowNum + cellRangeAddress.getLastRow());
+            toSheet.addMergedRegion(cellRangeAddress);
+        }
+    }
+
+    // fromSheet 拷贝到 当前 sheet ，当前 sheet 的 startRowNum
+    public void copyMergeRegionFromTargetSheet(Sheet fromSheet, int startRowNum) {
         int num = fromSheet.getNumMergedRegions();
         if (startRowNum > 0) {
             startRowNum++;
@@ -347,9 +360,10 @@ public class ExcelSession {
             CellRangeAddress cellRangeAddress = fromSheet.getMergedRegion(i);
             cellRangeAddress.setFirstRow(startRowNum + cellRangeAddress.getFirstRow());
             cellRangeAddress.setLastRow(startRowNum + cellRangeAddress.getLastRow());
-            toSheet.addMergedRegion(cellRangeAddress);
+            getSheet().addMergedRegion(cellRangeAddress);
         }
     }
+
 
     public int getMergeColCount(int rowIndex, int colIndex) {
         int sheetMergeCount = this.getSheet().getNumMergedRegions();
@@ -368,8 +382,9 @@ public class ExcelSession {
         return 1;
     }
 
-    public Map<Integer, String> getRowValueMap(@NonNull Row row) {
+    public Map<Integer, String> getRowValueMap(int rowIndex) {
         Map<Integer, String> ret = Maps.newHashMap();
+        Row row = getRow(rowIndex);
         // row.getLastCellNum() 不是从0开始的
         int lastCellNum = row.getLastCellNum();
         for (int colIndex = 0; colIndex < lastCellNum; colIndex++) {
@@ -419,14 +434,13 @@ public class ExcelSession {
         }
     }
 
-    public void copyRow(@NonNull Row fromRow, @NonNull Row toRow,
-                        boolean isCopyCellValue, boolean isCopyRowHeight,
+    public void copyRow(@NonNull Row fromRow, @NonNull Row toRow, boolean isCopyCellValue, boolean isCopyRowHeight,
                         boolean isCopyCellStyle, boolean isCopyCellComment) {
         // 设置行高
         if (isCopyRowHeight) {
             toRow.setHeight(fromRow.getHeight());
         }
-        for (Iterator<Cell> cellIt = fromRow.cellIterator(); cellIt.hasNext(); ) {
+        for (Iterator<Cell> cellIt = fromRow.cellIterator(); cellIt.hasNext();) {
             Cell fromCell = cellIt.next();
             Cell toCell = toRow.createCell(fromCell.getColumnIndex());
             // 样式
@@ -445,33 +459,18 @@ public class ExcelSession {
     }
 
     // 复制sheet
-    public void copySheetFollow(Sheet fromSheet, String toSheetName) {
+    public void copySheetRowFollowToTargetSheet(String toSheetName, boolean ignoreEmptyRow) {
         Sheet toSheet = createSheet(toSheetName);
         // 合并区域处理
         int startRowNum = toSheet.getLastRowNum();
-        copyMergeRegion(fromSheet, toSheet, startRowNum);
-        if (startRowNum != 0) {
-            startRowNum++;
-        }
-        for (Iterator<Row> rowIt = fromSheet.rowIterator(); rowIt.hasNext(); ) {
-            Row fromRow = rowIt.next();
-            Row toRow = toSheet.createRow(startRowNum + fromRow.getRowNum());
-            copyRow(fromRow, toRow, true, true, true, true);
-        }
-    }
-
-    public void copySheetFollowIgnoreEmptyRow(Sheet fromSheet, String toSheetName) {
-        Sheet toSheet = createSheet(toSheetName);
-        // 合并区域处理
-        int startRowNum = toSheet.getLastRowNum();
-        copyMergeRegion(fromSheet, toSheet, startRowNum);
+        copyMergeRegionToTargetSheet(toSheet, startRowNum);
         if (startRowNum != 0) {
             startRowNum++;
         }
         int fromRowNum = 0;
-        for (Iterator<Row> rowIt = fromSheet.rowIterator(); rowIt.hasNext();) {
+        for (Iterator<Row> rowIt = getSheet().rowIterator(); rowIt.hasNext();) {
             Row fromRow = rowIt.next();
-            if (isEmptyRow(fromRow)) {
+            if (ignoreEmptyRow && isEmptyRow(fromRow.getRowNum())) {
                 continue;
             }
             Row toRow = toSheet.createRow(startRowNum + fromRowNum);
@@ -498,14 +497,14 @@ public class ExcelSession {
     // 获取单元格内容的字符宽度
     public int getCellValueLength(int rowIndex, int colIndex) {
         String value = getCellValue(rowIndex, colIndex);
-        int cnNum = 0;
+        int num = 0;
         for (int index = 0; index < value.length(); index++) {
             Matcher matcher = Pattern.compile(Constants.CHINESE_REG_EX).matcher(value.substring(index, index + 1));
             if (matcher.find()) {
-                cnNum++;
+                num++;
             }
         }
-        return cnNum + value.length();
+        return num + value.length();
     }
 
     // 获取近似行高

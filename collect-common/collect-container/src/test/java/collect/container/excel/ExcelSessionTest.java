@@ -57,11 +57,16 @@ public class ExcelSessionTest {
     public static void sessionExcel() throws Exception {
         ExcelSession excelSession = new ExcelSession(new FileInputStream(path + "/ExcelSession.xlsx"));
         excelSession.insertRows(5, 10);
-        excelSession.removeRow(excelSession.createSheet("复制"),0);
-        excelSession.removeRow(excelSession.createSheet("测试"),0);
-        excelSession.copySheetFollow(excelSession.createSheet("复制"), "复制后的表");
-        excelSession.copySheetFollow(excelSession.createSheet("测试"), "复制后的表");
-        excelSession.copySheetFollow(excelSession.createSheet("复制"), "复制后的表");
+        excelSession.changeSheet("复制");
+        excelSession.removeRow(0);
+        excelSession.changeSheet("测试");
+        excelSession.removeRow(0);
+        excelSession.changeSheet("复制");
+        excelSession.copySheetRowFollowToTargetSheet("复制后的表", true);
+        excelSession.changeSheet("测试");
+        excelSession.copySheetRowFollowToTargetSheet("复制后的表", true);
+        excelSession.changeSheet("复制");
+        excelSession.copySheetRowFollowToTargetSheet("复制后的表", true);
         excelSession.removeSheet("复制");
         excelSession.removeSheet("测试");
         File file = excelSession.saveTemp(IdUtil.uuidHex(), ".xlsx");

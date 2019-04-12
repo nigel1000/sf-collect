@@ -15,7 +15,10 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 
 import java.io.InputStream;
 import java.util.List;
@@ -83,11 +86,10 @@ public class ExcelImportUtil extends ExcelSession {
         ExcelImportException excelParseException = new ExcelImportException(failCount);
         ExcelImportParam<C> excelImportParam = new ExcelImportParam<>(targetClass);
         for (int i = from; i <= to; i++) {
-            Row row = getRow(i);
-            boolean isEmpty = this.isEmptyRow(row);
+            boolean isEmpty = this.isEmptyRow(i);
             if (!isEmpty) {
                 try {
-                    retList.add(rowParse(row, excelImportParam));
+                    retList.add(rowParse(i, excelImportParam));
                 } catch (ExcelImportException e) {
                     isExcelExp = true;
                     if (!excelParseException.addInfo(e.getInfoList())) {
@@ -105,13 +107,12 @@ public class ExcelImportUtil extends ExcelSession {
     /**
      * 获取excel某一行
      */
-    private <C> C rowParse(Row row, ExcelImportParam<C> excelImportParam) throws ExcelImportException {
+    private <C> C rowParse(int rowIndex, ExcelImportParam<C> excelImportParam) throws ExcelImportException {
         // 利用反射赋值
         C result = excelImportParam.newInstance();
         ExcelImportException excelParseException = new ExcelImportException(failCount);
         String sheetName = getSheet().getSheetName();
-        Map<Integer, String> rowMap = getRowValueMap(row);
-        int rowNum = row.getRowNum();
+        Map<Integer, String> rowMap = getRowValueMap(rowIndex);
         for (Map.Entry<String, ExcelImportParam.ImportInfo<C>> entry : excelImportParam.getFieldImportMap()
                 .entrySet()) {
             String fieldName = entry.getKey();
@@ -139,7 +140,7 @@ public class ExcelImportUtil extends ExcelSession {
                         } catch (Exception ex) {
                             log.debug("数据转换错误", ex);
                             isConvertSuccess = false;
-                            ExcelSheetInfo expInfo = ExcelSheetInfo.builder().columnName(title).rowNum(rowNum)
+                            ExcelSheetInfo expInfo = ExcelSheetInfo.builder().columnName(title).rowNum(rowIndex)
                                     .sheetName(sheetName).colNum(colIndex).currentValue(currentValue).build();
                             if (ex.getClass() == UnifiedException.class) {
                                 expInfo.setErrMsg(ExcelConstants.fillCommonPlaceholder(ex.getMessage(), expInfo));
@@ -162,7 +163,7 @@ public class ExcelImportUtil extends ExcelSession {
                     try {
                         checkHandler.check(value, importInfo);
                     } catch (UnifiedException ex) {
-                        ExcelSheetInfo expInfo = ExcelSheetInfo.builder().columnName(title).rowNum(rowNum)
+                        ExcelSheetInfo expInfo = ExcelSheetInfo.builder().columnName(title).rowNum(rowIndex)
                                 .sheetName(sheetName).colNum(colIndex).currentValue(currentValue).build();
                         expInfo.setErrMsg(ExcelConstants.fillCommonPlaceholder(ex.getMessage(), expInfo));
                         if (!excelParseException.addInfo(expInfo)) {
