@@ -181,14 +181,13 @@ public class ExcelSession {
         ExcelUtil.insertRows(getSheet(), startRow, rowCount);
     }
 
-    public void copyCellValue(@NonNull Cell fromCell, @NonNull Cell toCell) {
-        ExcelUtil.copyCellValue(getSheet(), fromCell.getRowIndex(), fromCell.getColumnIndex(),
-                getSheet(), toCell.getRowIndex(), toCell.getColumnIndex());
+    public void copyCellValue(int fromRowIndex, int fromColIndex, int toRowIndex, int toColIndex) {
+        ExcelUtil.copyCellValue(getSheet(), fromRowIndex, fromColIndex, getSheet(), toRowIndex, toColIndex);
     }
 
-    public void copyRow(@NonNull Row fromRow, @NonNull Row toRow, boolean isCopyCellValue, boolean isCopyRowHeight,
+    public void copyRow(int fromRowIndex, int toRowIndex, boolean isCopyCellValue, boolean isCopyRowHeight,
                         boolean isCopyCellStyle, boolean isCopyCellComment) {
-        ExcelUtil.copyRow(getSheet(), fromRow.getRowNum(), getSheet(), toRow.getRowNum(), isCopyCellValue, isCopyRowHeight, isCopyCellStyle, isCopyCellComment);
+        ExcelUtil.copyRow(getSheet(), fromRowIndex, getSheet(), toRowIndex, isCopyCellValue, isCopyRowHeight, isCopyCellStyle, isCopyCellComment);
     }
 
     public void copySheetRowFollowToTargetSheet(String toSheetName, boolean ignoreEmptyRow) {
