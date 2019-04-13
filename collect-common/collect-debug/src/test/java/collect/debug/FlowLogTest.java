@@ -19,7 +19,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class FlowLogTest {
 
     public static void main(String[] args) {
-        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("application-context.xml");
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("context-spring.xml");
 
         FlowLogService flowLogService = (FlowLogService) applicationContext.getBean("flowLogService");
         FlowLogMapper flowLogMapper = (FlowLogMapper) applicationContext.getBean("flowLogMapper");

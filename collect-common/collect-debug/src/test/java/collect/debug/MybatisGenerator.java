@@ -46,11 +46,10 @@ public class MybatisGenerator {
     private static void genFlowLog() {
 
         GlobalParam globalParam = new GlobalParam();
-        globalParam.setDbSchema("test_base_mapper");
-        globalParam.setDbUrl(properties.get("url").toString());
-        globalParam.setDbUser(properties.get("name").toString());
-        globalParam.setDbPwd(properties.get("password").toString());
-        globalParam.setDbDriver(properties.get("driver").toString());
+        globalParam.setDbUrl(properties.get("jdbc.mysql.url").toString());
+        globalParam.setDbUser(properties.get("jdbc.mysql.name").toString());
+        globalParam.setDbPwd(properties.get("jdbc.mysql.password").toString());
+        globalParam.setDbDriver(properties.get("jdbc.mysql.driver").toString());
         globalParam.setAuthor("hznijianfeng");
         globalParam.setPrefixPath(path);
         globalParam.setTableNames(Lists.newArrayList("flow_log"));
@@ -72,11 +71,10 @@ public class MybatisGenerator {
     private static void genTest() {
 
         GlobalParam globalParam = new GlobalParam();
-        globalParam.setDbSchema("test_base_mapper");
-        globalParam.setDbUrl(properties.get("url").toString());
-        globalParam.setDbUser(properties.get("name").toString());
-        globalParam.setDbPwd(properties.get("password").toString());
-        globalParam.setDbDriver(properties.get("driver").toString());
+        globalParam.setDbUrl(properties.get("jdbc.mysql.url").toString());
+        globalParam.setDbUser(properties.get("jdbc.mysql.name").toString());
+        globalParam.setDbPwd(properties.get("jdbc.mysql.password").toString());
+        globalParam.setDbDriver(properties.get("jdbc.mysql.driver").toString());
         globalParam.setAuthor("hznijianfeng");
         globalParam.setPrefixPath(path);
         globalParam.setTableNames(Lists.newArrayList("test"));

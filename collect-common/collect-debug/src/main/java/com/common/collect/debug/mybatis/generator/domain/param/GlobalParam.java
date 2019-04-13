@@ -42,4 +42,11 @@ public class GlobalParam {
         }
     }
 
+    public void setDbUrl(String dbUrl) {
+        this.dbUrl = dbUrl;
+        if (EmptyUtil.isNotEmpty(dbUrl)) {
+            this.dbSchema = dbUrl.substring(dbUrl.lastIndexOf("/") + 1, dbUrl.indexOf("?"));
+        }
+    }
+
 }

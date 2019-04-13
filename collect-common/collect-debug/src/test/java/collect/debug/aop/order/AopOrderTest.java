@@ -13,7 +13,7 @@ public class AopOrderTest {
 
     public static void main(String[] args) {
 
-        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("application-context.xml");
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("context-spring.xml");
 
         log.info("--------------------- order ---------------------------");
         AopOrder aopOrder = applicationContext.getBean(AopOrder.class);

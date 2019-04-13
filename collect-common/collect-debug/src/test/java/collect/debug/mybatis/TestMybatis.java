@@ -24,7 +24,7 @@ import java.util.Date;
 public class TestMybatis {
 
     public static void main(String[] args) throws Exception {
-        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("application-context.xml");
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("context-spring.xml");
         TestMapper testMapper = (TestMapper) applicationContext.getBean("testMapper");
 
         Test test = genTest();
