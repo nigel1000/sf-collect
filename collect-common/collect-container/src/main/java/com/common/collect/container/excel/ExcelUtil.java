@@ -134,15 +134,17 @@ public class ExcelUtil {
     }
 
     // 拷贝行
-    public static void copyRow(@NonNull Row fromRow, @NonNull Row toRow, boolean isCopyCellValue, boolean isCopyRowHeight,
+    public static void copyRow(@NonNull Sheet fromSheet, int fromRowIndex,
+                               @NonNull Sheet toSheet, int toRowIndex,
+                               boolean isCopyCellValue, boolean isCopyRowHeight,
                                boolean isCopyCellStyle, boolean isCopyCellComment) {
         // 设置行高
         if (isCopyRowHeight) {
-            toRow.setHeight(fromRow.getHeight());
+            setRowHeight(toSheet, toRowIndex, getRowHeight(fromSheet, fromRowIndex));
         }
-        for (Iterator<Cell> cellIt = fromRow.cellIterator(); cellIt.hasNext(); ) {
+        for (Iterator<Cell> cellIt = getRow(fromSheet, fromRowIndex).cellIterator(); cellIt.hasNext(); ) {
             Cell fromCell = cellIt.next();
-            Cell toCell = toRow.createCell(fromCell.getColumnIndex());
+            Cell toCell = getCell(toSheet, toRowIndex, fromCell.getColumnIndex());
             // 样式
             if (isCopyCellStyle) {
                 toCell.setCellStyle(fromCell.getCellStyle());
@@ -153,20 +155,17 @@ public class ExcelUtil {
             }
             // 不同数据类型处理
             if (isCopyCellValue) {
-                copyCellValue(fromCell, toCell);
+                copyCellValue(fromSheet, fromRowIndex, fromCell.getColumnIndex(), toSheet, toRowIndex, toCell.getColumnIndex());
             }
         }
     }
 
     // 在 startRow 行后插入若干行 带样式 带行高
     public static void insertRows(@NonNull Sheet sheet, int startRow, int rowCount) {
-        if (getRow(sheet, startRow - 1) == null) {
-            throw UnifiedException.gen(startRow - 1 + " 行不存在");
-        }
-        Row fromRow = getRow(sheet, startRow - 1);
-        for (int i = 0; i < rowCount; i++) {
+        Row fromRow = getRow(sheet, startRow);
+        for (int i = 1; i <= rowCount; i++) {
             Row toRow = getRow(sheet, startRow + i);
-            copyRow(fromRow, toRow, false, true, true, false);
+            copyRow(sheet, fromRow.getRowNum(), sheet, toRow.getRowNum(), false, true, true, false);
         }
     }
 
@@ -259,7 +258,10 @@ public class ExcelUtil {
     }
 
     // 复制单元格
-    public static void copyCellValue(@NonNull Cell fromCell, @NonNull Cell toCell) {
+    public static void copyCellValue(@NonNull Sheet fromSheet, int fromRowIndex, int fromColIndex,
+                                     @NonNull Sheet toSheet, int toRowIndex, int toColIndex) {
+        Cell fromCell = getCell(fromSheet, fromRowIndex, fromColIndex);
+        Cell toCell = getCell(toSheet, toRowIndex, toColIndex);
         CellType srcCellType = fromCell.getCellTypeEnum();
         toCell.setCellType(srcCellType);
         if (srcCellType == CellType.NUMERIC) {
@@ -399,8 +401,7 @@ public class ExcelUtil {
             if (ignoreEmptyRow && isEmptyRow(fromSheet, fromRow.getRowNum())) {
                 continue;
             }
-            Row toRow = getRow(toSheet, startRowNum + fromRowNum);
-            copyRow(fromRow, toRow, true, true, true, true);
+            copyRow(fromSheet, fromRow.getRowNum(), toSheet, startRowNum + fromRowNum, true, true, true, true);
             fromRowNum++;
         }
     }
