@@ -13,7 +13,6 @@ public class MybatisContext {
     private static ThreadLocal<String> sqlRecord = new ThreadLocal<>();
     private static ThreadLocal<Boolean> enableSqlRecord = new ThreadLocal<>();
 
-
     public static void setEnableSqlRecord(boolean enable) {
         enableSqlRecord.set(enable);
     }

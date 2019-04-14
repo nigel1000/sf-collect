@@ -8,7 +8,7 @@
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%date %5level [%X{traceId}] %6relative --- [%15thread] [%-40logger{40}] [%C:%L] : %msg%n</pattern>
+            <pattern>%date %5level [%X{containerTraceId}] %6relative --- [%15thread] [%-40logger{40}] [%C:%L] : %msg%n</pattern>
         </encoder>
     </appender>
 
