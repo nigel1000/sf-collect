@@ -39,7 +39,7 @@ public class PathUtil {
 
     // 多个/或者多个\缩减为一个
     public static String correctSeparator(String path) {
-        if (path == null || "".equals(path.trim())) {
+        if (EmptyUtil.isBlank(path)) {
             return "";
         }
         List<Character> separator = Arrays.asList('\\', '/');
