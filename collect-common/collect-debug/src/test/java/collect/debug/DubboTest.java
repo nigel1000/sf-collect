@@ -28,9 +28,6 @@ public class DubboTest {
         zkAddress = properties.getProperty("zk." + "testjd");
         group = "env_machine";
 
-//        InvokerParam.serviceDubboIp = properties.getProperty("env_machine" + ".ip.hz");
-//        InvokerParam.serviceDubboPort = "20880";
-
     }
 
     public static void main(String[] args) {
@@ -45,6 +42,8 @@ public class DubboTest {
 //        invokerParam.setGroup(group);
 //        invokerParam.setZkAddress(zkAddress);
 //        invokerParam.setMockClass(DemoFacade.class);
+//        invokerParam.setOldIps(Lists.newArrayList("10.1.1.1", "10.2.2.2"));
+//        invokerParam.setNewIps(Lists.newArrayList("10.11.11.11", "10.22.22.22"));
 //
 //        DemoFacade demoFacade = InvokerFactory.getInstance(invokerParam);
 //

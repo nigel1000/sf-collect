@@ -1,10 +1,12 @@
 package com.common.collect.debug.dubbo.invoker;
 
 import com.alibaba.dubbo.common.URL;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.Data;
 import lombok.NonNull;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -14,14 +16,13 @@ import java.util.Map;
 @Data
 public class InvokerParam {
 
-    // 指定服务机器 id
-    public static String serviceDubboIp;
-    public static String serviceDubboPort;
-
     private String zkAddress;
 
     private Class mockClass;
     private String mockClassName;
+
+    private List<String> oldIps = Lists.newArrayList();
+    private List<String> newIps = Lists.newArrayList();
 
     private String application = "invoker-debug";
     private String host = "127.0.0.1";
@@ -33,29 +34,29 @@ public class InvokerParam {
     private String protocol = "dubbo";
     private String group;
     private String version = "1.0";
-    private int port = 20880;
+    private Integer port = 20880;
 
 
     public static Map<String, String> getParams(InvokerParam invokerParam) {
-        Map<String, String> params = Maps.newHashMap();
-        params.put("anyhost", invokerParam.getAnyHost());
-        params.put("application", invokerParam.getApplication());
-        params.put("check", invokerParam.getCheck());
-        params.put("default.timeout", invokerParam.getDefaultTimeout());
-        params.put("side", invokerParam.getSide());
-        params.put("path", invokerParam.getMockClassName());
-        params.put("interface", invokerParam.getMockClassName());
-        params.put("group", invokerParam.getGroup());
-        params.put("version", invokerParam.getVersion());
-        return params;
+        Map<String, String> param = Maps.newHashMap();
+        param.put("anyhost", invokerParam.getAnyHost());
+        param.put("application", invokerParam.getApplication());
+        param.put("check", invokerParam.getCheck());
+        param.put("default.timeout", invokerParam.getDefaultTimeout());
+        param.put("side", invokerParam.getSide());
+        param.put("path", invokerParam.getMockClassName());
+        param.put("interface", invokerParam.getMockClassName());
+        param.put("group", invokerParam.getGroup());
+        param.put("version", invokerParam.getVersion());
+        return param;
     }
 
-    public static Map<String, String> getInvokerParam(URL providerUrl) {
+    public static Map<String, String> getInvokerParam(URL providerUrl, InvokerParam invokerParam) {
         Map<String, String> param = Maps.newHashMap();
         param.put("protocol", providerUrl.getProtocol());
         param.put("address", providerUrl.getAddress());
-        param.put("path", providerUrl.getServiceInterface());
         param.put("group", providerUrl.getParameter("group"));
+        param.put("default.timeout", invokerParam.getDefaultTimeout());
         return param;
     }
 

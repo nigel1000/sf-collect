@@ -8,10 +8,10 @@ import com.alibaba.dubbo.config.ReferenceConfig;
 import com.alibaba.dubbo.registry.Registry;
 import com.alibaba.dubbo.registry.RegistryFactory;
 import com.common.collect.api.excps.UnifiedException;
-import com.common.collect.util.EmptyUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by hznijianfeng on 2019/1/17.
@@ -35,26 +35,26 @@ public class InvokerFactory {
             if (providerUrls != null && providerUrls.size() > 0) {
                 for (int i = 0; i < providerUrls.size(); i++) {
                     URL providerUrl = providerUrls.get(i);
-                    if (EmptyUtil.isNotEmpty(InvokerParam.serviceDubboIp)) {
-                        providerUrl = providerUrl.setHost(InvokerParam.serviceDubboIp);
+                    log.info("before providerUrl:{}", providerUrl);
+                    if (invokerParam.getOldIps().contains(providerUrl.getHost())) {
+                        providerUrl = providerUrl.setAddress(
+                                invokerParam.getNewIps().get(invokerParam.getOldIps().indexOf(providerUrl.getHost())));
                     }
-                    if (EmptyUtil.isNotEmpty(InvokerParam.serviceDubboPort)) {
-                        providerUrl = providerUrl.setPort(Integer.valueOf(InvokerParam.serviceDubboPort));
-                    }
-                    log.info("providerUrl:{}", providerUrl);
+                    log.info("after  providerUrl:{}", providerUrl);
                     try {
                         ApplicationConfig applicationConfig = new ApplicationConfig();
                         applicationConfig.setName(invokerParam.getApplication());
                         ReferenceConfig<T> referenceConfig = new ReferenceConfig<>();
-                        referenceConfig.setUrl(UrlUtils.parseURL(providerUrl.getAddress(), InvokerParam.getInvokerParam(providerUrl)).toString());
+                        Map<String, String> params = InvokerParam.getInvokerParam(providerUrl, invokerParam);
+                        referenceConfig.setUrl(UrlUtils.parseURL(providerUrl.getAddress(), params).toString());
                         referenceConfig.setInterface(Class.forName(providerUrl.getServiceInterface()));
                         referenceConfig.setVersion(invokerParam.getVersion());
                         referenceConfig.setApplication(applicationConfig);
                         return referenceConfig.get();
                     } catch (ClassNotFoundException ex) {
-                        throw UnifiedException.gen("没有找到 class " + url.getServiceInterface());
+                        throw UnifiedException.gen("没有找到 class " + providerUrl.getServiceInterface());
                     } catch (Exception ex) {
-                        log.error("无法访问 interface [{}] in {},尝试下一个", url.getServiceInterface(), url.getAddress(), ex);
+                        log.error("无法访问 interface [{}] in {},尝试下一个", providerUrl.getServiceInterface(), providerUrl.getAddress(), ex);
                     }
                 }
             }
