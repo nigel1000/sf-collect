@@ -49,6 +49,7 @@ Store：LSM三层存储模型，内存(MemStore)->（小文件(StoreFile)->合�
 |rowkey:2  |name |he |
 |rowkey:2  |age |28 |
 |rowkey:3  |name |she |
+
 rowkey 相同的这些数据其实就是原来的一行。
 
 # 列簇
