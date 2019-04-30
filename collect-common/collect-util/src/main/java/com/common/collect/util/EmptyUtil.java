@@ -10,15 +10,15 @@ import java.util.Set;
 
 public class EmptyUtil {
 
-    public static boolean isEmpty(final CharSequence cs) {
+    public static boolean isEmpty(CharSequence cs) {
         return cs == null || cs.length() == 0;
     }
 
-    public static boolean isNotEmpty(final CharSequence cs) {
+    public static boolean isNotEmpty(CharSequence cs) {
         return !isEmpty(cs);
     }
 
-    public static boolean isBlank(final CharSequence cs) {
+    public static boolean isBlank(CharSequence cs) {
         int strLen;
         if (cs == null || (strLen = cs.length()) == 0) {
             return true;
@@ -31,31 +31,31 @@ public class EmptyUtil {
         return true;
     }
 
-    public static boolean isNotBlank(final CharSequence cs) {
+    public static boolean isNotBlank(CharSequence cs) {
         return !isBlank(cs);
     }
 
-    public static <T> boolean isEmpty(final List<T> list) {
+    public static <T> boolean isEmpty(List<T> list) {
         return list == null || list.isEmpty();
     }
 
-    public static <T> boolean isNotEmpty(final List<T> list) {
+    public static <T> boolean isNotEmpty(List<T> list) {
         return !isEmpty(list);
     }
 
-    public static <K, V> boolean isEmpty(final Map<K, V> map) {
+    public static <K, V> boolean isEmpty(Map<K, V> map) {
         return map == null || map.isEmpty();
     }
 
-    public static <K, V> boolean isNotEmpty(final Map<K, V> map) {
+    public static <K, V> boolean isNotEmpty(Map<K, V> map) {
         return !isEmpty(map);
     }
 
-    public static <T> boolean isEmpty(final Set<T> set) {
+    public static <T> boolean isEmpty(Set<T> set) {
         return set == null || set.isEmpty();
     }
 
-    public static <T> boolean isNotEmpty(final Set<T> set) {
+    public static <T> boolean isNotEmpty(Set<T> set) {
         return !isEmpty(set);
     }
 

@@ -60,7 +60,6 @@ public class RedisTest {
         log.info("######################################################");
 
         Slf4jUtil.setLogLevel("debug");
-
         Map<String, String> batchGetPutMap =
                 RedisClientUtil.batchGetPut(jedisOperator, Lists.newArrayList(key, key + "formBiz"), 10, (t) -> {
                     Map<String, String> biz = Maps.newHashMap();
