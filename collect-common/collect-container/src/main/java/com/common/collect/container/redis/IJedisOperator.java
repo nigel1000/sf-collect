@@ -3,6 +3,7 @@ package com.common.collect.container.redis;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCommands;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +31,7 @@ public interface IJedisOperator {
 
     <T> boolean setIfNotExist(RedisKey redisKey, T object);
 
-    <T> void setWithExpire(RedisKey redisKey, T object);
+    <T> boolean setWithExpire(RedisKey redisKey, T object);
 
     default <T> void batchSetWithExpire(Map<RedisKey, T> map) {
         if (map == null) {
@@ -43,21 +44,35 @@ public interface IJedisOperator {
 
     <T> T get(RedisKey redisKey);
 
-    default <T> Map<RedisKey, T> batchGet(List<RedisKey> redisKeys) {
-        Map<RedisKey, T> result = new HashMap<>();
+    default <T> List<T> batchGet(List<RedisKey> redisKeys) {
+        List<T> result = new ArrayList<>();
         if (redisKeys == null) {
             return result;
         }
         for (RedisKey redisKey : redisKeys) {
             Object cache = get(redisKey);
             if (cache != null) {
-                result.put(redisKey, get(redisKey));
+                result.add(get(redisKey));
             }
         }
         return result;
     }
 
-    void remove(List<RedisKey> redisKey);
+    default <T> Map<String, T> batchGetMap(List<RedisKey> redisKeys) {
+        Map<String, T> result = new HashMap<>();
+        if (redisKeys == null) {
+            return result;
+        }
+        for (RedisKey redisKey : redisKeys) {
+            Object cache = get(redisKey);
+            if (cache != null) {
+                result.put(redisKey.getKey(), get(redisKey));
+            }
+        }
+        return result;
+    }
+
+    Long remove(RedisKey redisKey);
 
     // 解锁和获取锁只要key一样就行
     boolean lock(RedisKey redisKey);
@@ -65,10 +80,10 @@ public interface IJedisOperator {
     void release(RedisKey redisKey);
 
     // 解锁和获取的 bizCode 必须一样
-    default boolean lockWithBiz(RedisKey redisKey, String bizCode){
+    default boolean lockWithBiz(RedisKey redisKey, String bizCode) {
         return setIfNotExist(redisKey, bizCode);
     }
 
-    void releaseWithBiz(RedisKey redisKey, String bizCode);
+    Object releaseWithBiz(RedisKey redisKey, String bizCode);
 
 }

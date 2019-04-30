@@ -4,12 +4,12 @@ import com.common.collect.container.redis.JedisOperator;
 import com.common.collect.container.redis.client.RedisClientFactory;
 import com.common.collect.container.redis.client.RedisClientUtil;
 import com.common.collect.container.redis.enums.SerializeEnum;
-import com.common.collect.util.constant.Constants;
 import com.common.collect.util.log4j.Slf4jUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,7 +17,6 @@ import java.util.Map;
  */
 
 @Slf4j
-@SuppressWarnings("unchecked")
 public class RedisTest {
 
     public static void main(String[] args) throws Exception {
@@ -27,49 +26,57 @@ public class RedisTest {
         jedisOperator.getRedisConfig().setSerializeEnum(SerializeEnum.HESSIAN);
         jedisOperator.init();
 
-        new RedisClientUtil();
+        String value = "value";
+
+        String key = "test-key-1";
+        log.info("put:{}", RedisClientUtil.put(jedisOperator, key, value, 10));
+        String ret = RedisClientUtil.get(jedisOperator, key);
+        log.info("get:{}", ret);
+        log.info("remove:{}", RedisClientUtil.remove(jedisOperator, key));
+        ret = RedisClientUtil.get(jedisOperator, key);
+        log.info("get:{}", ret);
+        log.info("######################################################");
+
+        log.info("lock:{}", RedisClientUtil.lock(jedisOperator, key, 10));
+        log.info("lock:{}", RedisClientUtil.lock(jedisOperator, key, 10));
+        log.info("release:{}", RedisClientUtil.release(jedisOperator, key));
+        log.info("lock:{}", RedisClientUtil.lock(jedisOperator, key, 10));
+        log.info("releaseWithBizId:{}", RedisClientUtil.releaseWithBizId(jedisOperator, key, "1"));
+        log.info("######################################################");
+
+        log.info("lockWithBizId:{}", RedisClientUtil.lockWithBizId(jedisOperator, key, "2", 10));
+        log.info("lockWithBizId:{}", RedisClientUtil.lockWithBizId(jedisOperator, key, "2", 10));
+        log.info("releaseWithBizId:{}", RedisClientUtil.releaseWithBizId(jedisOperator, key, "2"));
+        log.info("lockWithBizId:{}", RedisClientUtil.lockWithBizId(jedisOperator, key, "2", 10));
+        log.info("releaseWithBizId:{}", RedisClientUtil.releaseWithBizId(jedisOperator, key, "2"));
+        log.info("releaseWithBizId:{}", RedisClientUtil.releaseWithBizId(jedisOperator, key, "2"));
+        log.info("######################################################");
+
+        log.info("put:{}", RedisClientUtil.put(jedisOperator, key, value, 10));
+        List<String> personList = RedisClientUtil.batchGet(jedisOperator, Lists.newArrayList(key));
+        log.info("batchGet:{}", personList);
+        Map<String, String> personMap = RedisClientUtil.batchGetMap(jedisOperator, Lists.newArrayList(key));
+        log.info("batchGetMap:{}", personMap);
+        log.info("######################################################");
+
         Slf4jUtil.setLogLevel("debug");
 
-        int expire = Constants.ONE_SECOND * 10;
-        //放入缓存 11L, 22L, 33L
-        Map<Long, Long> cacheRet = RedisClientUtil.batchGetPut(jedisOperator, "collect.container",
-                Lists.newArrayList(11L, 22L, 33L), expire, (keys) -> {
-                    Map ret = Maps.newHashMap();
-                    for (Object key : keys) {
-                        ret.put(key, key);
+        Map<String, String> batchGetPutMap =
+                RedisClientUtil.batchGetPut(jedisOperator, Lists.newArrayList(key, key + "formBiz"), 10, (t) -> {
+                    Map<String, String> biz = Maps.newHashMap();
+                    for (String s : t) {
+                        biz.put(s, value);
                     }
-                    return ret;
+                    return biz;
                 });
-        log.info("ret:{}", cacheRet);
-        //删除缓存 11L, 22L
-        RedisClientUtil.batchDelete(jedisOperator, "collect.container",
-                Lists.newArrayList(11L, 22L));
-        //放入缓存 11L, 22L, 33L, 44L
-        cacheRet = RedisClientUtil.batchGetPut(jedisOperator, "collect.container",
-                Lists.newArrayList(11L, 22L, 33L, 44L), 10, (keys) -> {
-                    Map ret = Maps.newHashMap();
-                    for (Object key : keys) {
-                        ret.put(key, key);
-                    }
-                    return ret;
-                });
-        log.info("ret:{}", cacheRet);
-        try {
-            RedisClientUtil.lock(jedisOperator, "collect.container.lock", expire, "分布式锁设置失败1");
-        } catch (Exception ex) {
-            log.error("exception:", ex);
-        }
-        try {
-            RedisClientUtil.lock(jedisOperator, "collect.container.lock", expire, "分布式锁设置失败2");
-        } catch (Exception ex) {
-            log.error("exception:", ex);
-        }
-        RedisClientUtil.release(jedisOperator, "collect.container.lock");
-        RedisClientUtil.release(jedisOperator, "collect.container.lock");
+        log.info("batchGetPut:{}", batchGetPutMap);
+        RedisClientUtil.batchRemove(jedisOperator, Lists.newArrayList(key, key + "formBiz"));
+        log.info("######################################################");
 
-        RedisClientUtil.upsert(jedisOperator, "collect.container.upsert", "upsert", expire);
+        Slf4jUtil.setLogLevel("info");
+        log.info("lockRelease:{}", RedisClientUtil.lockRelease(jedisOperator, key, 10, null, () -> value));
+        log.info("######################################################");
 
-        Thread.sleep(2000);
         System.exit(0);
     }
 
