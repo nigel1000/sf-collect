@@ -120,7 +120,7 @@ public class ControllerErrorHandler {
     public Response processControllerError(NativeWebRequest request, UnifiedException ex) {
         String message = ex.getErrorMessage();
         printLogInfo(request, ex);
-        return Response.fail(message);
+        return Response.build(ex.getErrorCode(), ex.getContext(), message);
     }
 
     /**

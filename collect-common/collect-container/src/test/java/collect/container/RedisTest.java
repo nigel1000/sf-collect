@@ -72,6 +72,17 @@ public class RedisTest {
         RedisClientUtil.batchRemove(jedisOperator, Lists.newArrayList(key, key + "formBiz"));
         log.info("######################################################");
 
+        log.info("put:{}", RedisClientUtil.put(jedisOperator, key, value, 10));
+        Map<String, String> batchGetPutAvoidNullValue =
+                RedisClientUtil.batchGetPutAvoidNullValue(jedisOperator, Lists.newArrayList(key, key + "formBiz", key + "formBizNull"), 10, (t) -> {
+                    Map<String, String> biz = Maps.newHashMap();
+                    biz.put(key + "formBiz", value);
+                    return biz;
+                }, "");
+        log.info("batchGetPutAvoidNullValue:{}", batchGetPutAvoidNullValue);
+        RedisClientUtil.batchRemove(jedisOperator, Lists.newArrayList(key, key + "formBiz", key + "formBizNull"));
+        log.info("######################################################");
+
         Slf4jUtil.setLogLevel("info");
         log.info("lockRelease:{}", RedisClientUtil.lockRelease(jedisOperator, key, 10, null, () -> value));
         log.info("######################################################");

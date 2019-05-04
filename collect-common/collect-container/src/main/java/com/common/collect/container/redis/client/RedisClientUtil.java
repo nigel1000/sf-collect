@@ -8,6 +8,7 @@ import com.common.collect.util.CollectionUtil;
 import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.FunctionUtil;
 import com.google.common.collect.Lists;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -126,6 +127,9 @@ public class RedisClientUtil {
      * 设定指定key的值，并设置键值对的过期时间
      */
     public static <V> boolean put(IJedisOperator redisClient, String key, V value, int seconds) {
+        if (value == null) {
+            return true;
+        }
         if (seconds <= 0) {
             throw UnifiedException.gen("过期时间不合法");
         }
@@ -140,6 +144,57 @@ public class RedisClientUtil {
             log.error(" put error", e);
         }
         return false;
+    }
+
+    // 空值也缓存，返回不包括空值
+    public static <V> Map<String, V> batchGetPutAvoidNullValue(IJedisOperator redisClient, List<String> keys, int expire,
+                                                               Function<List<String>, Map<String, V>> function, @NonNull V nullValue) {
+        if (EmptyUtil.isEmpty(keys)) {
+            return new HashMap<>();
+        }
+        Map<String, V> result = new HashMap<>();
+        // 去空去重
+        List<String> notEmptyKeys = CollectionUtil.removeDuplicate(keys);
+        // 从缓存中取数据
+        Map<String, V> cacheMap = batchGetMap(redisClient, notEmptyKeys);
+
+        List<String> unCacheKeys = Lists.newArrayList();
+        List<String> cacheKeys = Lists.newArrayList();
+        for (String key : keys) {
+            V cache = cacheMap.get(key);
+            if (cache != null) {
+                if (!nullValue.equals(cache)) {
+                    result.putIfAbsent(key, cache);
+                }
+                cacheKeys.add(key);
+            } else {
+                unCacheKeys.add(key);
+            }
+        }
+        logGet(cacheKeys);
+        // 对于缓存中不存在的key，调用function去db取数据并放入缓存
+        if (EmptyUtil.isNotEmpty(unCacheKeys)) {
+            Map<String, V> bizMap = function.apply(unCacheKeys);
+            for (String unCacheKey : unCacheKeys) {
+                V bizObj = bizMap.get(unCacheKey);
+                if (putAvoidNullValue(redisClient, unCacheKey, bizObj, nullValue, expire)) {
+                    fromBiz(unCacheKey);
+                }
+                result.putAll(bizMap);
+            }
+        }
+
+        return result;
+    }
+
+    public static <V> boolean putAvoidNullValue(IJedisOperator redisClient, String key, V value, @NonNull V nullValue, int seconds) {
+        if (seconds <= 0) {
+            throw UnifiedException.gen("过期时间不合法");
+        }
+        if (value == null) {
+            value = nullValue;
+        }
+        return put(redisClient, key, value, seconds);
     }
 
     /**
@@ -218,7 +273,7 @@ public class RedisClientUtil {
     }
 
     public static boolean release(IJedisOperator redisClient, String key) {
-        return remove(redisClient, key);
+        return releaseWithBizId(redisClient, key, "1");
     }
 
     public static boolean releaseWithBizId(IJedisOperator redisClient, String key, String lockId) {
