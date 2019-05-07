@@ -28,7 +28,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/back/door/mybatis")
-public class MybatisGeneratorController {
+public class MybatisController {
 
     @Value("${jdbc.mysql.url}")
     private String url;

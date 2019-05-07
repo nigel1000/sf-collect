@@ -1,0 +1,23 @@
+@startuml
+
+
+Serializable <|.. 电脑 : 实现
+电脑 <|-- Mac : 继承
+电脑 <|-- Window : 继承
+电脑 <|-- Linux : 继承
+package 属性变量，可选需要  <<Rectangle>> {
+    Mac --> 音箱 : 关联 弱依赖
+    Mac --> 蓝牙 : 关联 弱依赖
+}
+package 属性变量，推荐需要  <<Rectangle>> {
+    Window o-- 键盘 : 聚合 中度依赖
+    Window o-- 存储器 : 聚合 中度依赖
+}
+package 属性变量，强制需要  <<Rectangle>> {
+    Linux *-- CPU : 组合 重度依赖
+}
+package 方法参数，不同领域间的依赖 {
+    Mac ..> JDK : 依赖
+}
+
+@enduml
