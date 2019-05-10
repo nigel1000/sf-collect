@@ -62,7 +62,7 @@ alter table `flash_sale_goods_online`
   add column `goods_tag_pic_new` varchar(512) not null default '' comment '自定义商品图片标签';
 ```
 
-## 数据库
+## 通用操作
 ```sql
 -- 连接数据库实例
 mysql -p 3306 -h `127.0.0.1` -uroot -p123456
@@ -74,9 +74,6 @@ source ~/Documents/zcy_develop.sql;
 use mysql;
 update user set password=password("#/d5)anzaVlN") where user='root';
 flush privileges;
--- 显示变量值 
-show variables like '%max_allowed_packet%'
-show status like 'slow_queries';
 -- 所有大于16M的SQL文件都会报ERROR 2006 (HY000) at line 17128: MySQL server has gone away，可以登录MySQL客户端，修改系统变量：
 set global max_allowed_packet=500*1024*1024;
 ```
@@ -86,9 +83,36 @@ set global max_allowed_packet=500*1024*1024;
 -- 视图表 information_schema.views
 -- 触发器 information_schema.triggers
 
--- 加锁情况 information_schema.innodb_locks(5.7)&performance_schema.data_locks(8.0)
--- 5.7，通过 information_schema.innodb_locks 查看事务的锁情况，但只能看到阻塞事务的锁；如果事务并未被阻塞，则在该表中看不到该事务的锁情况。
--- 8.0，删除了 information_schema.innodb_locks，添加了 performance_schema.data_locks，不但可以看到阻塞该事务的锁，还可以看到该事务所持有的锁。
+-- 显示变量值 
+show variables like '%max_allowed_packet%'
+show status like 'slow_queries';
+-- 查看当前所有的连接数和连接状态
+show full processlist;
+-- 查看死锁日志，引擎当前状态
+show engine innodb status;
+-- 查询版本号
+select version();
+-- 查看建表语句
+show create table test_base_mapper.flow_log;
+desc test_base_mapper.flow_log;
+-- 事务隔离级别
+select @@tx_isolation;
+set session transaction isolation level repeatable read;
+```
+
+## 锁相关
+```text
+加锁情况 information_schema.innodb_locks(5.7)&performance_schema.data_locks(8.0)
+5.7，通过 information_schema.innodb_locks 查看事务的锁情况，但只能看到阻塞事务的锁；如果事务并未被阻塞，则在该表中看不到该事务的锁情况。
+8.0，删除了 information_schema.innodb_locks，添加了 performance_schema.data_locks，不但可以看到阻塞该事务的锁，还可以看到该事务所持有的锁。
+
+read committed 级别用的是纪录锁算法
+查询非聚簇索引是对非聚簇索引和主键索引加上相应对 S|X 锁
+查询聚簇索引|唯一索引是对聚簇索引加上相应对 S|X 锁
+查询非索引是对所有纪录对主键索引加上相应对 S|X 锁
+
+repeatable read 级别用的是next-key算法(gap锁+纪录锁)
+查询聚簇索引|唯一索引时会降级成 纪录锁算法
 ```
 
 

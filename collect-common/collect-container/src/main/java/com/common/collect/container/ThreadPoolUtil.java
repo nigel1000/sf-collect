@@ -1,6 +1,7 @@
 package com.common.collect.container;
 
 import com.common.collect.container.trace.TraceIdUtil;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.PrintWriter;
@@ -15,6 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class ThreadPoolUtil {
 
+    @Getter
     private ExecutorService executorService;
 
     private static class SingletonInstance {
@@ -74,11 +76,11 @@ public class ThreadPoolUtil {
     }
 
     public static void exec(Runnable command) {
-        SingletonInstance.INSTANCE.executorService.execute(TraceIdUtil.wrap(command));
+        SingletonInstance.INSTANCE.getExecutorService().execute(TraceIdUtil.wrap(command));
     }
 
     public static <T> Future<T> submit(Callable<T> command) {
-        return SingletonInstance.INSTANCE.executorService.submit(TraceIdUtil.wrap(command));
+        return SingletonInstance.INSTANCE.getExecutorService().submit(TraceIdUtil.wrap(command));
     }
 
 }
