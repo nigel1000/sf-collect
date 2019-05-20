@@ -4,7 +4,7 @@ import com.common.collect.api.Response;
 import com.common.collect.api.enums.CommonError;
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.AspectUtil;
-import com.common.collect.util.TypeUtil;
+import com.common.collect.util.ClassUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -93,7 +93,7 @@ public class CatchExcpAspectJ {
         if (Response.class == returnType) {
             return Response.fail(errorCode, errorMessage);
         }
-        return TypeUtil.returnBaseDataType(returnType);
+        return ClassUtil.returnBaseDataType(returnType);
     }
 
 

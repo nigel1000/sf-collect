@@ -1,6 +1,6 @@
 package com.common.collect.container;
 
-import com.common.collect.util.TypeUtil;
+import com.common.collect.util.ClassUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -30,7 +30,7 @@ public class AspectUtil {
             return null;
         }
 
-        List<Class> classes = TypeUtil.getSuperclasses(point.getTarget().getClass());
+        List<Class> classes = ClassUtil.getSuperclasses(point.getTarget().getClass());
         T result = null;
         T candidate = null;
         for (Class<?> clazz : classes) {
