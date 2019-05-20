@@ -7,6 +7,7 @@ import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.FileUtil;
 import com.common.collect.util.PathUtil;
 import com.common.collect.util.SplitUtil;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -22,6 +23,7 @@ import java.util.Map;
  */
 
 @Slf4j
+@Data
 public class DocsClient {
 
     private boolean reCreate = true;
