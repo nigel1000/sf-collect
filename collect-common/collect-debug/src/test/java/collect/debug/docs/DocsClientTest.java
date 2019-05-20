@@ -22,7 +22,8 @@ public class DocsClientTest {
 
     public static void main(String[] args) {
         log.info("save path:{}", path);
-        DocsClient.createDocsApi(path, "collect.debug");
+        DocsClient docsClient = new DocsClient();
+        docsClient.createDocsApi(path, "collect.debug");
     }
 
 }

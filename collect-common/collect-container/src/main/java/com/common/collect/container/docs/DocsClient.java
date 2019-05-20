@@ -24,7 +24,9 @@ import java.util.Map;
 @Slf4j
 public class DocsClient {
 
-    public static void createDocsApi(String prefixPath, String pkgPath) {
+    private boolean reCreate = true;
+
+    public void createDocsApi(String prefixPath, String pkgPath) {
         if (EmptyUtil.isEmpty(prefixPath)) {
             throw UnifiedException.gen("路径不能为空");
         }
@@ -80,7 +82,7 @@ public class DocsClient {
             tplMap.put("docsMethodConfig", docsMethodConfig);
             log.info("Create DocsApi: filePath:{},tplMap:{}", docsMethodConfig.getSavePath(), tplMap);
             String fileContent = TemplateUtil.genTemplate("/tpl", "docs.tpl", tplMap);
-            FileUtil.createFile(docsMethodConfig.getSavePath(), false, fileContent.getBytes(), docsMethodConfig.isReCreate());
+            FileUtil.createFile(docsMethodConfig.getSavePath(), false, fileContent.getBytes(), reCreate && docsMethodConfig.isReCreate());
         }
     }
 
