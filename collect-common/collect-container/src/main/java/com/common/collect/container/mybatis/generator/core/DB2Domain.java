@@ -1,11 +1,11 @@
-package com.common.collect.debug.mybatis.generator.core;
+package com.common.collect.container.mybatis.generator.core;
 
-import com.common.collect.debug.mybatis.DBUtil;
-import com.common.collect.debug.mybatis.TemplateUtil;
-import com.common.collect.debug.mybatis.generator.domain.db.Field;
-import com.common.collect.debug.mybatis.generator.domain.db.Table;
-import com.common.collect.debug.mybatis.generator.domain.param.DomainParam;
-import com.common.collect.debug.mybatis.generator.domain.param.GlobalParam;
+import com.common.collect.container.TemplateUtil;
+import com.common.collect.container.mybatis.generator.DBUtil;
+import com.common.collect.container.mybatis.generator.domain.db.Field;
+import com.common.collect.container.mybatis.generator.domain.db.Table;
+import com.common.collect.container.mybatis.generator.domain.param.DomainParam;
+import com.common.collect.container.mybatis.generator.domain.param.GlobalParam;
 import com.common.collect.util.ConvertUtil;
 import com.common.collect.util.FileUtil;
 import com.google.common.collect.Lists;

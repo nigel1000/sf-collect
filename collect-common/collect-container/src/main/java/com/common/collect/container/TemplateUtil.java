@@ -1,4 +1,4 @@
-package com.common.collect.debug.mybatis;
+package com.common.collect.container;
 
 import com.common.collect.api.excps.UnifiedException;
 import freemarker.template.Configuration;

@@ -157,6 +157,13 @@
             <artifactId>dubbo</artifactId>
             <optional>true</optional>
         </dependency>
+        <!--freemarker 相关-->
+        <dependency>
+            <groupId>org.freemarker</groupId>
+            <artifactId>freemarker</artifactId>
+            <version>2.3.22</version>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 
 </project>

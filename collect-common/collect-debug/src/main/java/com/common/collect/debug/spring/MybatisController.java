@@ -1,12 +1,12 @@
 package com.common.collect.debug.spring;
 
 import com.common.collect.api.excps.UnifiedException;
-import com.common.collect.debug.mybatis.DBUtil;
-import com.common.collect.debug.mybatis.generator.core.DB2Domain;
-import com.common.collect.debug.mybatis.generator.core.DB2Mapper;
-import com.common.collect.debug.mybatis.generator.domain.param.DomainParam;
-import com.common.collect.debug.mybatis.generator.domain.param.GlobalParam;
-import com.common.collect.debug.mybatis.generator.domain.param.MapperParam;
+import com.common.collect.container.mybatis.generator.DBUtil;
+import com.common.collect.container.mybatis.generator.core.DB2Domain;
+import com.common.collect.container.mybatis.generator.core.DB2Mapper;
+import com.common.collect.container.mybatis.generator.domain.param.DomainParam;
+import com.common.collect.container.mybatis.generator.domain.param.GlobalParam;
+import com.common.collect.container.mybatis.generator.domain.param.MapperParam;
 import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.FileUtil;
 import com.common.collect.util.SplitUtil;

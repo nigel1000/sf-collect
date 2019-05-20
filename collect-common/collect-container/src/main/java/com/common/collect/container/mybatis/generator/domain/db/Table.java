@@ -1,4 +1,4 @@
-package com.common.collect.debug.mybatis.generator.domain.db;
+package com.common.collect.container.mybatis.generator.domain.db;
 
 import lombok.Data;
 

@@ -1,13 +1,12 @@
 package collect.debug;
 
-import collect.debug.mybatis.TestMybatis;
 import com.common.collect.api.excps.UnifiedException;
-import com.common.collect.debug.mybatis.DBUtil;
-import com.common.collect.debug.mybatis.generator.core.DB2Domain;
-import com.common.collect.debug.mybatis.generator.core.DB2Mapper;
-import com.common.collect.debug.mybatis.generator.domain.param.DomainParam;
-import com.common.collect.debug.mybatis.generator.domain.param.GlobalParam;
-import com.common.collect.debug.mybatis.generator.domain.param.MapperParam;
+import com.common.collect.container.mybatis.generator.DBUtil;
+import com.common.collect.container.mybatis.generator.core.DB2Domain;
+import com.common.collect.container.mybatis.generator.core.DB2Mapper;
+import com.common.collect.container.mybatis.generator.domain.param.DomainParam;
+import com.common.collect.container.mybatis.generator.domain.param.GlobalParam;
+import com.common.collect.container.mybatis.generator.domain.param.MapperParam;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
@@ -25,7 +24,7 @@ public class MybatisGenerator {
     private static Properties properties;
 
     static {
-        path = TestMybatis.class.getResource("/").getPath();
+        path = MybatisGenerator.class.getResource("/").getPath();
         if (path.contains(":/")) {
             path = path.substring(1, path.indexOf("target")) + "logs/";
         } else {

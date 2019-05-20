@@ -1,10 +1,10 @@
-package com.common.collect.debug.mybatis;
+package com.common.collect.container.mybatis.generator;
 
 
 import com.common.collect.api.excps.UnifiedException;
-import com.common.collect.debug.mybatis.generator.domain.db.Field;
-import com.common.collect.debug.mybatis.generator.domain.db.Table;
-import com.common.collect.debug.mybatis.generator.domain.param.GlobalParam;
+import com.common.collect.container.mybatis.generator.domain.db.Field;
+import com.common.collect.container.mybatis.generator.domain.db.Table;
+import com.common.collect.container.mybatis.generator.domain.param.GlobalParam;
 import com.common.collect.util.EmptyUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;

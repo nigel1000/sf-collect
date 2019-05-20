@@ -1,4 +1,4 @@
-package com.common.collect.debug.mybatis.generator.domain.param;
+package com.common.collect.container.mybatis.generator.domain.param;
 
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.util.EmptyUtil;
