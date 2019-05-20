@@ -5,15 +5,11 @@ import com.common.collect.container.TemplateUtil;
 import com.common.collect.util.ClassUtil;
 import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.FileUtil;
-import com.common.collect.util.PathUtil;
-import com.common.collect.util.SplitUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,16 +31,10 @@ public class DocsClient {
         if (EmptyUtil.isEmpty(pkgPath)) {
             throw UnifiedException.gen("包路径不能为空");
         }
-        List<DocsMethodConfig> docsMethodConfigs = new ArrayList<>();
+        List<TplContext> tplContexts = new ArrayList<>();
         List<Class<?>> classList = ClassUtil.getClazzFromPackage(pkgPath);
         for (Class<?> cls : classList) {
             DocsApi docsApi = cls.getAnnotation(DocsApi.class);
-            String rootDirName = "";
-            String urlPrefix = "";
-            if (docsApi != null) {
-                rootDirName = docsApi.rootDirName();
-                urlPrefix = docsApi.urlPrefix();
-            }
             for (Method method : cls.getDeclaredMethods()) {
                 DocsApiMethod docsApiMethod = method.getAnnotation(DocsApiMethod.class);
                 if (docsApiMethod == null) {
@@ -69,22 +59,16 @@ public class DocsClient {
                     log.warn("class:{},method:{},获取返回数据失败", cls.getName(), method.getName());
                     continue;
                 }
-                docsMethodConfig.setSavePath(PathUtil.correctSeparator(prefixPath + File.separator + rootDirName + File.separator + docsApiMethod.nodeName()));
-                docsMethodConfig.setRequestUrl(urlPrefix + docsApiMethod.urlSuffix());
-                docsMethodConfig.setMethodAuthor(docsApiMethod.methodAuthor());
-                docsMethodConfig.setMethodDesc(docsApiMethod.methodDesc());
-                docsMethodConfig.setReCreate(docsApiMethod.reCreate());
-                docsMethodConfig.setSupportRequest(SplitUtil.join(Arrays.asList(docsApiMethod.supportRequest()), " | "));
-                docsMethodConfig.valid();
-                docsMethodConfigs.add(docsMethodConfig);
+                TplContext tplContext = TplContext.build(prefixPath, docsApi, docsApiMethod, docsMethodConfig);
+                tplContexts.add(tplContext);
             }
         }
-        for (DocsMethodConfig docsMethodConfig : docsMethodConfigs) {
+        for (TplContext tplContext : tplContexts) {
             Map<String, Object> tplMap = new HashMap<>();
-            tplMap.put("docsMethodConfig", docsMethodConfig);
-            log.info("Create DocsApi: filePath:{},tplMap:{}", docsMethodConfig.getSavePath(), tplMap);
+            tplMap.put("tplContext", tplContext);
+            log.info("Create DocsApi: filePath:{},tplMap:{}", tplContext.getSavePath(), tplMap);
             String fileContent = TemplateUtil.genTemplate("/tpl", "docs.tpl", tplMap);
-            FileUtil.createFile(docsMethodConfig.getSavePath(), false, fileContent.getBytes(), reCreate && docsMethodConfig.isReCreate());
+            FileUtil.createFile(tplContext.getSavePath(), false, fileContent.getBytes(), reCreate && tplContext.isReCreate());
         }
     }
 
