@@ -28,10 +28,8 @@ public class DocsDemo2 {
     public DocsMethodConfig method2() {
         DocsMethodConfig docsMethodConfig = new DocsMethodConfig();
         docsMethodConfig.setMethodParamType(MethodParamType.REQUEST_PARAM);
-        docsMethodConfig.setRequestParams(Lists.newArrayList(
-                DocsMethodParamConfig.builder().defValue(new BigDecimal(22)).paramName("id").paramType("BigDecimal").required(true).build()
-        ));
-        docsMethodConfig.setResponseBody(Response.ok("success"));
+        docsMethodConfig.addRequestParams(DocsMethodParamConfig.builder().defValue(new BigDecimal(22)).paramName("id").paramType("BigDecimal").required(true).build());
+        docsMethodConfig.putResponseBody("返回成功", Response.ok("success"));
         return docsMethodConfig;
     }
 
@@ -46,7 +44,7 @@ public class DocsDemo2 {
         DocsMethodConfig docsMethodConfig = new DocsMethodConfig();
         docsMethodConfig.setMethodParamType(MethodParamType.REQUEST_BODY);
         docsMethodConfig.setRequestBody(Lists.newArrayList(Lists.newArrayList(23, 45), 2, new BigDecimal(88), 4));
-        docsMethodConfig.setResponseBody(Response.ok(new BigDecimal(29)));
+        docsMethodConfig.putResponseBody("返回成功", Response.ok(new BigDecimal(29)));
         return docsMethodConfig;
     }
 

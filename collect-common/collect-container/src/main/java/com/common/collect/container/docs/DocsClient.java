@@ -56,8 +56,7 @@ public class DocsClient {
                     throw UnifiedException.gen("反射调用失败", ex);
                 }
                 if (docsMethodConfig == null) {
-                    log.warn("class:{},method:{},获取返回数据失败", cls.getName(), method.getName());
-                    continue;
+                    throw UnifiedException.gen("class:" + cls.getName() + ",method:" + method.getName() + ",获取返回数据失败");
                 }
                 TplContext tplContext = TplContext.build(prefixPath, docsApi, docsApiMethod, docsMethodConfig);
                 tplContexts.add(tplContext);

@@ -27,8 +27,15 @@ ${tplContext.requestBody!""}
 ```
 </#if>
 
+<#if tplContext.responseBody?exists>
 ## 返回
+    <#list tplContext.responseBody?keys as key>
+### ${key}
 ```json
-${tplContext.responseBody!""}
+${tplContext.responseBody[key]}
 ```
+
+    </#list>
+</#if>
+
 

@@ -8,7 +8,6 @@ import com.common.collect.container.docs.DocsMethodParamConfig;
 import com.common.collect.container.docs.MethodParamType;
 import com.common.collect.container.docs.SupportRequest;
 import com.common.collect.util.DateUtil;
-import org.assertj.core.util.Lists;
 
 /**
  * Created by hznijianfeng on 2019/5/20.
@@ -27,11 +26,10 @@ public class DocsDemo1 {
     public DocsMethodConfig method1() {
         DocsMethodConfig docsMethodConfig = new DocsMethodConfig();
         docsMethodConfig.setMethodParamType(MethodParamType.REQUEST_PARAM);
-        docsMethodConfig.setRequestParams(Lists.newArrayList(
-                DocsMethodParamConfig.builder().defValue(2).paramName("id").paramType("Integer").paramDesc("id").required(true).build(),
-                DocsMethodParamConfig.builder().defValue("name").paramName("name").paramType("String").paramDesc("name").required(false).build()
-        ));
-        docsMethodConfig.setResponseBody(Response.ok(DateUtil.now()));
+        docsMethodConfig.addRequestParams(DocsMethodParamConfig.builder().paramName("name").paramType("String").paramDesc("name").defValue("name").required(false).build());
+        docsMethodConfig.addRequestParams(DocsMethodParamConfig.builder().paramName("id").paramType("Integer").paramDesc("id").defValue(2).required(true).build());
+        docsMethodConfig.putResponseBody("返回成功", Response.ok(DateUtil.now()));
+        docsMethodConfig.putResponseBody("返回失败", Response.fail("操作失败"));
         return docsMethodConfig;
     }
 

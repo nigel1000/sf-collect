@@ -11,7 +11,9 @@ import lombok.NonNull;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by nijianfeng on 2019/5/20.
@@ -25,7 +27,7 @@ public class TplContext {
     //REQUEST_BODY
     private String requestBody;
 
-    private String responseBody;
+    private Map<String, String> responseBody;
 
 
     // 文档保存路径
@@ -65,7 +67,13 @@ public class TplContext {
         tplContext.setMethodParamType(docsMethodConfig.getMethodParamType().name());
         tplContext.setRequestParams(docsMethodConfig.getRequestParams());
         tplContext.setRequestBody(JsonUtil.bean2jsonPretty(docsMethodConfig.getRequestBody()));
-        tplContext.setResponseBody(JsonUtil.bean2jsonPretty(docsMethodConfig.getResponseBody()));
+
+        Map<String, Object> responseBody = docsMethodConfig.getResponseBody();
+        Map<String, String> responseBodyStr = new LinkedHashMap<>();
+        for (String key : responseBody.keySet()) {
+            responseBodyStr.put(key, JsonUtil.bean2jsonPretty(responseBody.get(key)));
+        }
+        tplContext.setResponseBody(responseBodyStr);
 
         tplContext.valid();
         return tplContext;
