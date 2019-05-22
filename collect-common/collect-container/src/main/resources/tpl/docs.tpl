@@ -8,7 +8,7 @@
 ```
 请求功能：${tplContext.methodDesc!""}
 支持请求：${tplContext.supportRequest!""}
-请求 url：${tplContext.requestUrl!""}
+请求路径：${tplContext.requestUrl!""}
 ```
 
 ## 入参

@@ -70,21 +70,29 @@ public class ClassUtil {
         Enumeration<URL> dirs;
         try {
             dirs = Thread.currentThread().getContextClassLoader().getResources(packageDirName);
+            if (!dirs.hasMoreElements()) {
+                // 可能是全路径不是目录
+                dirs = Thread.currentThread().getContextClassLoader().getResources(packageDirName + ".class");
+            }
             while (dirs.hasMoreElements()) {
                 URL url = dirs.nextElement();
                 String protocol = url.getProtocol();
 
                 if ("file".equals(protocol)) {// 如果是以文件的形式保存在服务器上
                     String filePath = URLDecoder.decode(url.getFile(), "UTF-8");// 获取包的物理路径
-                    findClassesByFile(packageName, filePath, true, clazzs);
+                    File file = new File(filePath);
+                    if (!file.isDirectory()) {
+                        clazzs.add(Thread.currentThread().getContextClassLoader().loadClass(packageName));
+                    } else {
+                        findClassesByFile(packageName, filePath, true, clazzs);
+                    }
                 } else if ("jar".equals(protocol)) {// 如果是jar包文件
                     JarFile jar = ((JarURLConnection) url.openConnection()).getJarFile();
                     findClassesByJar(packageName, jar, clazzs);
                 }
             }
-
-        } catch (Exception e) {
-            throw UnifiedException.gen("getClazzFromPackage failed");
+        } catch (Exception ex) {
+            throw UnifiedException.gen("getClazzFromPackage failed", ex);
         }
         return CollectionUtil.removeDuplicate(clazzs);
     }

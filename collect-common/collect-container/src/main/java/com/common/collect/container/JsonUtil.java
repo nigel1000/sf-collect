@@ -28,14 +28,10 @@ public class JsonUtil {
     public static String bean2jsonPretty(Object bean) {
         SerializerFeature[] serializerFeatures = new SerializerFeature[]{
                 SerializerFeature.WriteMapNullValue,
-                SerializerFeature.WriteDateUseDateFormat,
-                SerializerFeature.WriteNullListAsEmpty,
-                SerializerFeature.WriteNullStringAsEmpty,
                 SerializerFeature.PrettyFormat,
                 SerializerFeature.DisableCircularReferenceDetect};
         return JSON.toJSONString(bean, serializerFeatures);
     }
-
 
     public static <T> JSONArray list2json(List<T> list) {
 
