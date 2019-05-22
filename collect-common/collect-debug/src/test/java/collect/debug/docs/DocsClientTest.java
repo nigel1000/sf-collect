@@ -1,6 +1,7 @@
 package collect.debug.docs;
 
 import com.common.collect.container.docs.DocsClient;
+import com.common.collect.container.docs.DocsGlobalConfig;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -22,8 +23,12 @@ public class DocsClientTest {
 
     public static void main(String[] args) {
         log.info("save path:{}", path);
-        DocsClient docsClient = new DocsClient();
-        docsClient.createDocsApi(path, "collect.debug");
+        DocsGlobalConfig globalConfig = new DocsGlobalConfig();
+        globalConfig.setShowComment(true);
+        globalConfig.setReCreate(true);
+        globalConfig.setPrefixPath(path);
+        globalConfig.setPkgPath("collect.debug");
+        DocsClient.createDocsApi(globalConfig);
     }
 
 }

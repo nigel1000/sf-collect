@@ -25,6 +25,14 @@
 ```json
 ${tplContext.requestBody!""}
 ```
+
+<#if tplContext.showComment>
+## 入参字段描述
+```json
+${tplContext.requestBodyComment!""}
+```
+</#if>
+
 </#if>
 
 <#if tplContext.responseBody?exists>
@@ -34,8 +42,18 @@ ${tplContext.requestBody!""}
 ```json
 ${tplContext.responseBody[key]}
 ```
-
     </#list>
+
+<#if tplContext.showComment>
+## 返回字段描述
+    <#list tplContext.responseBodyComment?keys as key>
+### ${key}
+```json
+${tplContext.responseBodyComment[key]}
+```
+    </#list>
+</#if>
+
 </#if>
 
 

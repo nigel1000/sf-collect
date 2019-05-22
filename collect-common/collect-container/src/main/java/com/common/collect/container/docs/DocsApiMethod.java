@@ -22,6 +22,9 @@ public @interface DocsApiMethod {
 
     String methodDesc() default "";
 
+    // 是否显示字段描述
+    boolean showComment() default false;
+
     boolean reCreate() default true;
 
     SupportRequest[] supportRequest() default SupportRequest.GET;
