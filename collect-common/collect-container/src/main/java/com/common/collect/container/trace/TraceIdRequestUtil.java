@@ -1,5 +1,7 @@
 package com.common.collect.container.trace;
 
+import com.common.collect.util.EmptyUtil;
+
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -13,7 +15,7 @@ public class TraceIdRequestUtil {
         if (contextTraceId == null || "".equals(contextTraceId.trim())) {
             contextTraceId = request.getParameter(TraceConstants.TRACE_ID_KEY);
         }
-        if (contextTraceId != null && !"".equals(contextTraceId.trim())) {
+        if (EmptyUtil.isNotEmpty(contextTraceId)) {
             try {
                 TraceIdUtil.initTraceId(contextTraceId);
             } catch (Exception ex) {

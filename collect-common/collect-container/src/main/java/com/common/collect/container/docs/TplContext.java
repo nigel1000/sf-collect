@@ -1,5 +1,7 @@
 package com.common.collect.container.docs;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.JsonUtil;
 import com.common.collect.util.EmptyUtil;
@@ -72,7 +74,7 @@ public class TplContext {
         tplContext.setRequestParams(docsMethodConfig.getRequestParams());
         tplContext.setRequestBody(JsonUtil.bean2jsonPretty(docsMethodConfig.getRequestBody()));
         if (tplContext.isShowComment()) {
-            tplContext.setRequestBodyComment(JsonUtil.bean2jsonPretty(docsMethodConfig.getRequestBody()));
+            tplContext.setRequestBodyComment(bean2jsonPretty(docsMethodConfig.getRequestBody()));
         }
 
         Map<String, Object> responseBody = docsMethodConfig.getResponseBody();
@@ -85,13 +87,20 @@ public class TplContext {
         if (tplContext.isShowComment()) {
             Map<String, String> responseBodyCommentStr = new LinkedHashMap<>();
             for (String key : responseBody.keySet()) {
-                responseBodyCommentStr.put(key, JsonUtil.bean2jsonPretty(responseBody.get(key)));
+                responseBodyCommentStr.put(key, bean2jsonPretty(responseBody.get(key)));
             }
             tplContext.setResponseBodyComment(responseBodyCommentStr);
         }
 
         tplContext.valid();
         return tplContext;
+    }
+
+    public static String bean2jsonPretty(Object bean) {
+        SerializerFeature[] serializerFeatures = new SerializerFeature[]{
+                SerializerFeature.PrettyFormat,
+                SerializerFeature.DisableCircularReferenceDetect};
+        return JSON.toJSONString(bean, new FieldCommentFilter(), serializerFeatures);
     }
 
     private void valid() {

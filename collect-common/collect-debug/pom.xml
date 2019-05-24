@@ -187,7 +187,31 @@
             <artifactId>jsch</artifactId>
             <version>0.1.54</version>
         </dependency>
-
     </dependencies>
+
+    <build>
+        <plugins>
+            <!-- quasar https://colobu.com/2016/08/01/talk-about-quasar-again/ -->
+            <!-- http://int32.me/blog/2017/09/09/fk-q/ -->
+            <plugin>
+                <groupId>com.vlkan</groupId>
+                <artifactId>quasar-maven-plugin</artifactId>
+                <version>0.7.3</version>
+                <configuration>
+                    <check>true</check>
+                    <debug>true</debug>
+                    <verbose>true</verbose>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>instrument</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

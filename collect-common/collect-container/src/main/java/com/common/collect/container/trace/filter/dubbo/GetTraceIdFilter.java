@@ -24,6 +24,8 @@ public class GetTraceIdFilter implements Filter {
             }
         } catch (Exception ex) {
             log.info("GetTraceIdFilter exception:", ex);
+        }finally {
+            TraceIdUtil.clearTraceId();
         }
         return invoker.invoke(invocation);
     }
