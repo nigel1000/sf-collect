@@ -15,7 +15,7 @@ public interface ${className}${daoSuffixName} {
     </#if>
     <#if sqlIds?seq_contains("creates")>
 
-    Integer creates(List<${className}> items);
+    Integer creates(@Param("items") List<${className}> items);
     </#if>
     <#if sqlIds?seq_contains("delete")>
 

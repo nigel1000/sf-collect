@@ -3,6 +3,7 @@ package com.common.collect.util;
 import com.common.collect.api.excps.UnifiedException;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -91,8 +92,8 @@ public class ClassUtil {
                     findClassesByJar(packageName, jar, clazzs);
                 }
             }
-        } catch (Exception ex) {
-            throw UnifiedException.gen("getClazzFromPackage failed", ex);
+        } catch (IOException | ClassNotFoundException e) {
+            throw UnifiedException.gen("getClazzFromPackage failed", e);
         }
         return CollectionUtil.removeDuplicate(clazzs);
     }
@@ -123,8 +124,8 @@ public class ClassUtil {
                 String className = file.getName().substring(0, file.getName().length() - 6);
                 try {
                     classes.add(Thread.currentThread().getContextClassLoader().loadClass(packageName + "." + className));
-                } catch (Exception e) {
-                    throw UnifiedException.gen("findClassesByFile failed");
+                } catch (ClassNotFoundException e) {
+                    throw UnifiedException.gen("findClassesByFile failed", e);
                 }
             }
         }
@@ -155,8 +156,8 @@ public class ClassUtil {
             String className = name.substring(0, name.length() - 6);
             try {
                 classes.add(Thread.currentThread().getContextClassLoader().loadClass(pkgName + "." + className));
-            } catch (Exception e) {
-                throw UnifiedException.gen("findClassesByJar failed");
+            } catch (ClassNotFoundException e) {
+                throw UnifiedException.gen("findClassesByJar failed", e);
             }
         }
     }

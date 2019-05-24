@@ -23,6 +23,18 @@ public class PageParam implements Serializable {
     private int defaultOffset = 0; /* mysql默认偏移量从0开始 */
     private int defaultPageSize = 10;
 
+    public static PageParam valueOfByLimit(int offset, int limit) throws RuntimeException {
+        PageParam pageParam = new PageParam();
+        pageParam.init(offset / limit + 1, limit);
+        return pageParam;
+    }
+
+    public static PageParam valueOfByLimit(int offset, int limit, String sortBy) throws RuntimeException {
+        PageParam pageParam = valueOfByLimit(offset, limit);
+        pageParam.sortBy = sortBy;
+        return pageParam;
+    }
+
     public static PageParam valueOfByPageNo(Integer pageNo, Integer pageSize) {
         PageParam pageParam = new PageParam();
         pageParam.init(pageNo, pageSize);

@@ -44,12 +44,12 @@
     </#if>
     <#if sqlIds?seq_contains("creates")>
 
-    <insert id="creates" parameterType="list">
+    <insert id="creates">
         INSERT INTO
         <include refid="tb"/>
         (<include refid="cols_all"/>)
         VALUES
-        <foreach collection="list" item="item" index="index" separator=",">
+        <foreach collection="items" item="item" index="index" separator=",">
             (<include refid="vals_all"/>)
         </foreach>
     </insert>
