@@ -27,7 +27,6 @@ public class JsonUtil {
 
     public static String bean2jsonPretty(Object bean) {
         SerializerFeature[] serializerFeatures = new SerializerFeature[]{
-                SerializerFeature.WriteMapNullValue,
                 SerializerFeature.PrettyFormat,
                 SerializerFeature.DisableCircularReferenceDetect};
         return JSON.toJSONString(bean, serializerFeatures);
