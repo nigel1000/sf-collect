@@ -25,6 +25,12 @@ public class DocsClient {
         List<TplContext> tplContexts = new ArrayList<>();
         List<Class<?>> classList = ClassUtil.getClazzFromPackage(globalConfig.getPkgPath());
         for (Class<?> cls : classList) {
+            Object obj;
+            try {
+                obj = cls.newInstance();
+            } catch (Exception ex) {
+                throw UnifiedException.gen("反射调用失败", ex);
+            }
             DocsApi docsApi = cls.getAnnotation(DocsApi.class);
             for (Method method : getMethods(cls)) {
                 log.info("createDocsApi className:{},methodName:{}", cls.getName(), method.getName());
@@ -37,7 +43,7 @@ public class DocsClient {
                         args[i] = null;
                     }
                     method.setAccessible(true);
-                    docsMethodConfig = (DocsMethodConfig) method.invoke(cls.newInstance(), args);
+                    docsMethodConfig = (DocsMethodConfig) method.invoke(obj, args);
                 } catch (Exception ex) {
                     throw UnifiedException.gen("反射调用失败", ex);
                 }
