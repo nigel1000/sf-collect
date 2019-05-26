@@ -5,13 +5,11 @@ import com.common.collect.container.TemplateUtil;
 import com.common.collect.util.ClassUtil;
 import com.common.collect.util.FileUtil;
 import lombok.Data;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by hznijianfeng on 2019/5/20.
@@ -28,14 +26,9 @@ public class DocsClient {
         List<Class<?>> classList = ClassUtil.getClazzFromPackage(globalConfig.getPkgPath());
         for (Class<?> cls : classList) {
             DocsApi docsApi = cls.getAnnotation(DocsApi.class);
-            for (Method method : cls.getDeclaredMethods()) {
+            for (Method method : getMethods(cls)) {
+                log.info("createDocsApi className:{},methodName:{}", cls.getName(), method.getName());
                 DocsApiMethod docsApiMethod = method.getAnnotation(DocsApiMethod.class);
-                if (docsApiMethod == null) {
-                    continue;
-                }
-                if (!method.getReturnType().equals(DocsMethodConfig.class)) {
-                    continue;
-                }
                 DocsMethodConfig docsMethodConfig;
                 try {
                     int argsLength = method.getParameterCount();
@@ -62,6 +55,22 @@ public class DocsClient {
             String fileContent = TemplateUtil.genTemplate("/tpl", "docs.tpl", tplMap);
             FileUtil.createFile(tplContext.getSavePath(), false, fileContent.getBytes(), tplContext.isReCreate());
         }
+    }
+
+    private static List<Method> getMethods(@NonNull Class<?> cls) {
+        List<Method> ret = new ArrayList<>();
+        for (Method method : cls.getDeclaredMethods()) {
+            DocsApiMethod docsApiMethod = method.getAnnotation(DocsApiMethod.class);
+            if (docsApiMethod == null) {
+                continue;
+            }
+            if (!method.getReturnType().equals(DocsMethodConfig.class)) {
+                continue;
+            }
+            ret.add(method);
+        }
+        ret.sort(Comparator.comparingLong(m -> m.getAnnotation(DocsApiMethod.class).order()));
+        return ret;
     }
 
 }

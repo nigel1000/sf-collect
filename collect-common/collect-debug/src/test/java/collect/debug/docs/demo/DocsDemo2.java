@@ -23,7 +23,8 @@ public class DocsDemo2 {
             urlSuffix = "/method2",
             methodAuthor = "hznijianfeng",
             methodDesc = "测试方法",
-            supportRequest = {SupportRequest.GET, SupportRequest.POST}
+            supportRequest = {SupportRequest.GET, SupportRequest.POST},
+            order = 2
     )
     public DocsMethodConfig method2() {
         DocsMethodConfig docsMethodConfig = new DocsMethodConfig();
@@ -38,7 +39,8 @@ public class DocsDemo2 {
             urlSuffix = "/method22",
             methodAuthor = "hznijianfeng",
             methodDesc = "测试方法",
-            supportRequest = {SupportRequest.GET, SupportRequest.POST}
+            supportRequest = {SupportRequest.GET, SupportRequest.POST},
+            order = 1
     )
     public DocsMethodConfig method22() {
         DocsMethodConfig docsMethodConfig = new DocsMethodConfig();
