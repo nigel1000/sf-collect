@@ -29,6 +29,4 @@ public @interface DocsApiMethod {
 
     SupportRequest[] supportRequest() default SupportRequest.GET;
 
-    long order() default Long.MAX_VALUE;
-
 }

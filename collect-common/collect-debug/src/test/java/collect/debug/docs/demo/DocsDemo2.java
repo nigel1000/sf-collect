@@ -18,35 +18,35 @@ import java.math.BigDecimal;
 @DocsApi(rootDirName = "DocsDemo2", urlPrefix = "/DocsDemo2")
 public class DocsDemo2 {
 
-    @DocsApiMethod(
-            nodeName = "method2.md",
-            urlSuffix = "/method2",
-            methodAuthor = "hznijianfeng",
-            methodDesc = "测试方法",
-            supportRequest = {SupportRequest.GET, SupportRequest.POST},
-            order = 2
-    )
-    public DocsMethodConfig method2() {
-        DocsMethodConfig docsMethodConfig = new DocsMethodConfig();
-        docsMethodConfig.setMethodParamType(MethodParamType.REQUEST_PARAM);
-        docsMethodConfig.addRequestParams(DocsMethodParamConfig.builder().defValue(new BigDecimal(22)).paramName("id").paramType("BigDecimal").required(true).build());
-        docsMethodConfig.putResponseBody("返回成功", Response.ok("success"));
-        return docsMethodConfig;
-    }
 
     @DocsApiMethod(
             nodeName = "method22.md",
             urlSuffix = "/method22",
             methodAuthor = "hznijianfeng",
             methodDesc = "测试方法",
-            supportRequest = {SupportRequest.GET, SupportRequest.POST},
-            order = 1
+            supportRequest = {SupportRequest.GET, SupportRequest.POST}
     )
     public DocsMethodConfig method22() {
         DocsMethodConfig docsMethodConfig = new DocsMethodConfig();
         docsMethodConfig.setMethodParamType(MethodParamType.REQUEST_BODY);
         docsMethodConfig.setRequestBody(Lists.newArrayList(Lists.newArrayList(23, 45), 2, new BigDecimal(88), 4));
         docsMethodConfig.putResponseBody("返回成功", Response.ok(new BigDecimal(29)));
+        return docsMethodConfig;
+    }
+
+
+    @DocsApiMethod(
+            nodeName = "method2.md",
+            urlSuffix = "/method2",
+            methodAuthor = "hznijianfeng",
+            methodDesc = "测试方法",
+            supportRequest = {SupportRequest.GET, SupportRequest.POST}
+    )
+    public DocsMethodConfig method2() {
+        DocsMethodConfig docsMethodConfig = new DocsMethodConfig();
+        docsMethodConfig.setMethodParamType(MethodParamType.REQUEST_PARAM);
+        docsMethodConfig.addRequestParams(DocsMethodParamConfig.builder().defValue(new BigDecimal(22)).paramName("id").paramType("BigDecimal").required(true).build());
+        docsMethodConfig.putResponseBody("返回成功", Response.ok("success"));
         return docsMethodConfig;
     }
 

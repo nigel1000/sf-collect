@@ -69,7 +69,7 @@ public class DocsClient {
             }
             ret.add(method);
         }
-        ret.sort(Comparator.comparingLong(m -> m.getAnnotation(DocsApiMethod.class).order()));
+        ret.sort((o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()));
         return ret;
     }
 
