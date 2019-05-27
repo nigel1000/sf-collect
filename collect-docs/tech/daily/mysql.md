@@ -39,6 +39,7 @@ create table `demo` (
   `before_value` mediumtext comment '先前的值',
   `create_at` datetime default current_timestamp not null comment '创建时间',
   `update_at` datetime default current_timestamp not null on update current_timestamp comment '修改时间',
+  index idx_biz_type (biz_type),
   primary key (`id`)
 ) engine=innodb default charset=utf8mb4 comment='demo 表' ;
 ```
@@ -46,6 +47,7 @@ create table `demo` (
 ## 索引操作
 ```sql
 create unique index uniq_category on `category` (`first_category_id`,`second_category_id`);
+alter table `group_squad` add index idx_group_list_id (deleted,group_list_id);
 create index idx_sku_storage on `goods_sku_store` (sku_id, store_id);
 drop index idx_sku_storage on `goods_sku_manage`;
 ```
