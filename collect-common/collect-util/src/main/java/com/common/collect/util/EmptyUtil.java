@@ -35,27 +35,27 @@ public class EmptyUtil {
         return !isBlank(cs);
     }
 
-    public static <T> boolean isEmpty(List<T> list) {
+    public static boolean isEmpty(List<?> list) {
         return list == null || list.isEmpty();
     }
 
-    public static <T> boolean isNotEmpty(List<T> list) {
+    public static boolean isNotEmpty(List<?> list) {
         return !isEmpty(list);
     }
 
-    public static <K, V> boolean isEmpty(Map<K, V> map) {
+    public static boolean isEmpty(Map<?, ?> map) {
         return map == null || map.isEmpty();
     }
 
-    public static <K, V> boolean isNotEmpty(Map<K, V> map) {
+    public static boolean isNotEmpty(Map<?, ?> map) {
         return !isEmpty(map);
     }
 
-    public static <T> boolean isEmpty(Set<T> set) {
+    public static boolean isEmpty(Set<?> set) {
         return set == null || set.isEmpty();
     }
 
-    public static <T> boolean isNotEmpty(Set<T> set) {
+    public static boolean isNotEmpty(Set<?> set) {
         return !isEmpty(set);
     }
 

@@ -60,6 +60,11 @@
             <artifactId>poi</artifactId>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <optional>true</optional>
+        </dependency>
         <!-- spring -->
         <dependency>
             <groupId>org.springframework</groupId>

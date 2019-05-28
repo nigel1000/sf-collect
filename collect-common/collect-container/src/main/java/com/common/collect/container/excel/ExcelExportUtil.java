@@ -11,6 +11,7 @@ import com.google.common.collect.Maps;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -167,7 +168,7 @@ public class ExcelExportUtil extends ExcelSession {
     }
 
     // 导出 一行数据 到 excel
-    public void exportData(List<Object> data, List<Integer> colIndex, int rowIndex) {
+    public void exportData(List<?> data, List<Integer> colIndex, int rowIndex) {
         if (EmptyUtil.isEmpty(data) || EmptyUtil.isEmpty(colIndex) || data.size() != colIndex.size()) {
             throw UnifiedException.gen(ExcelConstants.MODULE, "data和colIndex 必须不为空并且size相等");
         }
@@ -175,6 +176,17 @@ public class ExcelExportUtil extends ExcelSession {
         Row row = this.getRow(rowIndex);
         for (int i = 0; i < data.size(); i++) {
             setCellValue(row.getRowNum(), colIndex.get(i), data.get(i));
+        }
+    }
+
+    public void exportData(List<?> data, int rowIndex) {
+        if (CollectionUtils.isEmpty(data)) {
+            throw UnifiedException.gen(ExcelConstants.MODULE, "data 必须不为空");
+        }
+        // 组装数据
+        Row row = this.getRow(rowIndex);
+        for (int i = 0; i < data.size(); i++) {
+            setCellValue(row.getRowNum(), i, data.get(i));
         }
     }
 

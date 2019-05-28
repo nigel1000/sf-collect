@@ -1,6 +1,8 @@
 package collect.container.excel;
 
+import collect.container.excel.base.DefaultEventModelParseHandler;
 import collect.container.excel.base.ExcelComposeEO;
+import com.common.collect.container.excel.EventModelReader;
 import com.common.collect.container.excel.ExcelImportUtil;
 import com.common.collect.container.excel.ExcelSession;
 import com.common.collect.container.excel.client.ExcelClient;
@@ -41,7 +43,9 @@ public class ExcelSessionTest {
         }
         Slf4jUtil.setLogLevel("debug");
 
-        sessionExcel();
+        eventModelReader();
+
+//        sessionExcel();
 
 //        importCorrect();
 
@@ -52,6 +56,11 @@ public class ExcelSessionTest {
 //        exportTpl();
 
 
+    }
+
+    public static void eventModelReader() throws Exception {
+        EventModelReader eventModelReader = new EventModelReader(new FileInputStream(path + "/ExcelSession.xlsx"));
+        eventModelReader.processSheet(null, 2, Lists.newArrayList(new DefaultEventModelParseHandler()));
     }
 
     public static void sessionExcel() throws Exception {
