@@ -35,17 +35,22 @@ public class EventModelReader {
 
     private final static int every_sheet_read_size_code = 50000;
 
+    // 提供三种方式设置文件： 流，url，文件
     private File excelFile;
 
+    // 业务逻辑处理器
     private IEventModelParseHandler handler;
 
     @Setter
+    // 每个sheet取多少数据就停止解析xml，默认全部
     private Integer everySheetReadSize;
 
     @Setter
+    // 每取到多少数据后交给 handler 进行处理，解决业务数据占内存问题，默认100
     private Integer batchHandleSize;
 
     @Setter
+    // 需要解析的sheet下标，默认解析全部
     private List<Integer> parseSheetIndex;
 
     public EventModelReader(@NonNull Object excelFile, @NonNull IEventModelParseHandler handler) {
@@ -73,12 +78,7 @@ public class EventModelReader {
         this.excelFile = file;
     }
 
-    // parseSheetIndexs 默认全部sheet
-    // batchHandleSize 默认为10
     public void processSheet() {
-        if (this.excelFile == null) {
-            throw UnifiedException.gen("未指定解析文件");
-        }
         OPCPackage opcPackage;
         SheetHandler sheetHandler;
         XMLReader xmlReader;
