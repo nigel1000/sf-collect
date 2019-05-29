@@ -59,8 +59,9 @@ public class ExcelSessionTest {
     }
 
     public static void eventModelReader() throws Exception {
-        EventModelReader eventModelReader = new EventModelReader(new FileInputStream(path + "/ExcelSession.xlsx"));
-        eventModelReader.processSheet(null, 2, Lists.newArrayList(new DefaultEventModelParseHandler()));
+        DefaultEventModelParseHandler handler = new DefaultEventModelParseHandler();
+        EventModelReader eventModelReader = new EventModelReader(new FileInputStream(path + "/ExcelSession.xlsx"), handler);
+        eventModelReader.processSheet();
     }
 
     public static void sessionExcel() throws Exception {

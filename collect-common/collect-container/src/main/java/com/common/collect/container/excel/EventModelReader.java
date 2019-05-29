@@ -27,11 +27,28 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Created by hznijianfeng on 2019/5/28.
+ */
+
 public class EventModelReader {
+
+    private final static int every_sheet_read_size_code = 50000;
 
     private File excelFile;
 
-    public EventModelReader(@NonNull Object excelFile) {
+    private IEventModelParseHandler handler;
+
+    @Setter
+    private Integer everySheetReadSize;
+
+    @Setter
+    private Integer batchHandleSize;
+
+    @Setter
+    private List<Integer> parseSheetIndex;
+
+    public EventModelReader(@NonNull Object excelFile, @NonNull IEventModelParseHandler handler) {
         if (excelFile instanceof InputStream) {
             excelFile((InputStream) excelFile);
         } else if (excelFile instanceof String) {
@@ -41,6 +58,7 @@ public class EventModelReader {
         } else {
             throw UnifiedException.gen("非合法参数");
         }
+        this.handler = handler;
     }
 
     private void excelFile(@NonNull InputStream is) {
@@ -57,41 +75,56 @@ public class EventModelReader {
 
     // parseSheetIndexs 默认全部sheet
     // batchHandleSize 默认为10
-    public void processSheet(List<Integer> parseSheetIndex, Integer batchHandleSize,
-                             List<IEventModelParseHandler> handlers) {
+    public void processSheet() {
         if (this.excelFile == null) {
             throw UnifiedException.gen("未指定解析文件");
         }
-        if (EmptyUtil.isEmpty(handlers)) {
-            throw UnifiedException.gen("数据处理器不能为空");
-        }
-        OPCPackage pkg;
+        OPCPackage opcPackage;
+        SheetHandler sheetHandler;
+        XMLReader xmlReader;
+        XSSFReader xssfReader;
+        Iterator<InputStream> sheets;
         try {
-            pkg = OPCPackage.open(this.excelFile.getAbsolutePath());
-            XSSFReader r = new XSSFReader(pkg);
-            SharedStringsTable sst = r.getSharedStringsTable();
-            XMLReader parser = SAXHelper.newXMLReader();
-            SheetHandler handler = new SheetHandler(sst);
-            handler.setHandlers(handlers);
+            opcPackage = OPCPackage.open(this.excelFile.getAbsolutePath());
+            xssfReader = new XSSFReader(opcPackage);
+            SharedStringsTable sst = xssfReader.getSharedStringsTable();
+            xmlReader = SAXHelper.newXMLReader();
+            sheetHandler = new SheetHandler(sst);
+            sheetHandler.setHandler(handler);
+            if (everySheetReadSize != null) {
+                sheetHandler.setEverySheetReadSize(everySheetReadSize);
+            }
             if (batchHandleSize != null) {
-                handler.setBatchHandleSize(batchHandleSize);
+                sheetHandler.setBatchHandleSize(batchHandleSize);
             }
-            parser.setContentHandler(handler);
-            int currentSheetIndex = 0;
-            Iterator<InputStream> sheets = r.getSheetsData();
-            while (sheets.hasNext()) {
-                if (parseSheetIndex == null || parseSheetIndex.contains(currentSheetIndex)) {
-                    handler.setSheetStart(true);
-                    InputStream sheet = sheets.next();
-                    InputSource sheetSource = new InputSource(sheet);
-                    parser.parse(sheetSource);
-                    sheet.close();
-                    handler.handleData();
-                }
-            }
+            xmlReader.setContentHandler(sheetHandler);
+            sheets = xssfReader.getSheetsData();
         } catch (Exception e) {
             throw UnifiedException.gen("processSheet", e);
         }
+        int currentSheetIndex = 0;
+        while (sheets.hasNext()) {
+            if (parseSheetIndex == null || parseSheetIndex.contains(currentSheetIndex)) {
+                sheetHandler.startReadSheet();
+                InputStream sheet = sheets.next();
+                InputSource sheetSource = new InputSource(sheet);
+                try {
+                    xmlReader.parse(sheetSource);
+                    sheet.close();
+                } catch (UnifiedException ex) {
+                    if (ex.getErrorCode() == every_sheet_read_size_code) {
+                        sheetHandler.handleData();
+                        continue;
+                    } else {
+                        throw ex;
+                    }
+                } catch (Exception e) {
+                    throw UnifiedException.gen("processSheet", e);
+                }
+                sheetHandler.handleData();
+            }
+        }
+
     }
 
     /**
@@ -100,11 +133,15 @@ public class EventModelReader {
     private static class SheetHandler extends DefaultHandler {
 
         @Setter
-        private int batchHandleSize = 10;
+        private int batchHandleSize = 100;
         @Setter
-        private List<IEventModelParseHandler> handlers;
+        private IEventModelParseHandler handler;
         @Setter
-        private boolean sheetStart = true;
+        private int everySheetReadSize = Integer.MAX_VALUE;
+
+        private boolean sheetStart;
+        private int sheetAlreadyReadRowNum;
+
         private SharedStringsTable sst;
         private String lastContents;
         private boolean nextIsString;
@@ -118,6 +155,15 @@ public class EventModelReader {
         private SheetHandler(SharedStringsTable sst) {
             this.sst = sst;
         }
+
+        private void startReadSheet() {
+            sheetStart = true;
+            sheetAlreadyReadRowNum = 0;
+            curColIndex = null;
+            oneRow.clear();
+            rows.clear();
+        }
+
 
         @Override
         public void startElement(String uri, String localName, String name, Attributes attributes) {
@@ -178,6 +224,13 @@ public class EventModelReader {
                         cols.add(value);
                     }
                     if (!isEmptyRow) {
+                        sheetAlreadyReadRowNum++;
+                    }
+                    if (sheetAlreadyReadRowNum > everySheetReadSize) {
+                        throw UnifiedException.gen(every_sheet_read_size_code,
+                                "读取行数已大于每个 sheet 读取行数 " + everySheetReadSize);
+                    }
+                    if (!isEmptyRow) {
                         rows.add(cols);
                     }
                     if (rows.size() >= batchHandleSize) {
@@ -189,13 +242,11 @@ public class EventModelReader {
             }
         }
 
-        public void handleData() {
+        private void handleData() {
             EventModelParam eventModelParam = new EventModelParam();
             eventModelParam.setRows(rows);
             eventModelParam.setSheetStart(sheetStart);
-            for (IEventModelParseHandler handler : handlers) {
-                handler.handle(eventModelParam);
-            }
+            handler.handle(eventModelParam);
             rows.clear();
         }
 
@@ -204,5 +255,6 @@ public class EventModelReader {
             lastContents += new String(ch, start, length);
         }
     }
+
 
 }
