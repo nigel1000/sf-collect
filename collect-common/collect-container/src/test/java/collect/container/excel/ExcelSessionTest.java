@@ -60,7 +60,11 @@ public class ExcelSessionTest {
 
     public static void eventModelReader() throws Exception {
         DefaultEventModelParseHandler handler = new DefaultEventModelParseHandler();
-        EventModelReader eventModelReader = new EventModelReader(new FileInputStream(path + "/ExcelSession.xlsx"), handler);
+        EventModelReader eventModelReader = new EventModelReader(new FileInputStream(path + "/EventModelReader.xlsx"), handler);
+        eventModelReader.setNeedReadColNum(7);
+        eventModelReader.setBatchHandleSize(3);
+        eventModelReader.setParseSheetIndex(Lists.newArrayList(1, 3));
+        eventModelReader.setNeedReadRowNum(4);
         eventModelReader.processSheet();
     }
 

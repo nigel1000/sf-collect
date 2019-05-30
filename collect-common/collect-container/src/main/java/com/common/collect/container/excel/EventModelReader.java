@@ -33,7 +33,7 @@ import java.util.Map;
 
 public class EventModelReader {
 
-    private final static int every_sheet_read_size_code = 50000;
+    private final static int need_read_row_num_code = 50000;
 
     // 提供三种方式设置文件： 流，url，文件
     private File excelFile;
@@ -43,15 +43,19 @@ public class EventModelReader {
 
     @Setter
     // 每个sheet取多少数据就停止解析xml，默认全部
-    private Integer everySheetReadSize;
+    private Integer needReadRowNum;
 
     @Setter
     // 每取到多少数据后交给 handler 进行处理，解决业务数据占内存问题，默认100
     private Integer batchHandleSize;
 
     @Setter
-    // 需要解析的sheet下标，默认解析全部
+    // 需要解析的sheet下标，默认解析全部，从1开始，非0开始
     private List<Integer> parseSheetIndex;
+
+    @Setter
+    // 表格列数 一行数据列数如果不足此数，自动填充空字符串
+    private Integer needReadColNum;
 
     public EventModelReader(@NonNull Object excelFile, @NonNull IEventModelParseHandler handler) {
         if (excelFile instanceof InputStream) {
@@ -91,11 +95,15 @@ public class EventModelReader {
             xmlReader = SAXHelper.newXMLReader();
             sheetHandler = new SheetHandler(sst);
             sheetHandler.setHandler(handler);
-            if (everySheetReadSize != null) {
-                sheetHandler.setEverySheetReadSize(everySheetReadSize);
+            // 对整个所有 sheet 都生效的配置
+            if (needReadRowNum != null) {
+                sheetHandler.setNeedReadRowNum(needReadRowNum);
             }
             if (batchHandleSize != null) {
                 sheetHandler.setBatchHandleSize(batchHandleSize);
+            }
+            if (needReadColNum != null) {
+                sheetHandler.setNeedReadColNum(needReadColNum);
             }
             xmlReader.setContentHandler(sheetHandler);
             sheets = xssfReader.getSheetsData();
@@ -104,7 +112,9 @@ public class EventModelReader {
         }
         int currentSheetIndex = 0;
         while (sheets.hasNext()) {
+            currentSheetIndex++;
             if (parseSheetIndex == null || parseSheetIndex.contains(currentSheetIndex)) {
+                sheetHandler.setCurSheetIndex(currentSheetIndex);
                 sheetHandler.startReadSheet();
                 InputStream sheet = sheets.next();
                 InputSource sheetSource = new InputSource(sheet);
@@ -112,7 +122,7 @@ public class EventModelReader {
                     xmlReader.parse(sheetSource);
                     sheet.close();
                 } catch (UnifiedException ex) {
-                    if (ex.getErrorCode() == every_sheet_read_size_code) {
+                    if (ex.getErrorCode() == need_read_row_num_code) {
                         sheetHandler.handleData();
                         continue;
                     } else {
@@ -122,6 +132,8 @@ public class EventModelReader {
                     throw UnifiedException.gen("processSheet", e);
                 }
                 sheetHandler.handleData();
+            } else {
+                sheets.next();
             }
         }
 
@@ -137,7 +149,11 @@ public class EventModelReader {
         @Setter
         private IEventModelParseHandler handler;
         @Setter
-        private int everySheetReadSize = Integer.MAX_VALUE;
+        private int needReadRowNum = Integer.MAX_VALUE;
+        @Setter
+        private int needReadColNum = 0;
+        @Setter
+        private int curSheetIndex = 0;
 
         private boolean sheetStart;
         private int sheetAlreadyReadRowNum;
@@ -223,21 +239,26 @@ public class EventModelReader {
                         }
                         cols.add(value);
                     }
-                    if (!isEmptyRow) {
-                        sheetAlreadyReadRowNum++;
+                    oneRow.clear();
+                    if (isEmptyRow) {
+                        return;
                     }
-                    if (sheetAlreadyReadRowNum > everySheetReadSize) {
-                        throw UnifiedException.gen(every_sheet_read_size_code,
-                                "读取行数已大于每个 sheet 读取行数 " + everySheetReadSize);
+                    if (sheetAlreadyReadRowNum + 1 > needReadRowNum) {
+                        throw UnifiedException.gen(need_read_row_num_code,
+                                "读取行数已大于每个 sheet 读取行数 " + needReadRowNum);
                     }
-                    if (!isEmptyRow) {
-                        rows.add(cols);
+                    sheetAlreadyReadRowNum++;
+                    // 填充空字符串
+                    if (needReadColNum > cols.size()) {
+                        for (int i = 0; i < needReadColNum - cols.size(); i++) {
+                            cols.add("");
+                        }
                     }
+                    rows.add(cols);
                     if (rows.size() >= batchHandleSize) {
                         handleData();
                         sheetStart = false;
                     }
-                    oneRow.clear();
                 }
             }
         }
@@ -246,6 +267,9 @@ public class EventModelReader {
             EventModelParam eventModelParam = new EventModelParam();
             eventModelParam.setRows(rows);
             eventModelParam.setSheetStart(sheetStart);
+            eventModelParam.setNeedReadColNum(needReadColNum);
+            eventModelParam.setCurSheetIndex(curSheetIndex);
+            eventModelParam.setSheetAlreadyReadRowNum(sheetAlreadyReadRowNum);
             handler.handle(eventModelParam);
             rows.clear();
         }
@@ -255,6 +279,5 @@ public class EventModelReader {
             lastContents += new String(ch, start, length);
         }
     }
-
 
 }

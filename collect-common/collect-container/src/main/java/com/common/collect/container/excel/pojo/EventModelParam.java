@@ -13,6 +13,12 @@ public class EventModelParam {
 
     private boolean sheetStart;
 
+    private int needReadColNum;
+
+    private int curSheetIndex;
+
+    private int sheetAlreadyReadRowNum;
+
     private List<List<String>> rows;
 
 }
