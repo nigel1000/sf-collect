@@ -119,7 +119,9 @@ public class ControllerErrorHandler {
     @ResponseStatus(HttpStatus.OK)
     public Response processControllerError(NativeWebRequest request, UnifiedException ex) {
         String message = ex.getErrorMessage();
-        printLogInfo(request, ex);
+        if (ex.getCause() != null) {
+            printLogInfo(request, ex);
+        }
         return Response.build(ex.getErrorCode(), ex.getContext(), message);
     }
 
