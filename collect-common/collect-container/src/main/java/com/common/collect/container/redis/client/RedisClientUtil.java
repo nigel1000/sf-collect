@@ -35,8 +35,7 @@ public class RedisClientUtil {
             log.error(" get error", e);
         }
         if (ret != null) {
-            logGet(key);
-            logGet(ret);
+            logGet("get", key, ret);
         }
         return ret;
     }
@@ -56,7 +55,7 @@ public class RedisClientUtil {
             log.error(" batchGet error", e);
         }
         if (EmptyUtil.isNotEmpty(ret)) {
-            logGet(keys);
+            logGet("batchGet", keys, ret);
             logGet(ret);
         }
         return ret;
@@ -77,8 +76,7 @@ public class RedisClientUtil {
             log.error(" batchGetMap error", e);
         }
         if (EmptyUtil.isNotEmpty(ret)) {
-            logGet(keys);
-            logGet(ret);
+            logGet("batchGetMap", keys, ret);
         }
         return ret;
     }
@@ -105,7 +103,7 @@ public class RedisClientUtil {
                 unCacheKeys.add(key);
             }
         }
-        logGet(cacheKeys);
+        logGet("batchGetPut", cacheKeys);
         // 对于缓存中不存在的key，调用function去db取数据并放入缓存
         if (EmptyUtil.isNotEmpty(unCacheKeys)) {
             Map<String, V> bizMap = function.apply(unCacheKeys);
@@ -113,7 +111,7 @@ public class RedisClientUtil {
                 V bizObj = bizMap.get(unCacheKey);
                 if (bizObj != null) {
                     if (put(redisClient, unCacheKey, bizObj, expire)) {
-                        fromBiz(unCacheKey);
+                        fromBiz("batchGetPut", unCacheKey);
                     }
                 }
             }
@@ -136,8 +134,7 @@ public class RedisClientUtil {
         try {
             Boolean ret = redisClient.setWithExpire(RedisKey.createKey(key, seconds), value);
             if (ret) {
-                logUpsert(key);
-                logUpsert(value);
+                logUpsert("put", key, value);
                 return true;
             }
         } catch (Exception e) {
@@ -171,14 +168,14 @@ public class RedisClientUtil {
                 unCacheKeys.add(key);
             }
         }
-        logGet(cacheKeys);
+        logGet("batchGetPutAvoidNullValue", cacheKeys);
         // 对于缓存中不存在的key，调用function去db取数据并放入缓存
         if (EmptyUtil.isNotEmpty(unCacheKeys)) {
             Map<String, V> bizMap = function.apply(unCacheKeys);
             for (String unCacheKey : unCacheKeys) {
                 V bizObj = bizMap.get(unCacheKey);
                 if (putAvoidNullValue(redisClient, unCacheKey, bizObj, nullValue, expire)) {
-                    fromBiz(unCacheKey);
+                    fromBiz("batchGetPutAvoidNullValue", unCacheKey);
                 }
                 result.putAll(bizMap);
             }
@@ -204,7 +201,7 @@ public class RedisClientUtil {
         try {
             Long ret = redisClient.remove(RedisKey.createKey(key));
             if (ret > 0) {
-                logDel(key);
+                logDel("remove", key);
                 return true;
             }
         } catch (Exception e) {
@@ -263,8 +260,7 @@ public class RedisClientUtil {
         try {
             ret = redisClient.setIfNotExist(RedisKey.createKey(key, seconds), lockId);
             if (ret) {
-                logLock(key);
-                logLock(lockId);
+                logLock("lockWithBizId", key, lockId);
             }
         } catch (Exception e) {
             log.error("rdbClientImpl setNx error", e);
@@ -279,44 +275,43 @@ public class RedisClientUtil {
     public static boolean releaseWithBizId(IJedisOperator redisClient, String key, String lockId) {
         Object result = redisClient.releaseWithBiz(RedisKey.createKey(key), lockId);
         if (Long.valueOf(1).equals(result)) {
-            logRelease(key);
-            logRelease(lockId);
+            logRelease("releaseWithBizId", key, lockId);
             return true;
         }
         return false;
     }
 
-    private static void fromBiz(Object content) {
+    private static void fromBiz(Object... content) {
         if (log.isDebugEnabled()) {
             log.debug("[from biz] [content:{}] ", JsonUtil.bean2json(content));
         }
     }
 
-    private static void logGet(Object content) {
+    private static void logGet(Object... content) {
         if (log.isDebugEnabled()) {
             log.debug("[from cache] [content:{}] ", JsonUtil.bean2json(content));
         }
     }
 
-    private static void logDel(Object content) {
+    private static void logDel(Object... content) {
         if (log.isDebugEnabled()) {
             log.debug("[del cache] [content:{}] ", JsonUtil.bean2json(content));
         }
     }
 
-    private static void logUpsert(Object content) {
+    private static void logUpsert(Object... content) {
         if (log.isDebugEnabled()) {
             log.debug("[upsert cache] [content:{}] ", JsonUtil.bean2json(content));
         }
     }
 
-    private static void logLock(Object content) {
+    private static void logLock(Object... content) {
         if (log.isDebugEnabled()) {
             log.debug("[lock cache] [content:{}] ", JsonUtil.bean2json(content));
         }
     }
 
-    private static void logRelease(Object content) {
+    private static void logRelease(Object... content) {
         if (log.isDebugEnabled()) {
             log.debug("[release cache] [content:{}] ", JsonUtil.bean2json(content));
         }
