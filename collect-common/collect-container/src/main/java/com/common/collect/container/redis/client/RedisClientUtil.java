@@ -56,7 +56,6 @@ public class RedisClientUtil {
         }
         if (EmptyUtil.isNotEmpty(ret)) {
             logGet("batchGet", keys, ret);
-            logGet(ret);
         }
         return ret;
     }
