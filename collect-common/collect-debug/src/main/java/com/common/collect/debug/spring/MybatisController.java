@@ -42,6 +42,7 @@ public class MybatisController {
     private String mybatis_key = "c26b094cc27346379266147682c41fc0";
 
     @RequestMapping("/generator")
+    // /back/door/mybatis/generator?tableName=tb_ars_activity_userprofile&uuid=c26b094cc27346379266147682c41fc0
     public void generator(@RequestParam("tableName") String tableName,
                           @RequestParam(value = "author", required = false) String author,
                           @RequestParam(value = "schema", required = false) String schema,

@@ -32,7 +32,7 @@ public class RedisTest {
         log.info("put:{}", RedisClientUtil.put(jedisOperator, key, value, 10));
         String ret = RedisClientUtil.get(jedisOperator, key);
         log.info("get:{}", ret);
-        log.info("remove:{}", RedisClientUtil.remove(jedisOperator, key));
+        log.info("remove:{}", RedisClientUtil.del(jedisOperator, key));
         ret = RedisClientUtil.get(jedisOperator, key);
         log.info("get:{}", ret);
         log.info("######################################################");
@@ -69,7 +69,7 @@ public class RedisTest {
                     return biz;
                 });
         log.info("batchGetPut:{}", batchGetPutMap);
-        RedisClientUtil.batchRemove(jedisOperator, Lists.newArrayList(key, key + "formBiz"));
+        RedisClientUtil.batchDel(jedisOperator, Lists.newArrayList(key, key + "formBiz"));
         log.info("######################################################");
 
         log.info("put:{}", RedisClientUtil.put(jedisOperator, key, value, 10));
@@ -80,7 +80,7 @@ public class RedisTest {
                     return biz;
                 }, "");
         log.info("batchGetPutAvoidNullValue:{}", batchGetPutAvoidNullValue);
-        RedisClientUtil.batchRemove(jedisOperator, Lists.newArrayList(key, key + "formBiz", key + "formBizNull"));
+        RedisClientUtil.batchDel(jedisOperator, Lists.newArrayList(key, key + "formBiz", key + "formBizNull"));
         log.info("######################################################");
 
         Slf4jUtil.setLogLevel("info");

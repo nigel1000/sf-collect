@@ -7,6 +7,7 @@ import com.common.collect.container.redis.RedisKey;
 import com.common.collect.util.CollectionUtil;
 import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.FunctionUtil;
+import com.common.collect.util.constant.Constants;
 import com.google.common.collect.Lists;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -120,6 +121,11 @@ public class RedisClientUtil {
         return result;
     }
 
+
+    public static <V> boolean put(IJedisOperator redisClient, String key, V value) {
+        return put(redisClient, key, value, Constants.ONE_DAY * 30);
+    }
+
     /**
      * 设定指定key的值，并设置键值对的过期时间
      */
@@ -196,7 +202,7 @@ public class RedisClientUtil {
     /**
      * 根据 key 值删除缓存
      */
-    public static boolean remove(IJedisOperator redisClient, String key) {
+    public static boolean del(IJedisOperator redisClient, String key) {
         try {
             Long ret = redisClient.remove(RedisKey.createKey(key));
             if (ret > 0) {
@@ -212,14 +218,14 @@ public class RedisClientUtil {
     /**
      * 批量删除
      */
-    public static boolean batchRemove(IJedisOperator redisClient, List<String> keys) {
+    public static boolean batchDel(IJedisOperator redisClient, List<String> keys) {
         if (EmptyUtil.isEmpty(keys)) {
             return true;
         }
         boolean ret = true;
         try {
             for (String key : keys) {
-                if (!remove(redisClient, key) && ret) {
+                if (!del(redisClient, key) && ret) {
                     ret = false;
                 }
             }
