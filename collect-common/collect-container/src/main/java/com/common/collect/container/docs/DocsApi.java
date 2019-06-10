@@ -20,7 +20,7 @@ public @interface DocsApi {
     String urlPrefix() default "";
 
     // 是否显示字段描述
-    boolean showComment() default false;
+    boolean showComment() default true;
 
     boolean reCreate() default true;
 

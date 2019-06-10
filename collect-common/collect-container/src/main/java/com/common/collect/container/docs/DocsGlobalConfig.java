@@ -14,7 +14,7 @@ import java.io.Serializable;
 public class DocsGlobalConfig implements Serializable {
 
     private boolean reCreate = true;
-    private boolean showComment = false;
+    private boolean showComment = true;
     private String prefixPath;
     private String pkgPath;
 

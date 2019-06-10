@@ -65,8 +65,8 @@ public class TplContext {
         tplContext.setRequestUrl(urlPrefix + docsApiMethod.urlSuffix());
         tplContext.setMethodAuthor(docsApiMethod.methodAuthor());
         tplContext.setMethodDesc(docsApiMethod.methodDesc());
-        tplContext.setReCreate(priorityConfig(globalConfig.isReCreate(), docsApiMethod.reCreate(), docsApi != null && docsApi.reCreate()));
-        tplContext.setShowComment(priorityConfig(globalConfig.isShowComment(), docsApiMethod.showComment(), docsApi != null && docsApi.showComment()));
+        tplContext.setReCreate(priorityConfig(globalConfig.isReCreate(), docsApi != null && docsApi.reCreate(), docsApiMethod.reCreate()));
+        tplContext.setShowComment(priorityConfig(globalConfig.isShowComment(), docsApi != null && docsApi.showComment(), docsApiMethod.showComment()));
         tplContext.setSupportRequest(SplitUtil.join(Arrays.asList(docsApiMethod.supportRequest()), " | "));
 
         docsMethodConfig.valid();
@@ -109,16 +109,8 @@ public class TplContext {
         }
     }
 
-    private static boolean priorityConfig(boolean global, boolean method, boolean cls) {
-        if (global) {
-            return true;
-        } else if (method) {
-            return true;
-        } else if (cls) {
-            return true;
-        } else {
-            return false;
-        }
+    private static boolean priorityConfig(boolean global, boolean cls, boolean method) {
+        return global && cls && method;
     }
 
 }
