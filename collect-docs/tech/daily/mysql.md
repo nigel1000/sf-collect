@@ -117,4 +117,59 @@ repeatable read 级别用的是next-key算法(gap锁+纪录锁)
 查询聚簇索引|唯一索引时会降级成 纪录锁算法
 ```
 
+## 物化特性仅仅针对查询语句
+```sql
+-- MySQL5.6 引入了Materialization物化特性 
+-- 用于子查询（比如在IN/NOT IN子查询以及 FROM 子查询）优化。 
+-- 具体实现方式是：在SQL执行过程中，第一次需要子查询结果时执行子查询并将子查询的结果保存为临时表 ，后续对子查询结果集的访问将直接通过临时表获得。
+-- 物化子查询优化SQL执行的关键点在于对子查询只需要执行一次。
+-- 与之相对的执行方式是对外表的每一行都对子查询进行调用，其执行计划中的查询类型为“DEPENDENT SUBQUERY”。
+-- 需要特别注意它目前仅仅针对查询语句的优化。
+-- 1. 对待EXISTS子句时，仍然采用嵌套子查询的执行方式。
+-- 2. 对于更新或删除需要手工重写成JOIN。
+
+-- 子查询 -> join 
+-- 子查询
+update operation o
+set status = 'applying'
+where o.id in (select id
+               from (select o.id, o.status
+                     from operation o
+                     where o.group = 123
+                       and o.status not in ('done')
+                     order by o.parent,
+                              o.id
+                     limit 1) t); 
+-- join           
+update operation o
+join (select o.id, o.status
+      from operation o
+      where o.group = 123
+        and o.status not in ('done')
+      order by o.parent,
+               o.id
+      limit 1) t
+on o.id = t.id
+set status = 'applying';
+
+-- exists -> join
+-- exists
+SELECT *
+FROM my_neighbor n
+       LEFT JOIN my_neighbor_apply sra ON n.id = sra.neighbor_id
+                                            AND sra.user_id = 'xxx'
+WHERE n.topic_status < 4
+  AND EXISTS(SELECT 1 FROM message_info m WHERE n.id = m.neighbor_id
+                                            AND m.user = 'xxx')
+  AND n.topic_type <> 5 ;
+-- join 
+SELECT *
+FROM my_neighbor n
+       INNER JOIN message_info m ON n.id = m.neighbor_id
+                                      AND m.user = 'xxx'
+       LEFT JOIN my_neighbor_apply sra ON n.id = sra.neighbor_id
+                                            AND sra.user_id = 'xxx'
+WHERE n.topic_status < 4
+  AND n.topic_type <> 5 ;
+```
 
