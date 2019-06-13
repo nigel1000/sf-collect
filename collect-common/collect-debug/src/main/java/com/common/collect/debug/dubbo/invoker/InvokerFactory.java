@@ -36,9 +36,8 @@ public class InvokerFactory {
                 for (int i = 0; i < providerUrls.size(); i++) {
                     URL providerUrl = providerUrls.get(i);
                     log.info("before providerUrl:{}", providerUrl);
-                    if (invokerParam.getOldIps().contains(providerUrl.getHost())) {
-                        providerUrl = providerUrl.setAddress(
-                                invokerParam.getNewIps().get(invokerParam.getOldIps().indexOf(providerUrl.getHost())));
+                    if (invokerParam.getIpMap().containsKey(providerUrl.getHost())) {
+                        providerUrl = providerUrl.setAddress(invokerParam.getIpMap().get(providerUrl.getHost()));
                     }
                     log.info("after  providerUrl:{}", providerUrl);
                     try {
