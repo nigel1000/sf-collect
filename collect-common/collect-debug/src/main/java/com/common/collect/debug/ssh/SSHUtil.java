@@ -4,7 +4,12 @@ import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.trace.TraceIdUtil;
 import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.FileUtil;
-import com.jcraft.jsch.*;
+import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.UserInfo;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -164,10 +169,8 @@ public class SSHUtil {
         private String targetPath;    // 目标地址
 
         // SSH 端口转发
-        private Boolean localForward = false;// 本地转发
-        private Boolean remoteForward = false;// 远程转发
+        private Boolean localForward = false;// 远程转发到本地
         private Integer localPort;// 本地端口
-        private String remoteHost = "localhost";// 远程服务器
         private Integer remotePort;// 远程服务端口
 
         public SSHInfo(String host, String user) {
@@ -177,23 +180,23 @@ public class SSHUtil {
 
         public Session getSession() throws Exception {
             JSch jsch = new JSch();
-            //秘钥方式连接
+            // 秘钥方式连接
             if (this.getPrivateKey() != null) {
                 if (EmptyUtil.isNotBlank(this.getPassphrase())) {
-                    //设置带口令的密钥
+                    // 设置带口令的密钥
                     jsch.addIdentity(null, this.getPrivateKey(), this.getPublicKey(), this.getPassphrase().getBytes());
                 } else {
-                    //设置不带口令的密钥
+                    // 设置不带口令的密钥
                     jsch.addIdentity(null, this.getPrivateKey(), this.getPublicKey(), null);
                 }
             }
-            //获取session连接
+            // 获取session连接
             Session session = jsch.getSession(this.getUser(), this.getHost(), this.getPort());
-            //连接失败
+            // 连接失败
             if (session == null) {
                 throw UnifiedException.gen("获取 ssh 会话失败");
             }
-            //如果密码方式连接  session传入密码
+            // 如果密码方式连接 session传入密码
             if (EmptyUtil.isNotBlank(this.getPassword())) {
                 session.setPassword(this.getPassword());
             }
@@ -201,17 +204,9 @@ public class SSHUtil {
             Properties config = new Properties();
             config.put("StrictHostKeyChecking", "no");
 
-            if (localForward && remoteForward) {
-                throw new IllegalArgumentException("不能既本地转发又远程转发");
-            }
-            // 设置SSH本地端口转发
             if (localForward) {
-                int assignedPort = session.setPortForwardingL(localPort, remoteHost, remotePort);
-                log.info("设置SSH本地端口转发,本地转发到远程, assignedPort:[{}]", assignedPort);
-            }
-            // 设置SSH远程端口转发
-            if (remoteForward) {
-                session.setPortForwardingR(remotePort, remoteHost, localPort);
+                int assignedPort = session.setPortForwardingL(localPort, "localhost", remotePort);
+                log.info("远程转发到本地,远程端口:[{}] 本地端口:[{}]", remotePort, assignedPort);
             }
 
             session.setConfig(config);
@@ -243,15 +238,12 @@ public class SSHUtil {
                 }
 
                 @Override
-                public void showMessage(String s) {
-                }
+                public void showMessage(String s) {}
             });
-            //设置session通道最大开启时间  默认5分钟  可调用close()方法关闭该通道
+            // 设置session通道最大开启时间 默认5分钟 可调用close()方法关闭该通道
             session.connect(SESSION_TIMEOUT);
             return session;
         }
 
     }
-
-
 }

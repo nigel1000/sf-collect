@@ -45,7 +45,7 @@ public class RedisController {
     // /back/door/redis/operate?type=hget&key=redis&field=redis&uuid=c26b094cc27346379266147682c41fc0
     // /back/door/redis/operate?type=hgetAll&key=redis&uuid=c26b094cc27346379266147682c41fc0
 
-    // http://yunti-kl.netease.com/back/door/redis/operate?type=del&key=redis&uuid=c26b094cc27346379266147682c41fc0
+    // /back/door/redis/operate?type=del&key=redis&uuid=c26b094cc27346379266147682c41fc0
     @RequestMapping("/operate")
     public Response<Object> generator(@RequestParam("type") String type,
                                       @RequestParam(value = "key", required = true) String key,
