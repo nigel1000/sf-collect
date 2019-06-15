@@ -1,7 +1,7 @@
 package com.common.collect.container.excel.base;
 
-import com.common.collect.container.excel.pojo.ExcelImportParam;
-import com.common.collect.container.excel.pojo.ExcelSheetInfo;
+import com.common.collect.container.excel.context.ExcelContext;
+import com.common.collect.container.excel.context.ExcelSheetInfo;
 
 /**
  * Created by hznijianfeng on 2019/3/7.
@@ -37,13 +37,13 @@ public class ExcelConstants {
                 .replace(PLACEHOLDER_SHEET_NAME, info.getSheetName());
     }
 
-    public static String fillConvertPlaceholder(String value, ExcelImportParam.ImportInfo importInfo) {
-        return value.replace(PLACEHOLDER_DATE_PARSE, importInfo.getExcelConvertModel().getDateParse());
+    public static String fillConvertPlaceholder(String value, String fieldName, ExcelContext excelContext) {
+        return "属性 " + fieldName + " " + value.replace(PLACEHOLDER_DATE_PARSE, excelContext.getExcelConvertDateParseMap().get(fieldName));
     }
 
-    public static String fillCheckPlaceholder(String value, ExcelImportParam.ImportInfo importInfo) {
-        return value.replace(PLACEHOLDER_MAX, importInfo.getExcelCheckModel().getMax() + "").replace(PLACEHOLDER_REGEX,
-                importInfo.getExcelCheckModel().getRegex());
+    public static String fillCheckPlaceholder(String value, String fieldName, ExcelContext excelContext) {
+        return "属性 " + fieldName + " " + value.replace(PLACEHOLDER_MAX, excelContext.getExcelCheckMaxMap().get(fieldName) + "").replace(PLACEHOLDER_REGEX,
+                excelContext.getExcelCheckRegexMap().get(fieldName));
     }
 
 }

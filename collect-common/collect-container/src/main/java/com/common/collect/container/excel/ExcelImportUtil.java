@@ -1,14 +1,12 @@
 package com.common.collect.container.excel;
 
 import com.common.collect.api.excps.UnifiedException;
-import com.common.collect.container.excel.annotations.model.ExcelImportModel;
 import com.common.collect.container.excel.base.ExcelConstants;
+import com.common.collect.container.excel.context.ExcelContext;
+import com.common.collect.container.excel.context.ExcelSheetInfo;
 import com.common.collect.container.excel.define.ICheckImportHandler;
 import com.common.collect.container.excel.define.IConvertImportHandler;
 import com.common.collect.container.excel.excps.ExcelImportException;
-import com.common.collect.container.excel.pojo.ExcelImportParam;
-import com.common.collect.container.excel.pojo.ExcelSheetInfo;
-import com.common.collect.util.CollectionUtil;
 import com.common.collect.util.EmptyUtil;
 import com.google.common.collect.Lists;
 import lombok.Getter;
@@ -22,7 +20,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by nijianfeng on 2018/8/26.
@@ -84,12 +81,12 @@ public class ExcelImportUtil extends ExcelSession {
         List<C> retList = Lists.newArrayList();
         boolean isExcelExp = false;
         ExcelImportException excelParseException = new ExcelImportException(failCount);
-        ExcelImportParam<C> excelImportParam = new ExcelImportParam<>(targetClass);
+        ExcelContext excelContext = ExcelContext.excelContext(targetClass);
         for (int i = from; i <= to; i++) {
             boolean isEmpty = this.isEmptyRow(i);
             if (!isEmpty) {
                 try {
-                    retList.add(rowParse(i, excelImportParam));
+                    retList.add(rowParse(i, excelContext));
                 } catch (ExcelImportException e) {
                     isExcelExp = true;
                     if (!excelParseException.addInfo(e.getInfoList())) {
@@ -107,22 +104,18 @@ public class ExcelImportUtil extends ExcelSession {
     /**
      * 获取excel某一行
      */
-    private <C> C rowParse(int rowIndex, ExcelImportParam<C> excelImportParam) throws ExcelImportException {
+    private <C> C rowParse(int rowIndex, ExcelContext excelContext) throws ExcelImportException {
         // 利用反射赋值
-        C result = excelImportParam.newInstance();
+        C result = excelContext.newInstance();
         ExcelImportException excelParseException = new ExcelImportException(failCount);
         String sheetName = getSheet().getSheetName();
-        Map<Integer, String> rowMap = getRowValueMap(rowIndex);
-        for (Map.Entry<String, ExcelImportParam.ImportInfo<C>> entry : excelImportParam.getFieldImportMap()
-                .entrySet()) {
-            String fieldName = entry.getKey();
-            ExcelImportParam.ImportInfo importInfo = entry.getValue();
-            if (importInfo == null) {
+        List<String> rowMap = getRowValueList(rowIndex);
+        for (String fieldName : excelContext.getFieldNameList()) {
+            if (!excelContext.isImport(fieldName)) {
                 continue;
             }
-            ExcelImportModel excelImportModel = importInfo.getExcelImportModel();
-            String title = excelImportModel.getTitle();
-            List<Integer> colIndexes = excelImportModel.getColIndexList();
+            String title = excelContext.getExcelImportTitleMap().get(fieldName);
+            List<Integer> colIndexes = excelContext.getExcelImportColIndexNumMap().get(fieldName);
             List<Object> values = Lists.newArrayList();
             for (Integer colIndex : colIndexes) {
                 Object value = null;
@@ -130,10 +123,9 @@ public class ExcelImportUtil extends ExcelSession {
                 if (EmptyUtil.isNotBlank(currentValue)) {
                     boolean isConvertSuccess = true;
                     // 后面加的可以覆盖默认 转换 以最后一个为准
-                    for (IConvertImportHandler convertHandler : importInfo.getExcelConvertModel()
-                            .getConvertImportHandlersList()) {
+                    for (IConvertImportHandler convertHandler : excelContext.getExcelConvertImportHandlerMap().get(fieldName)) {
                         try {
-                            Object convert = convertHandler.convert(currentValue, importInfo);
+                            Object convert = convertHandler.convert(currentValue, fieldName, excelContext);
                             if (convert != null) {
                                 value = convert;
                             }
@@ -159,9 +151,9 @@ public class ExcelImportUtil extends ExcelSession {
                     }
                 }
                 // 校验
-                for (ICheckImportHandler checkHandler : importInfo.getExcelCheckModel().getCheckImportHandlersList()) {
+                for (ICheckImportHandler checkHandler : excelContext.getExcelCheckImportHandlerMap().get(fieldName)) {
                     try {
-                        checkHandler.check(value, importInfo);
+                        checkHandler.check(value, fieldName, excelContext);
                     } catch (UnifiedException ex) {
                         ExcelSheetInfo expInfo = ExcelSheetInfo.builder().columnName(title).rowNum(rowIndex)
                                 .sheetName(sheetName).colNum(colIndex).currentValue(currentValue).build();
@@ -175,19 +167,17 @@ public class ExcelImportUtil extends ExcelSession {
                     values.add(value);
                 }
             }
-            if (excelImportModel.isMultiCol()) {
-                if (excelImportModel.isDuplicateRemove()) {
-                    values = CollectionUtil.removeDuplicate(values);
-                }
-                excelImportParam.setFieldValue(fieldName, result, values);
+            if (excelContext.getExcelImportIsMultiColMap().get(fieldName)) {
+                excelContext.setFieldValue(fieldName, result, values);
             } else {
                 if (values.size() == 1) {
-                    excelImportParam.setFieldValue(fieldName, result, values.get(0));
+                    excelContext.setFieldValue(fieldName, result, values.get(0));
                 } else if (values.size() != 0) {
                     throw UnifiedException.gen(ExcelConstants.MODULE, "单列解析出现异常数据");
                 }
             }
         }
+
         if (!excelParseException.isEmptyInfo()) {
             throw excelParseException;
         }

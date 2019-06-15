@@ -5,6 +5,7 @@ import com.common.collect.container.excel.base.ExcelConstants;
 import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.FileUtil;
 import com.common.collect.util.ValidUtil;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.NonNull;
 import org.apache.poi.ss.usermodel.*;
@@ -16,6 +17,7 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -383,6 +385,17 @@ public class ExcelUtil {
         int lastCellNum = row.getLastCellNum();
         for (int colIndex = 0; colIndex < lastCellNum; colIndex++) {
             ret.put(colIndex, getCellValue(sheet, rowIndex, colIndex));
+        }
+        return ret;
+    }
+
+    public static List<String> getRowValueList(@NonNull Sheet sheet, int rowIndex) {
+        List<String> ret = Lists.newArrayList();
+        Row row = getRow(sheet, rowIndex);
+        // row.getLastCellNum() 不是从0开始的
+        int lastCellNum = row.getLastCellNum();
+        for (int colIndex = 0; colIndex < lastCellNum; colIndex++) {
+            ret.add(colIndex, getCellValue(sheet, rowIndex, colIndex));
         }
         return ret;
     }

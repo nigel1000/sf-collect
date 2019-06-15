@@ -17,7 +17,7 @@ public class SingletonBeanFactory implements IBeanFactory {
     @Override
     @SuppressWarnings("unchecked")
     public <T> T getBean(Class<T> clazz) {
-        if (clazz.isInterface()) {
+        if (clazz == null || clazz.isInterface()) {
             return null;
         }
         String key = clazz.getTypeName();

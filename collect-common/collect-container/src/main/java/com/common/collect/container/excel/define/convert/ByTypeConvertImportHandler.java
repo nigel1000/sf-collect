@@ -1,14 +1,13 @@
 package com.common.collect.container.excel.define.convert;
 
 import com.common.collect.api.excps.UnifiedException;
-import com.common.collect.container.excel.annotations.model.ExcelConvertModel;
-import com.common.collect.container.excel.annotations.model.ExcelImportModel;
 import com.common.collect.container.excel.base.ExcelConstants;
+import com.common.collect.container.excel.context.ExcelContext;
 import com.common.collect.container.excel.define.IConvertImportHandler;
-import com.common.collect.container.excel.pojo.ExcelImportParam;
 import com.common.collect.util.DateUtil;
 import com.common.collect.util.EmptyUtil;
 
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -18,16 +17,14 @@ import java.util.Date;
 public class ByTypeConvertImportHandler implements IConvertImportHandler {
 
     @Override
-    public Object convert(String value, ExcelImportParam.ImportInfo importInfo) {
+    public Object convert(String value, String fieldName, ExcelContext excelContext) {
         if (value == null) {
             return null;
         }
-        ExcelConvertModel excelConvertModel = importInfo.getExcelConvertModel();
-        ExcelImportModel excelImportModel = importInfo.getExcelImportModel();
-        Class fieldTypeClass = importInfo.getFieldInfo().getFieldType();
-        if (excelImportModel.isMultiCol()) {
-            fieldTypeClass = excelImportModel.getDataType();
-        }
+        Class fieldTypeClass = excelContext.getExcelImportMultiColListTypeMap().get(fieldName);
+        String dateParse = excelContext.getExcelConvertDateParseMap().get(fieldName);
+        String dateParseTips = excelContext.getExcelConvertDateParseTipsMap().get(fieldName);
+        Field field = excelContext.getFieldMap().get(fieldName);
         Object result = null;
         // 不是一下类型的情况下自行扩展 IConvertImportHandler
         if (fieldTypeClass == Long.class || fieldTypeClass == long.class) {
@@ -40,12 +37,12 @@ public class ByTypeConvertImportHandler implements IConvertImportHandler {
             result = Boolean.valueOf(value);
         } else if (fieldTypeClass == Date.class) {
             if (EmptyUtil.isNotBlank(value)) {
-                if (EmptyUtil.isNotEmpty(excelConvertModel.getDateParse())) {
+                if (EmptyUtil.isNotEmpty(dateParse)) {
                     try {
-                        result = DateUtil.parseDate(value, excelConvertModel.getDateParse());
+                        result = DateUtil.parseDate(value, dateParse);
                     } catch (Exception ex) {
                         String tips = ExcelConstants.fillConvertPlaceholder(
-                                importInfo.getExcelConvertModel().getDateParseTips(), importInfo);
+                                dateParseTips, fieldName, excelContext);
                         throw UnifiedException.gen(ExcelConstants.MODULE, tips, ex);
                     }
                 } else {
@@ -53,8 +50,8 @@ public class ByTypeConvertImportHandler implements IConvertImportHandler {
                         result = DateUtil.parseDate(value, "yyyy-MM-dd HH:mm:ss");
                     } catch (Exception ex) {
                         throw UnifiedException.gen(ExcelConstants.MODULE,
-                                "请在属性" + importInfo.getFieldInfo().getFieldName()
-                                        + "上配置@ExcelConvert的正确dateParse,默认支持 yyyy-MM-dd HH:mm:ss",
+                                "请在属性 " + field.getName()
+                                        + " 上配置@ExcelConvert的正确dateParse,默认支持 yyyy-MM-dd HH:mm:ss",
                                 ex);
                     }
                 }

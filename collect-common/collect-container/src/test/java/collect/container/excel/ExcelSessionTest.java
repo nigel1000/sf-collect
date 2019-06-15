@@ -7,7 +7,6 @@ import com.common.collect.container.excel.ExcelImportUtil;
 import com.common.collect.container.excel.ExcelSession;
 import com.common.collect.container.excel.client.ExcelClient;
 import com.common.collect.util.IdUtil;
-import com.common.collect.util.log4j.Slf4jUtil;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,20 +40,25 @@ public class ExcelSessionTest {
         } catch (Exception ex) {
 
         }
-        Slf4jUtil.setLogLevel("debug");
+//        Slf4jUtil.setLogLevel("debug");
 
+        log.info("eventModelReader ##########");
         eventModelReader();
 
-//        sessionExcel();
+        log.info("sessionExcel ##########");
+        sessionExcel();
 
-//        importCorrect();
+        log.info("importCorrect ##########");
+        importCorrect();
 
-//        importError();
+        log.info("importError ##########");
+        importError();
 
-//        exportNew();
+        log.info("exportNew ##########");
+        exportNew();
 
-//        exportTpl();
-
+        log.info("exportTpl ##########");
+        exportTpl();
 
     }
 
@@ -70,7 +74,7 @@ public class ExcelSessionTest {
 
     public static void sessionExcel() throws Exception {
         ExcelSession excelSession = new ExcelSession(new FileInputStream(path + "/ExcelSession.xlsx"));
-        excelSession.insertRows(5, 10);
+        excelSession.insertRows(5, 50);
         excelSession.changeSheet("复制");
         excelSession.removeRow(0);
         excelSession.changeSheet("测试");

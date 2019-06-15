@@ -1,4 +1,4 @@
-package com.common.collect.container.excel.pojo;
+package com.common.collect.container.excel.context;
 
 import lombok.Data;
 
@@ -9,7 +9,7 @@ import java.util.List;
  */
 
 @Data
-public class EventModelParam {
+public class EventModelContext {
 
     private boolean sheetStart;
 

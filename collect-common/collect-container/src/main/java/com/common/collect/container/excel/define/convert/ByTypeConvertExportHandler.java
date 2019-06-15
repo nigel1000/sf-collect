@@ -1,8 +1,7 @@
 package com.common.collect.container.excel.define.convert;
 
-import com.common.collect.container.excel.annotations.model.ExcelConvertModel;
+import com.common.collect.container.excel.context.ExcelContext;
 import com.common.collect.container.excel.define.IConvertExportHandler;
-import com.common.collect.container.excel.pojo.ExcelExportParam;
 import com.common.collect.util.DateUtil;
 import com.common.collect.util.EmptyUtil;
 
@@ -15,11 +14,11 @@ import java.util.Date;
 public class ByTypeConvertExportHandler implements IConvertExportHandler {
 
     @Override
-    public String convert(Object value, ExcelExportParam.ExportInfo exportInfo) {
+    public String convert(Object value, String fieldName, ExcelContext excelContext) {
         if (value == null) {
             return "";
         }
-        ExcelConvertModel excelConvertModel = exportInfo.getExcelConvertModel();
+        String dateFormat = excelContext.getExcelConvertDateFormatMap().get(fieldName);
         String result;
         Class fieldTypeClass = value.getClass();
         // 不是一下类型的情况下自行扩展 IConvertExportHandler
@@ -32,8 +31,8 @@ public class ByTypeConvertExportHandler implements IConvertExportHandler {
         } else if (fieldTypeClass == Boolean.class || fieldTypeClass == boolean.class) {
             result = String.valueOf(value);
         } else if (fieldTypeClass == Date.class) {
-            if (EmptyUtil.isNotEmpty(excelConvertModel.getDateFormat())) {
-                result = DateUtil.format((Date) value, excelConvertModel.getDateFormat());
+            if (EmptyUtil.isNotEmpty(dateFormat)) {
+                result = DateUtil.format((Date) value, dateFormat);
             } else {
                 result = DateUtil.format((Date) value, "yyyy-MM-dd HH:mm:ss");
             }

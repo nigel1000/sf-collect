@@ -12,6 +12,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 
@@ -175,6 +176,10 @@ public class ExcelSession {
 
     public Map<Integer, String> getRowValueMap(int rowIndex) {
         return ExcelUtil.getRowValueMap(getSheet(), rowIndex);
+    }
+
+    public List<String> getRowValueList(int rowIndex) {
+        return ExcelUtil.getRowValueList(getSheet(), rowIndex);
     }
 
     public void insertRows(int startRow, int rowCount) {

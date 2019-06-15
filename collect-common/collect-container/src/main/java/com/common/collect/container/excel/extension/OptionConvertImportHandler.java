@@ -1,8 +1,7 @@
 package com.common.collect.container.excel.extension;
 
-import com.common.collect.container.excel.annotations.model.ExcelImportModel;
+import com.common.collect.container.excel.context.ExcelContext;
 import com.common.collect.container.excel.define.IConvertImportHandler;
-import com.common.collect.container.excel.pojo.ExcelImportParam;
 
 /**
  * Created by nijianfeng on 2019/3/8.
@@ -10,15 +9,11 @@ import com.common.collect.container.excel.pojo.ExcelImportParam;
 public class OptionConvertImportHandler implements IConvertImportHandler {
 
     @Override
-    public Object convert(String value, ExcelImportParam.ImportInfo importInfo) {
+    public Object convert(String value, String fieldName, ExcelContext excelContext) {
         if (value == null) {
             return null;
         }
-        ExcelImportModel excelImportModel = importInfo.getExcelImportModel();
-        Class fieldTypeClass = importInfo.getFieldInfo().getFieldType();
-        if (excelImportModel.isMultiCol()) {
-            fieldTypeClass = excelImportModel.getDataType();
-        }
+        Class fieldTypeClass = excelContext.getExcelImportMultiColListTypeMap().get(fieldName);
         Object result = null;
         // 不是一下类型的情况下自行扩展 IConvertImportHandler
         if (IOptionValue.class.isAssignableFrom(fieldTypeClass)) {

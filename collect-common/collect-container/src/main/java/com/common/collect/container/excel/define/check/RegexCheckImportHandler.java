@@ -1,10 +1,9 @@
 package com.common.collect.container.excel.define.check;
 
 import com.common.collect.api.excps.UnifiedException;
-import com.common.collect.container.excel.annotations.model.ExcelCheckModel;
 import com.common.collect.container.excel.base.ExcelConstants;
+import com.common.collect.container.excel.context.ExcelContext;
 import com.common.collect.container.excel.define.ICheckImportHandler;
-import com.common.collect.container.excel.pojo.ExcelImportParam;
 import com.common.collect.util.EmptyUtil;
 
 import java.util.regex.Matcher;
@@ -16,18 +15,18 @@ import java.util.regex.Pattern;
 public class RegexCheckImportHandler implements ICheckImportHandler {
 
     @Override
-    public void check(Object value, ExcelImportParam.ImportInfo importInfo) {
-        if (importInfo == null || importInfo.getExcelCheck() == null || value == null) {
+    public void check(Object value, String fieldName, ExcelContext excelContext) {
+        if (excelContext.getExcelCheckMap().get(fieldName) == null || value == null) {
             return;
         }
-        ExcelCheckModel excelCheckModel = importInfo.getExcelCheckModel();
         // 校验日期格式
-        String regex = excelCheckModel.getRegex();
+        String regex = excelContext.getExcelCheckRegexMap().get(fieldName);
         if (value.getClass() == String.class && EmptyUtil.isNotBlank(regex)) {
             Pattern pattern = Pattern.compile(regex);
             Matcher matcher = pattern.matcher(value.toString());
             if (!matcher.matches()) {
-                String tips = ExcelConstants.fillCheckPlaceholder(excelCheckModel.getRegexTips(), importInfo);
+                String regexTips = excelContext.getExcelCheckRegexTipsMap().get(fieldName);
+                String tips = ExcelConstants.fillCheckPlaceholder(regexTips, fieldName, excelContext);
                 throw UnifiedException.gen(ExcelConstants.MODULE, tips);
             }
         }

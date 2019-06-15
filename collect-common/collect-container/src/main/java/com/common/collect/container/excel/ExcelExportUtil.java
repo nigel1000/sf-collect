@@ -1,13 +1,11 @@
 package com.common.collect.container.excel;
 
 import com.common.collect.api.excps.UnifiedException;
-import com.common.collect.container.excel.annotations.model.ExcelExportModel;
 import com.common.collect.container.excel.base.ExcelConstants;
+import com.common.collect.container.excel.context.ExcelContext;
 import com.common.collect.container.excel.define.ICellConfig;
 import com.common.collect.container.excel.define.IConvertExportHandler;
-import com.common.collect.container.excel.pojo.ExcelExportParam;
 import com.common.collect.util.EmptyUtil;
-import com.google.common.collect.Maps;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -25,7 +23,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
 
 import static com.common.collect.container.excel.ExcelExportUtil.ExcelType.BIG_XLSX;
 
@@ -40,24 +37,9 @@ public class ExcelExportUtil extends ExcelSession {
     @Getter
     private ExcelType excelType;
 
-    private Map<String, ExcelExportParam> excelExportParamMap = Maps.newHashMap();
-
-    @SuppressWarnings("unchecked")
-    public <C> ExcelExportParam<C> getExcelExportParam(Class<C> type) {
-        String key = type.getTypeName();
-        if (excelExportParamMap.containsKey(key)) {
-            return excelExportParamMap.get(key);
-        }
-        ExcelExportParam<C> excelExportParam = new ExcelExportParam<>(type);
-        excelExportParamMap.putIfAbsent(key, excelExportParam);
-        return excelExportParam;
-    }
-
     // BIG_XLSX 由于其实现方式 不能回写
     public enum ExcelType {
-        BIG_XLSX("xlsx"), XLSX("xlsx"), XLS("xls"),
-
-        ;
+        BIG_XLSX("xlsx"), XLSX("xlsx"), XLS("xls"),;
         @Getter
         private String type;
 
@@ -96,7 +78,7 @@ public class ExcelExportUtil extends ExcelSession {
         if (BIG_XLSX == getExcelType()) {
             Sheet sheet = ((SXSSFWorkbook) getWorkbook()).getXSSFWorkbook().getSheetAt(getActiveSheetIndex());
             // 已存在模板的最大行数和写入的最大行数 取最大的
-            return Math.max(sheet.getLastRowNum(), this.getSheet().getLastRowNum());
+            return Math.max(sheet.getLastRowNum(), super.getLastRowNum());
         } else {
             return super.getLastRowNum();
         }
@@ -105,7 +87,7 @@ public class ExcelExportUtil extends ExcelSession {
     // 新建文件导出
     public ExcelExportUtil(@NonNull String sheetName, @NonNull ExcelType excelType) {
         if (excelType == BIG_XLSX) {
-            setWorkbook(new SXSSFWorkbook());
+            setWorkbook(new SXSSFWorkbook(50));
         } else if (ExcelType.XLSX.equals(excelType)) {
             setWorkbook(new XSSFWorkbook());
         } else if (ExcelType.XLS.equals(excelType)) {
@@ -121,7 +103,7 @@ public class ExcelExportUtil extends ExcelSession {
     public ExcelExportUtil(@NonNull ExcelType excelType, @NonNull InputStream inputStream) {
         try {
             if (excelType == BIG_XLSX) {
-                setWorkbook(new SXSSFWorkbook(new XSSFWorkbook(inputStream)));
+                setWorkbook(new SXSSFWorkbook(new XSSFWorkbook(inputStream), 50));
             } else {
                 setWorkbook(WorkbookFactory.create(inputStream));
             }
@@ -198,19 +180,21 @@ public class ExcelExportUtil extends ExcelSession {
     // 导出 title 到 excel 的 指定行
     public <C> void exportTitle(Class<C> type, int rowIndex) {
         // 组装数据
-        ExcelExportParam<C> excelExportParam = getExcelExportParam(type);
+        ExcelContext excelContext = ExcelContext.excelContext(type);
         // 设置标题列
         int maxColIndex = -1;
-        for (Map.Entry<String, ExcelExportParam.ExportInfo<C>> entry : excelExportParam.getFieldExportMap()
-                .entrySet()) {
-            ExcelExportModel excelExportModel = entry.getValue().getExcelExportModel();
-            int colIndex = excelExportModel.getColIndex();
+        for (String fieldName : excelContext.getFieldNameList()) {
+            if (!excelContext.isExport(fieldName)) {
+                continue;
+            }
+            int colIndex = excelContext.getExcelExportColIndexMap().get(fieldName);
             if (maxColIndex < colIndex) {
                 maxColIndex = colIndex;
             }
-            String title = excelExportModel.getTitle();
+            String title = excelContext.getExcelExportTitleMap().get(fieldName);
             setCellValue(rowIndex, colIndex, title);
         }
+
         // 自适应行高
         if (isCalRowHeight && maxColIndex != -1) {
             rowHeightAutoFit(new CellRangeAddress(rowIndex, rowIndex, 0, maxColIndex));
@@ -236,35 +220,38 @@ public class ExcelExportUtil extends ExcelSession {
     }
 
     public <C> void export(@NonNull List<C> data, Class<C> type, int startRowIndex) {
-        ExcelExportParam<C> excelExportParam = getExcelExportParam(type);
-        exportData(data, excelExportParam, startRowIndex);
+        ExcelContext excelContext = ExcelContext.excelContext(type);
+        exportData(data, excelContext, startRowIndex);
     }
 
-    private <C> void exportData(@NonNull List<C> data, ExcelExportParam<C> excelExportParam, int rowOffset) {
+    private <C> void exportData(@NonNull List<C> data, ExcelContext excelContext, int rowOffset) {
         for (C obj : data) {
+            if (obj == null) {
+                continue;
+            }
             Row row = this.getRow(rowOffset);
             int maxColIndex = -1;
-            for (Map.Entry<String, ExcelExportParam.ExportInfo<C>> entry : excelExportParam.getFieldExportMap()
-                    .entrySet()) {
-                ExcelExportParam.ExportInfo exportInfo = entry.getValue();
-                int colIndex = exportInfo.getExcelExportModel().getColIndex();
+            for (String fieldName : excelContext.getFieldNameList()) {
+                if (!excelContext.isExport(fieldName)) {
+                    continue;
+                }
+                int colIndex = excelContext.getExcelExportColIndexMap().get(fieldName);
                 if (maxColIndex < colIndex) {
                     maxColIndex = colIndex;
                 }
                 // 利用反射赋值
-                Object result = excelExportParam.getFieldValue(entry.getKey(), obj);
-                for (IConvertExportHandler convertHandler : exportInfo.getExcelConvertModel()
-                        .getConvertExportHandlersList()) {
-                    Object convert = convertHandler.convert(result, exportInfo);
+                Object result = excelContext.getFieldValue(fieldName, obj);
+                for (IConvertExportHandler convertHandler : excelContext.getExcelConvertExportHandlerMap().get(fieldName)) {
+                    Object convert = convertHandler.convert(result, fieldName, excelContext);
                     if (convert != null) {
                         result = convert;
                     }
                 }
                 setCellValue(row.getRowNum(), colIndex, result);
-                ICellConfig cellConfig = exportInfo.getExcelExportModel().getCellConfigImpl();
+                ICellConfig cellConfig = excelContext.getCellConfig();
                 if (cellConfig != null) {
                     ICellConfig.ExcelCellConfigInfo cellConfigInfo =
-                            cellConfig.pullCellConfig(result, this, excelExportParam);
+                            cellConfig.pullCellConfig(result, this, excelContext);
                     if (cellConfigInfo != null) {
                         setCellStyle(row.getRowNum(), colIndex, cellConfigInfo.getCellStyle());
                         if (cellConfigInfo.isHidden()) {

@@ -1,10 +1,9 @@
 package com.common.collect.container.excel.define.check;
 
 import com.common.collect.api.excps.UnifiedException;
-import com.common.collect.container.excel.annotations.model.ExcelCheckModel;
 import com.common.collect.container.excel.base.ExcelConstants;
+import com.common.collect.container.excel.context.ExcelContext;
 import com.common.collect.container.excel.define.ICheckImportHandler;
-import com.common.collect.container.excel.pojo.ExcelImportParam;
 import com.common.collect.util.EmptyUtil;
 
 /**
@@ -13,15 +12,14 @@ import com.common.collect.util.EmptyUtil;
 public class RequireCheckImportHandler implements ICheckImportHandler {
 
     @Override
-    public void check(Object value, ExcelImportParam.ImportInfo importInfo) {
-        if (importInfo == null || importInfo.getExcelCheck() == null) {
+    public void check(Object value, String fieldName, ExcelContext excelContext) {
+        if (excelContext.getExcelCheckMap().get(fieldName) == null) {
             return;
         }
-        ExcelCheckModel excelCheckModel = importInfo.getExcelCheckModel();
-        boolean required = excelCheckModel.isRequired();
+        boolean required = excelContext.getExcelCheckRequiredMap().get(fieldName);
         if (required && (value == null || (value instanceof String && EmptyUtil.isBlank(String.valueOf(value))))) {
-            String tips = excelCheckModel.getRequiredTips();
-            throw UnifiedException.gen(ExcelConstants.MODULE, tips);
+            String requiredTips = excelContext.getExcelCheckRequiredTipsMap().get(fieldName);
+            throw UnifiedException.gen(ExcelConstants.MODULE, requiredTips);
         }
     }
 }

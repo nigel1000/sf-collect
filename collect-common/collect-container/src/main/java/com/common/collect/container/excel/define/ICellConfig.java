@@ -4,7 +4,7 @@ package com.common.collect.container.excel.define;
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.excel.ExcelSession;
 import com.common.collect.container.excel.base.ExcelConstants;
-import com.common.collect.container.excel.pojo.ExcelParam;
+import com.common.collect.container.excel.context.ExcelContext;
 import lombok.Data;
 import org.apache.poi.ss.usermodel.CellStyle;
 
@@ -35,6 +35,6 @@ public interface ICellConfig {
 
     }
 
-    ExcelCellConfigInfo pullCellConfig(Object value, ExcelSession excelSession, ExcelParam excelParam);
+    ExcelCellConfigInfo pullCellConfig(Object value, ExcelSession excelSession, ExcelContext excelContext);
 
 }

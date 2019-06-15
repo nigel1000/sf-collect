@@ -1,8 +1,8 @@
 package com.common.collect.container.excel.define.cell;
 
 import com.common.collect.container.excel.ExcelSession;
+import com.common.collect.container.excel.context.ExcelContext;
 import com.common.collect.container.excel.define.ICellConfig;
-import com.common.collect.container.excel.pojo.ExcelParam;
 import org.apache.poi.ss.usermodel.CellStyle;
 
 import java.math.BigDecimal;
@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 public class DefaultCellConfig implements ICellConfig {
 
     @Override
-    public ExcelCellConfigInfo pullCellConfig(Object value, ExcelSession excelSession, ExcelParam excelParam) {
+    public ExcelCellConfigInfo pullCellConfig(Object value, ExcelSession excelSession, ExcelContext excelContext) {
 
         ExcelCellConfigInfo excelCellConfigInfo = new ExcelCellConfigInfo();
 

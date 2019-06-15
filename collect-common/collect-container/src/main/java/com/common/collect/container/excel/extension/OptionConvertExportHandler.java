@@ -1,7 +1,7 @@
 package com.common.collect.container.excel.extension;
 
+import com.common.collect.container.excel.context.ExcelContext;
 import com.common.collect.container.excel.define.IConvertExportHandler;
-import com.common.collect.container.excel.pojo.ExcelExportParam;
 
 /**
  * Created by nijianfeng on 2019/3/8.
@@ -9,7 +9,7 @@ import com.common.collect.container.excel.pojo.ExcelExportParam;
 public class OptionConvertExportHandler implements IConvertExportHandler {
 
     @Override
-    public String convert(Object value, ExcelExportParam.ExportInfo exportInfo) {
+    public String convert(Object value, String fieldName, ExcelContext excelContext) {
         if (value == null) {
             return "";
         }

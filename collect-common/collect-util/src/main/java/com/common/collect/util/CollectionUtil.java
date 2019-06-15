@@ -38,6 +38,19 @@ public class CollectionUtil {
         return result;
     }
 
+    public static List<String> removeBlank(List<String> origin) {
+        List<String> result = new ArrayList<>();
+        if (origin == null || origin.size() == 0) {
+            return result;
+        }
+        for (String t : origin) {
+            if (EmptyUtil.isNotBlank(t)) {
+                result.add(t);
+            }
+        }
+        return result;
+    }
+
     public static <T> List<T> removeDuplicate(List<T> origin) {
         List<T> result = new ArrayList<>();
         if (origin == null || origin.size() == 0) {

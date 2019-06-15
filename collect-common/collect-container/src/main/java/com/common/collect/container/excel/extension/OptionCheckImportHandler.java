@@ -2,8 +2,8 @@ package com.common.collect.container.excel.extension;
 
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.excel.base.ExcelConstants;
+import com.common.collect.container.excel.context.ExcelContext;
 import com.common.collect.container.excel.define.ICheckImportHandler;
-import com.common.collect.container.excel.pojo.ExcelImportParam;
 
 /**
  * Created by nijianfeng on 2018/8/26.
@@ -11,8 +11,8 @@ import com.common.collect.container.excel.pojo.ExcelImportParam;
 public class OptionCheckImportHandler implements ICheckImportHandler {
 
     @Override
-    public void check(Object value, ExcelImportParam.ImportInfo importInfo) {
-        if (importInfo == null || importInfo.getExcelCheck() == null || value == null) {
+    public void check(Object value, String fieldName, ExcelContext excelContext) {
+        if (excelContext.getExcelCheckMap().get(fieldName) == null || value == null) {
             return;
         }
 
