@@ -52,11 +52,7 @@ public class ExcelExportUtil extends ExcelSession {
     // 模版文件不能使用 BIG_XLSX 写，由于xlsx已有数据，而获取已有数据行时却为空
     public Row getRow(int rowIndex) {
         try {
-            Row row = this.getSheet().getRow(rowIndex);
-            if (row == null) {
-                row = this.getSheet().createRow(rowIndex);
-            }
-            return row;
+            return super.getRow(rowIndex);
         } catch (Exception ex) {
             if (BIG_XLSX == getExcelType()) {
                 // https://blog.csdn.net/qq_31615049/article/details/82228812
