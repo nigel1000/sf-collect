@@ -59,6 +59,8 @@ public class ExcelContext {
     private Map<String, ExcelExport> excelExportMap = new LinkedHashMap<>();
     private Map<String, Integer> excelExportColIndexMap = new LinkedHashMap<>();
     private Map<String, String> excelExportTitleMap = new LinkedHashMap<>();
+    private Map<String, Class<? extends ICellConfig>> excelExportCellConfigClsMap = new LinkedHashMap<>();
+    private Map<String, ICellConfig> excelExportCellConfigMap = new LinkedHashMap<>();
     // ExcelCheck
     private Map<String, ExcelCheck> excelCheckMap = new LinkedHashMap<>();
     private Map<String, Boolean> excelCheckRequiredMap = new LinkedHashMap<>();
@@ -174,11 +176,9 @@ public class ExcelContext {
                 excelExportColIndexMap.put(fieldName, colIndex);
                 excelExportTitleMap.put(fieldName, excelExport.title());
                 Class<? extends ICellConfig> cellConfigCls = excelExport.cellConfig();
-                ICellConfig cellConfig = beanFactory.getBean(cellConfigCls);
-                if (cellConfig != null) {
-                    this.cellConfigCls = cellConfigCls;
-                    this.cellConfig = cellConfig;
-                }
+                excelExportCellConfigClsMap.put(fieldName, cellConfigCls);
+                ICellConfig cellConfig = ConvertUtil.selectAfter(this.cellConfig, beanFactory.getBean(cellConfigCls));
+                excelExportCellConfigMap.put(fieldName, cellConfig);
             }
 
             ExcelCheck excelCheck = field.getAnnotation(ExcelCheck.class);
@@ -257,7 +257,6 @@ public class ExcelContext {
         cellConfigCls = excelEntity.cellConfig();
         cellConfig = beanFactory.getBean(cellConfigCls);
     }
-
 
     public <C> C newInstance() {
         try {

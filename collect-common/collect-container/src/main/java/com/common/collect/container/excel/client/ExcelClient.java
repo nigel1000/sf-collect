@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 @Slf4j
 public class ExcelClient {
 
-    public <T> List<T> urlImport(@NonNull String excelUrl, Class<T> clazz) {
+    public static <T> List<T> urlImport(@NonNull String excelUrl, Class<T> clazz) {
         ExcelImportUtil excelParse = new ExcelImportUtil(HttpUtil.get(excelUrl));
         // 收集所有的错误
         excelParse.setImportLimit(1000);
@@ -30,7 +30,7 @@ public class ExcelClient {
         return excelParse.excelParse(1, clazz);
     }
 
-    public <T> List<T> fileImport(@NonNull File file, Class<T> clazz) {
+    public static <T> List<T> fileImport(@NonNull File file, Class<T> clazz) {
         try {
             ExcelImportUtil excelParse = new ExcelImportUtil(new FileInputStream(file));
             // 收集所有的错误
@@ -43,7 +43,7 @@ public class ExcelClient {
         }
     }
 
-    public <T> File fileExport(@NonNull Class<T> clazz, @NonNull String sheetName, Consumer<ExcelExportUtil> execute) {
+    public static <T> File fileExport(@NonNull Class<T> clazz, @NonNull String sheetName, Consumer<ExcelExportUtil> execute) {
         // 导出excel
         ExcelExportUtil excelExportUtil = new ExcelExportUtil(sheetName, ExcelExportUtil.ExcelType.BIG_XLSX);
         excelExportUtil.exportTitle(clazz);
@@ -53,7 +53,7 @@ public class ExcelClient {
         return file;
     }
 
-    public <T> File fileTplExport(@NonNull String classPathSource, Consumer<ExcelExportUtil> execute) {
+    public static File fileTplExport(@NonNull String classPathSource, Consumer<ExcelExportUtil> execute) {
         // 导出excel
         try {
             Resource resource = new ClassPathResource(classPathSource);
@@ -68,7 +68,7 @@ public class ExcelClient {
         }
     }
 
-    public <T> File fileUrlExport(@NonNull String excelUrl, Consumer<ExcelExportUtil> execute) {
+    public static File fileUrlExport(@NonNull String excelUrl, Consumer<ExcelExportUtil> execute) {
         // 导出excel
         ExcelExportUtil excelExportUtil =
                 new ExcelExportUtil(ExcelExportUtil.ExcelType.BIG_XLSX, HttpUtil.get(excelUrl));

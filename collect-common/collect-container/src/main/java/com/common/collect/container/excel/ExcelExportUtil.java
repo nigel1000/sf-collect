@@ -274,7 +274,7 @@ public class ExcelExportUtil extends ExcelSession {
                     }
                 }
                 setCellValue(row.getRowNum(), colIndex, result);
-                ICellConfig cellConfig = excelContext.getCellConfig();
+                ICellConfig cellConfig = excelContext.getExcelExportCellConfigMap().get(fieldName);
                 if (cellConfig != null) {
                     ICellConfig.ExcelCellConfigInfo cellConfigInfo =
                             cellConfig.pullCellConfig(result, this, excelContext);

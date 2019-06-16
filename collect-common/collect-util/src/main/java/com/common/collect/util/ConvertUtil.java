@@ -96,20 +96,8 @@ public class ConvertUtil {
         return map;
     }
 
-    public static String sqlLikeAround(String column) {
-
-        if (column == null || "".equals(column.trim())) {
-            return null;
-        }
-        return "%" + column.trim() + "%";
-    }
-
-    public static String sqlLikeTail(String column) {
-
-        if (column == null || "".equals(column.trim())) {
-            return null;
-        }
-        return column.trim() + "%";
+    public static  <T> T selectAfter(T global, T field) {
+        return field != null ? field : global;
     }
 
 
