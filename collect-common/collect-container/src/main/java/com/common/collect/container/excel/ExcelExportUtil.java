@@ -72,22 +72,23 @@ public class ExcelExportUtil extends ExcelSession {
         }
     }
 
-    private int tplRowNum = -1;
     private int existRowNum = 0;
+
+    public void initExistRowNum() {
+        int tplRowNum;
+        if (BIG_XLSX == getExcelType()) {
+            Sheet sheet = ((SXSSFWorkbook) getWorkbook()).getXSSFWorkbook().getSheetAt(getActiveSheetIndex());
+            // 已存在模板的最大行数和写入的最大行数 取最大的
+            tplRowNum = Math.max(sheet.getLastRowNum(), super.getLastRowNum());
+        } else {
+            tplRowNum = super.getLastRowNum();
+        }
+        existRowNum = existRowNum + tplRowNum;
+        log.info("existRowNum:{}", existRowNum);
+    }
 
     @Override
     public int getLastRowNum() {
-        if (tplRowNum == -1) {
-            if (BIG_XLSX == getExcelType()) {
-                Sheet sheet = ((SXSSFWorkbook) getWorkbook()).getXSSFWorkbook().getSheetAt(getActiveSheetIndex());
-                // 已存在模板的最大行数和写入的最大行数 取最大的
-                tplRowNum = Math.max(sheet.getLastRowNum(), super.getLastRowNum());
-            } else {
-                tplRowNum = super.getLastRowNum();
-            }
-            existRowNum = existRowNum + tplRowNum;
-            log.info("tplRowNum:{}", tplRowNum);
-        }
         return existRowNum;
     }
 
@@ -117,6 +118,7 @@ public class ExcelExportUtil extends ExcelSession {
         }
         setSheet(createSheet(sheetName));
         this.excelType = excelType;
+        initExistRowNum();
     }
 
     // 从已有模板中导出
@@ -129,6 +131,7 @@ public class ExcelExportUtil extends ExcelSession {
             }
             changeSheet(0);
             this.excelType = excelType;
+            initExistRowNum();
         } catch (Exception e) {
             throw UnifiedException.gen(ExcelConstants.MODULE, "excel 文件流有误!", e);
         }
@@ -143,6 +146,7 @@ public class ExcelExportUtil extends ExcelSession {
             }
             changeSheet(0);
             this.excelType = excelType;
+            initExistRowNum();
         } catch (Exception e) {
             throw UnifiedException.gen(ExcelConstants.MODULE, filePath + " 文件流有误!", e);
         }
@@ -157,6 +161,7 @@ public class ExcelExportUtil extends ExcelSession {
             setSheet(sheet);
         }
         this.excelType = excelType;
+        initExistRowNum();
     }
 
     public ExcelExportUtil(@NonNull ExcelType excelType, @NonNull Workbook workbook) {
@@ -167,6 +172,7 @@ public class ExcelExportUtil extends ExcelSession {
         }
         changeSheet(0);
         this.excelType = excelType;
+        initExistRowNum();
     }
 
     // 导出 一行数据 到 excel
