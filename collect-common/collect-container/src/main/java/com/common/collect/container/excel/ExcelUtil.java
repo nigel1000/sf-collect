@@ -122,7 +122,11 @@ public class ExcelUtil {
 
     // 判断是否空行
     public static boolean isEmptyRow(@NonNull Sheet sheet, int rowIndex) {
-        Iterator<Cell> cellIter = getRow(sheet, rowIndex).cellIterator();
+        Row row = sheet.getRow(rowIndex);
+        if (row == null) {
+            return true;
+        }
+        Iterator<Cell> cellIter = row.cellIterator();
         boolean isRowEmpty = true;
         while (cellIter.hasNext()) {
             Cell cell = cellIter.next();
@@ -136,10 +140,8 @@ public class ExcelUtil {
     }
 
     // 拷贝行
-    public static void copyRow(@NonNull Sheet fromSheet, int fromRowIndex,
-                               @NonNull Sheet toSheet, int toRowIndex,
-                               boolean isCopyCellValue, boolean isCopyRowHeight,
-                               boolean isCopyCellStyle, boolean isCopyCellComment) {
+    public static void copyRow(@NonNull Sheet fromSheet, int fromRowIndex, @NonNull Sheet toSheet, int toRowIndex,
+                               boolean isCopyCellValue, boolean isCopyRowHeight, boolean isCopyCellStyle, boolean isCopyCellComment) {
         // 设置行高
         if (isCopyRowHeight) {
             setRowHeight(toSheet, toRowIndex, getRowHeight(fromSheet, fromRowIndex));
@@ -157,7 +159,8 @@ public class ExcelUtil {
             }
             // 不同数据类型处理
             if (isCopyCellValue) {
-                copyCellValue(fromSheet, fromRowIndex, fromCell.getColumnIndex(), toSheet, toRowIndex, toCell.getColumnIndex());
+                copyCellValue(fromSheet, fromRowIndex, fromCell.getColumnIndex(), toSheet, toRowIndex,
+                        toCell.getColumnIndex());
             }
         }
     }

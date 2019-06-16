@@ -78,8 +78,8 @@ public class ExcelExportUtil extends ExcelSession {
         int tplRowNum;
         if (BIG_XLSX == getExcelType()) {
             Sheet sheet = ((SXSSFWorkbook) getWorkbook()).getXSSFWorkbook().getSheetAt(getActiveSheetIndex());
-            // 已存在模板的最大行数和写入的最大行数 取最大的
-            tplRowNum = Math.max(sheet.getLastRowNum(), super.getLastRowNum());
+            // 已存在模板的最大行数
+            tplRowNum = sheet.getLastRowNum();
         } else {
             tplRowNum = super.getLastRowNum();
         }

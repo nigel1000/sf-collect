@@ -59,8 +59,8 @@ public class ExcelSessionTest {
         log.info("exportNew ##########");
         exportNew();
 
-//        log.info("exportTpl ##########");
-//        exportTpl();
+        log.info("exportTpl ##########");
+        exportTpl();
 
     }
 
@@ -122,7 +122,7 @@ public class ExcelSessionTest {
             for (int i = 0; i < 2000; i++) {
                 excelExportUtil.exportForward(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
             }
-            log.info("lastRowNum:{} ", excelExportUtil.getLastRowNum());
+            log.info("从0开始 lastRowNum:{} ", excelExportUtil.getLastRowNum());
         };
         excelClient.fileExport(ExcelComposeEO.class, "测试", execute);
         // 新建 excel 100 万条数据 30秒
@@ -138,6 +138,7 @@ public class ExcelSessionTest {
             for (int i = 0; i < 10; i++) {
                 excelExportUtil.exportForward(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
             }
+            log.info("从0开始 lastRowNum:{} ", excelExportUtil.getLastRowNum());
         }));
         // 用模版 100 万条数据 30秒
         log.info("耗时：{} 秒", (System.currentTimeMillis() - time) / 1000);
