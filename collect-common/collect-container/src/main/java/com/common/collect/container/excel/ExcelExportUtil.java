@@ -255,11 +255,14 @@ public class ExcelExportUtil extends ExcelSession {
             if (obj == null) {
                 continue;
             }
-            Row row = this.getRow(rowOffset);
             int maxColIndex = -1;
+            Row row = null;
             for (String fieldName : excelContext.getFieldNameList()) {
                 if (!excelContext.isExport(fieldName)) {
                     continue;
+                }
+                if (row == null) {
+                    row = this.getRow(rowOffset);
                 }
                 int colIndex = excelContext.getExcelExportColIndexMap().get(fieldName);
                 if (maxColIndex < colIndex) {
@@ -267,7 +270,8 @@ public class ExcelExportUtil extends ExcelSession {
                 }
                 // 利用反射赋值
                 Object result = excelContext.getFieldValue(fieldName, obj);
-                for (IConvertExportHandler convertHandler : excelContext.getExcelConvertExportHandlerMap().get(fieldName)) {
+                for (IConvertExportHandler convertHandler : excelContext.getExcelConvertExportHandlerMap()
+                        .get(fieldName)) {
                     Object convert = convertHandler.convert(result, fieldName, excelContext);
                     if (convert != null) {
                         result = convert;
