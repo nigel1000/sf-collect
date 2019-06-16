@@ -9,12 +9,10 @@ import com.common.collect.util.EmptyUtil;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -29,6 +27,7 @@ import static com.common.collect.container.excel.ExcelExportUtil.ExcelType.BIG_X
 /**
  * Created by nijianfeng on 2018/8/26.
  */
+@Slf4j
 public class ExcelExportUtil extends ExcelSession {
 
     @Setter
@@ -73,15 +72,36 @@ public class ExcelExportUtil extends ExcelSession {
         }
     }
 
+    private int tplRowNum = -1;
+    private int existRowNum = 0;
+
     @Override
     public int getLastRowNum() {
-        if (BIG_XLSX == getExcelType()) {
-            Sheet sheet = ((SXSSFWorkbook) getWorkbook()).getXSSFWorkbook().getSheetAt(getActiveSheetIndex());
-            // 已存在模板的最大行数和写入的最大行数 取最大的
-            return Math.max(sheet.getLastRowNum(), super.getLastRowNum());
-        } else {
-            return super.getLastRowNum();
+        if (tplRowNum == -1) {
+            if (BIG_XLSX == getExcelType()) {
+                Sheet sheet = ((SXSSFWorkbook) getWorkbook()).getXSSFWorkbook().getSheetAt(getActiveSheetIndex());
+                // 已存在模板的最大行数和写入的最大行数 取最大的
+                tplRowNum = Math.max(sheet.getLastRowNum(), super.getLastRowNum());
+            } else {
+                tplRowNum = super.getLastRowNum();
+            }
+            existRowNum = existRowNum + tplRowNum;
+            log.info("tplRowNum:{}", tplRowNum);
         }
+        return existRowNum;
+    }
+
+    public void setExistRowNum(int rowNum) {
+        if (existRowNum < rowNum) {
+            existRowNum = rowNum;
+        }
+    }
+
+    @Override
+    public Cell setCellValue(int rowIndex, int colIndex, Object value) {
+        Cell cell = super.setCellValue(rowIndex, colIndex, value);
+        setExistRowNum(rowIndex);
+        return cell;
     }
 
     // 新建文件导出
@@ -267,6 +287,7 @@ public class ExcelExportUtil extends ExcelSession {
             if (isCalRowHeight && maxColIndex != -1) {
                 rowHeightAutoFit(new CellRangeAddress(rowOffset, rowOffset, 0, maxColIndex));
             }
+            rowOffset++;
         }
     }
 

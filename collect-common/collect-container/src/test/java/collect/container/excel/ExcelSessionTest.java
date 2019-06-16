@@ -42,17 +42,17 @@ public class ExcelSessionTest {
         }
 //        Slf4jUtil.setLogLevel("debug");
 
-        log.info("eventModelReader ##########");
-        eventModelReader();
-
-        log.info("sessionExcel ##########");
-        sessionExcel();
-
-        log.info("importCorrect ##########");
-        importCorrect();
-
-        log.info("importError ##########");
-        importError();
+//        log.info("eventModelReader ##########");
+//        eventModelReader();
+//
+//        log.info("sessionExcel ##########");
+//        sessionExcel();
+//
+//        log.info("importCorrect ##########");
+//        importCorrect();
+//
+//        log.info("importError ##########");
+//        importError();
 
         log.info("exportNew ##########");
         exportNew();
@@ -117,8 +117,8 @@ public class ExcelSessionTest {
         ExcelComposeEO excelComposeEO = ExcelComposeEO.gen();
         long time = System.currentTimeMillis();
         excelClient.fileExport(ExcelComposeEO.class, "测试", (excelExportUtil -> {
-            for (int i = 0; i < 10; i++) {
-                excelExportUtil.exportForward(Lists.newArrayList(excelComposeEO), ExcelComposeEO.class);
+            for (int i = 0; i < 1000; i++) {
+                excelExportUtil.exportForward(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
             }
         }));
         // 新建 excel 100 万条数据 30秒
@@ -132,7 +132,7 @@ public class ExcelSessionTest {
         long time = System.currentTimeMillis();
         excelClient.fileTplExport("ExcelExportTpl.xlsx", (excelExportUtil -> {
             for (int i = 0; i < 10; i++) {
-                excelExportUtil.exportForward(Lists.newArrayList(excelComposeEO), ExcelComposeEO.class);
+                excelExportUtil.exportForward(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
             }
         }));
         // 用模版 100 万条数据 30秒
