@@ -3,6 +3,7 @@ package collect.container.excel;
 import collect.container.excel.base.DefaultEventModelParseHandler;
 import collect.container.excel.base.ExcelComposeEO;
 import com.common.collect.container.excel.EventModelReader;
+import com.common.collect.container.excel.ExcelExportUtil;
 import com.common.collect.container.excel.ExcelImportUtil;
 import com.common.collect.container.excel.ExcelSession;
 import com.common.collect.container.excel.client.ExcelClient;
@@ -13,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.List;
+import java.util.function.Consumer;
 
 
 /**
@@ -116,12 +118,13 @@ public class ExcelSessionTest {
 
         ExcelComposeEO excelComposeEO = ExcelComposeEO.gen();
         long time = System.currentTimeMillis();
-        excelClient.fileExport(ExcelComposeEO.class, "测试", (excelExportUtil -> {
-            for (int i = 0; i < 1000; i++) {
+        Consumer<ExcelExportUtil> execute = (excelExportUtil) -> {
+            for (int i = 0; i < 2000; i++) {
                 excelExportUtil.exportForward(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
             }
             log.info("lastRowNum:{} ", excelExportUtil.getLastRowNum());
-        }));
+        };
+        excelClient.fileExport(ExcelComposeEO.class, "测试", execute);
         // 新建 excel 100 万条数据 30秒
         log.info("耗时：{} 秒", (System.currentTimeMillis() - time) / 1000);
     }
