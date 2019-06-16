@@ -48,7 +48,7 @@ public class ExcelClient {
         ExcelExportUtil excelExportUtil = new ExcelExportUtil(sheetName, ExcelExportUtil.ExcelType.BIG_XLSX);
         excelExportUtil.exportTitle(clazz);
         execute.accept(excelExportUtil);
-        File file = excelExportUtil.saveTemp(IdUtil.uuidHex(), ".xlsx");
+        File file = excelExportUtil.saveTemp(IdUtil.uuidHex());
         log.info("导出文件地址:\n{}", file.getAbsolutePath());
         return file;
     }
