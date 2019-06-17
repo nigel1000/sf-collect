@@ -1,9 +1,18 @@
 package com.common.collect.container.excel.context;
 
 import com.common.collect.api.excps.UnifiedException;
-import com.common.collect.container.excel.annotations.*;
+import com.common.collect.container.excel.annotations.ExcelCheck;
+import com.common.collect.container.excel.annotations.ExcelConvert;
+import com.common.collect.container.excel.annotations.ExcelEntity;
+import com.common.collect.container.excel.annotations.ExcelExport;
+import com.common.collect.container.excel.annotations.ExcelImport;
 import com.common.collect.container.excel.base.ExcelConstants;
-import com.common.collect.container.excel.define.*;
+import com.common.collect.container.excel.define.IBeanFactory;
+import com.common.collect.container.excel.define.ICellConfig;
+import com.common.collect.container.excel.define.ICheckImportHandler;
+import com.common.collect.container.excel.define.IColIndexParser;
+import com.common.collect.container.excel.define.IConvertExportHandler;
+import com.common.collect.container.excel.define.IConvertImportHandler;
 import com.common.collect.container.excel.define.bean.SingletonBeanFactory;
 import com.common.collect.container.excel.define.check.MaxCheckImportHandler;
 import com.common.collect.container.excel.define.check.RegexCheckImportHandler;
@@ -83,9 +92,7 @@ public class ExcelContext {
     private static Map<Class, ExcelContext> cacheClassParseResult = new LinkedHashMap<>();
 
     public static ExcelContext excelContext(Class clazz) {
-        return cacheClassParseResult.computeIfAbsent(clazz, (cls) ->
-                new ExcelContext(clazz)
-        );
+        return cacheClassParseResult.computeIfAbsent(clazz, (cls) -> new ExcelContext(clazz));
     }
 
     private ExcelContext(Class<?> clazz) {
@@ -105,11 +112,14 @@ public class ExcelContext {
             if (excelImport == null && excelExport == null) {
                 continue;
             }
-
             String fieldName = field.getName();
             Class fieldType = field.getType();
             String setMethodName = "set" + ConvertUtil.firstUpper(fieldName);
             String getMethodName = "get" + ConvertUtil.firstUpper(fieldName);
+
+            excelImportMap.put(fieldName, excelImport);
+            excelExportMap.put(fieldName, excelExport);
+
             fieldNameList.add(fieldName);
             fieldMap.put(fieldName, field);
             fieldClsMap.put(fieldName, fieldType);
@@ -131,13 +141,12 @@ public class ExcelContext {
     }
 
     private void parseField() {
-        //  处理 导入参数
+        // 处理 导入参数
         for (Map.Entry<String, Field> entry : fieldMap.entrySet()) {
             String fieldName = entry.getKey();
             Field field = entry.getValue();
-            ExcelImport excelImport = field.getAnnotation(ExcelImport.class);
-            if (excelImport != null) {
-                excelImportMap.put(fieldName, excelImport);
+            if (isImport(fieldName)) {
+                ExcelImport excelImport = excelImportMap.get(fieldName);
                 String colIndex = excelImport.colIndex();
                 if (EmptyUtil.isBlank(colIndex)) {
                     throw UnifiedException.gen(ExcelConstants.MODULE, "colIndex不能为空");
@@ -166,9 +175,8 @@ public class ExcelContext {
                 excelImportTitleMap.put(fieldName, excelImport.title());
             }
 
-            ExcelExport excelExport = field.getAnnotation(ExcelExport.class);
-            if (excelExport != null) {
-                excelExportMap.put(fieldName, excelExport);
+            if (isExport(fieldName)) {
+                ExcelExport excelExport = excelExportMap.get(fieldName);
                 int colIndex = excelExport.colIndex();
                 if (colIndex < 0) {
                     throw UnifiedException.gen(ExcelConstants.MODULE, "导出 colIndex 不能小于0");
