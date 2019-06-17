@@ -57,11 +57,7 @@ public class ExcelExportUtil extends ExcelSession {
             if (BIG_XLSX == getExcelType()) {
                 // https://blog.csdn.net/qq_31615049/article/details/82228812
                 Sheet sheet = ((SXSSFWorkbook) getWorkbook()).getXSSFWorkbook().getSheetAt(getActiveSheetIndex());
-                Row row = sheet.getRow(rowIndex);
-                if (row == null) {
-                    row = sheet.createRow(rowIndex);
-                }
-                return row;
+                return ExcelUtil.getRow(sheet, rowIndex);
             } else {
                 throw ex;
             }
@@ -75,7 +71,7 @@ public class ExcelExportUtil extends ExcelSession {
         if (BIG_XLSX == getExcelType()) {
             Sheet sheet = ((SXSSFWorkbook) getWorkbook()).getXSSFWorkbook().getSheetAt(getActiveSheetIndex());
             // 已存在模板的最大行数
-            tplRowNum = sheet.getLastRowNum();
+            tplRowNum = ExcelUtil.getLastRowNum(sheet);
         } else {
             tplRowNum = super.getLastRowNum();
         }
