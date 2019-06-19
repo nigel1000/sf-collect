@@ -250,7 +250,8 @@ public class EventModelReader {
                     sheetAlreadyReadRowNum++;
                     // 填充空字符串
                     if (needReadColNum > cols.size()) {
-                        for (int i = 0; i < needReadColNum - cols.size(); i++) {
+                        int time = needReadColNum - cols.size();
+                        for (int i = 0; i < time; i++) {
                             cols.add("");
                         }
                     }

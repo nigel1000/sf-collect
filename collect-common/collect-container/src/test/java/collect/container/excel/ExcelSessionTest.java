@@ -44,9 +44,9 @@ public class ExcelSessionTest {
         }
 //        Slf4jUtil.setLogLevel("debug");
 
-//        log.info("eventModelReader ##########");
-//        eventModelReader();
-//
+        log.info("eventModelReader ##########");
+        eventModelReader();
+
 //        log.info("sessionExcel ##########");
 //        sessionExcel();
 //
@@ -56,18 +56,18 @@ public class ExcelSessionTest {
 //        log.info("importError ##########");
 //        importError();
 
-        log.info("exportNew ##########");
-        exportNew();
-
-        log.info("exportTpl ##########");
-        exportTpl();
+//        log.info("exportNew ##########");
+//        exportNew();
+//
+//        log.info("exportTpl ##########");
+//        exportTpl();
 
     }
 
     public static void eventModelReader() throws Exception {
         DefaultEventModelParseHandler handler = new DefaultEventModelParseHandler();
         EventModelReader eventModelReader = new EventModelReader(new FileInputStream(path + "/EventModelReader.xlsx"), handler);
-        eventModelReader.setNeedReadColNum(7);
+        eventModelReader.setNeedReadColNum(12);
         eventModelReader.setBatchHandleSize(3);
         eventModelReader.setParseSheetIndex(Lists.newArrayList(1, 3));
         eventModelReader.setNeedReadRowNum(4);
