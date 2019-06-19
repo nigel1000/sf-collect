@@ -2,8 +2,8 @@ package com.common.collect.container.excel;
 
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.HttpUtil;
-import com.common.collect.container.excel.define.IEventModelParseHandler;
 import com.common.collect.container.excel.context.EventModelContext;
+import com.common.collect.container.excel.define.IEventModelParseHandler;
 import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.FileUtil;
 import com.common.collect.util.IdUtil;
@@ -271,7 +271,7 @@ public class EventModelReader {
             eventModelParam.setCurSheetIndex(curSheetIndex);
             eventModelParam.setSheetAlreadyReadRowNum(sheetAlreadyReadRowNum);
             handler.handle(eventModelParam);
-            rows.clear();
+            rows = new LinkedList<>();
         }
 
         @Override
