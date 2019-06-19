@@ -19,14 +19,17 @@ public interface RetryRecordMapper {
             + "(null,#{retryRecord.bizType},#{retryRecord.msgType},#{retryRecord.msgKey},#{retryRecord.bizId},#{retryRecord.extra},#{retryRecord.body},#{retryRecord.tryTimes},#{retryRecord.maxTryTimes},#{retryRecord.initErrorMessage},#{retryRecord.endErrorMessage},#{retryRecord.status},now(),now())")
     Integer create(@Param("retryRecord") RetryRecord retryRecord, @Param("metaConfig") IMetaConfig metaConfig);
 
+    @Update("update ${metaConfig.tableName} set body=#{body},try_times=0,status=0 where id=#{id}")
+    Integer updateBody(@Param("id") Long id, @Param("body") String body, @Param("metaConfig") IMetaConfig metaConfig);
+
     @Select("select * from ${metaConfig.tableName} "
             + "where msg_key=#{metaConfig.msgKey} and msg_type=#{metaConfig.msgType} and biz_type=#{metaConfig.bizType} "
-            + "and status=0 and try_times<=max_try_times")
+            + "and status=0 and try_times<=max_try_times limit 100")
     List<RetryRecord> loadNeedRetryRecord(@Param("metaConfig") IMetaConfig metaConfig);
 
     @Select("select * from ${metaConfig.tableName} "
             + "where msg_key=#{metaConfig.msgKey} and msg_type=#{metaConfig.msgType} and biz_type=#{metaConfig.bizType} "
-            + "and status=0 and try_times<=max_try_times and biz_id=#{bizId}")
+            + "and status=0 and try_times<=max_try_times and biz_id=#{bizId} limit 100")
     List<RetryRecord> loadNeedRetryRecordByBizId(@Param("bizId") String bizId,
                                                  @Param("metaConfig") IMetaConfig metaConfig);
 
@@ -34,7 +37,8 @@ public interface RetryRecordMapper {
     Integer fail(@Param("id") Long id, @Param("metaConfig") IMetaConfig metaConfig);
 
     @Update("update ${metaConfig.tableName} set status=0, end_error_message=#{errorMessage} ,try_times=try_times+1 where id=#{id}")
-    Integer failExp(@Param("id") Long id, @Param("errorMessage") String errorMessage, @Param("metaConfig") IMetaConfig metaConfig);
+    Integer failExp(@Param("id") Long id, @Param("errorMessage") String errorMessage,
+                    @Param("metaConfig") IMetaConfig metaConfig);
 
     @Update("update ${metaConfig.tableName} set status=1 where id=#{id}")
     Integer success(@Param("id") Long id, @Param("metaConfig") IMetaConfig metaConfig);

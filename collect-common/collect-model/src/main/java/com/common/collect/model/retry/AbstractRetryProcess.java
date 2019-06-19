@@ -1,5 +1,6 @@
 package com.common.collect.model.retry;
 
+import com.common.collect.util.EmptyUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,19 +20,24 @@ public abstract class AbstractRetryProcess {
     public abstract void init();
 
     public void handleRetry() {
-        List<RetryRecord> retryRecords = retryRecordService.loadNeedRetryRecord(metaConfig);
-        for (RetryRecord retryRecord : retryRecords) {
-            try {
-                if (bizExecute(retryRecord)) {
-                    retryRecordService.success(retryRecord.getId(), metaConfig);
-                } else {
+        while (true) {
+            List<RetryRecord> retryRecords = retryRecordService.loadNeedRetryRecord(metaConfig);
+            if (EmptyUtil.isEmpty(retryRecords)) {
+                break;
+            }
+            for (RetryRecord retryRecord : retryRecords) {
+                try {
+                    if (bizExecute(retryRecord)) {
+                        retryRecordService.success(retryRecord.getId(), metaConfig);
+                    } else {
+                        failExecute(retryRecord);
+                        retryRecordService.fail(retryRecord.getId(), metaConfig);
+                    }
+                } catch (Exception ex) {
                     failExecute(retryRecord);
-                    retryRecordService.fail(retryRecord.getId(), metaConfig);
+                    log.error("重试记录 id:{} 失败异常。", retryRecord.getId(), ex);
+                    retryRecordService.failExp(retryRecord.getId(), ex, metaConfig);
                 }
-            } catch (Exception ex) {
-                failExecute(retryRecord);
-                log.error("重试记录 id:{} 失败异常。", retryRecord.getId(), ex);
-                retryRecordService.failExp(retryRecord.getId(), ex, metaConfig);
             }
         }
     }
