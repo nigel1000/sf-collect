@@ -247,7 +247,7 @@ Redis Cluster 中共有 16384 个 hash slot，Redis 会计算每个 Key 的 CRC1
 客户端在对 Key 进行读写操作时，可以连接 Cluster 中的任意一个分片，如果操作的 Key 不在此分片负责的 Slot 范围内，Redis Cluster 会自动将请求重定向到正确的分片上。  
 
 ### Hash Tags routing 功能
-以 hash tags 要求的格式明明的 Key，将会确保进入同一个 Slot 中。  
+以 hash tags 要求的格式的 Key，将会确保进入同一个 Slot 中。  
 例如：{uiv}user:1000 和 {uiv}user:1001 拥有同样的 hash tag {uiv}，会保存在同一个 Slot 中。  
 使用 Redis Cluster 时，Pipelining、事务和 LUA Script 功能涉及的 Key 必须在同一个数据分片上，否则将会返回错误。  
 
