@@ -94,19 +94,15 @@ public class ExcelSessionTest {
     }
 
     public static void importCorrect() {
-        ExcelClient excelClient = new ExcelClient();
-
         List<ExcelComposeEO> corrects =
-                excelClient.fileImport(new File(path + "/ExcelImport.xlsx"), ExcelComposeEO.class);
+                ExcelClient.fileImport(new File(path + "/ExcelImport.xlsx"), ExcelComposeEO.class);
         print(corrects);
     }
 
     public static void importError() {
-        ExcelClient excelClient = new ExcelClient();
-
         try {
             List<ExcelComposeEO> errors =
-                    excelClient.fileImport(new File(path + "/ExcelImportError.xlsx"), ExcelComposeEO.class);
+                    ExcelClient.fileImport(new File(path + "/ExcelImportError.xlsx"), ExcelComposeEO.class);
             print(errors);
         } catch (Exception ex) {
             log.error("导出错误信息", ex);
@@ -114,8 +110,6 @@ public class ExcelSessionTest {
     }
 
     public static void exportNew() {
-        ExcelClient excelClient = new ExcelClient();
-
         ExcelComposeEO excelComposeEO = ExcelComposeEO.gen();
         long time = System.currentTimeMillis();
         Consumer<ExcelExportUtil> execute = (excelExportUtil) -> {
@@ -124,17 +118,15 @@ public class ExcelSessionTest {
             }
             log.info("从0开始 lastRowNum:{} ", excelExportUtil.getLastRowNum());
         };
-        excelClient.fileExport(ExcelComposeEO.class, "测试", execute);
+        ExcelClient.fileExport(ExcelComposeEO.class, "测试", execute);
         // 新建 excel 100 万条数据 30秒
         log.info("耗时：{} 秒", (System.currentTimeMillis() - time) / 1000);
     }
 
     public static void exportTpl() {
-        ExcelClient excelClient = new ExcelClient();
-
         ExcelComposeEO excelComposeEO = ExcelComposeEO.gen();
         long time = System.currentTimeMillis();
-        excelClient.fileTplExport("ExcelExportTpl.xlsx", (excelExportUtil -> {
+        ExcelClient.fileTplExport("ExcelExportTpl.xlsx", (excelExportUtil -> {
             for (int i = 0; i < 10; i++) {
                 excelExportUtil.exportForward(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
             }
