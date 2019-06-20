@@ -176,8 +176,8 @@ public class EventModelReader {
             sheetStart = true;
             sheetAlreadyReadRowNum = 0;
             curColIndex = null;
-            oneRow.clear();
-            rows.clear();
+            oneRow = new LinkedHashMap<>();
+            rows = new LinkedList<>();
         }
 
 
@@ -239,13 +239,12 @@ public class EventModelReader {
                         }
                         cols.add(value);
                     }
-                    oneRow.clear();
+                    oneRow = new LinkedHashMap<>();
                     if (isEmptyRow) {
                         return;
                     }
                     if (sheetAlreadyReadRowNum + 1 > needReadRowNum) {
-                        throw UnifiedException.gen(need_read_row_num_code,
-                                "读取行数已大于每个 sheet 读取行数 " + needReadRowNum);
+                        throw UnifiedException.gen(need_read_row_num_code, "读取行数已大于每个 sheet 读取行数 " + needReadRowNum);
                     }
                     sheetAlreadyReadRowNum++;
                     // 填充空字符串
