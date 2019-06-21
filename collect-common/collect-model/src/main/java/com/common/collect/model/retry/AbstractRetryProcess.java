@@ -3,6 +3,7 @@ package com.common.collect.model.retry;
 import com.common.collect.util.EmptyUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -15,6 +16,7 @@ import java.util.List;
 public abstract class AbstractRetryProcess {
 
     private IMetaConfig metaConfig;
+    @Autowired(required = false)
     private RetryRecordService retryRecordService;
 
     public abstract void init();
