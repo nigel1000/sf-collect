@@ -2,9 +2,8 @@ package com.common.collect.model.flowlog;
 
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.model.flowlog.mapper.FlowLogMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.Resource;
 
 /**
  * Created by nijianfeng on 2018/10/28.
@@ -13,7 +12,7 @@ import javax.annotation.Resource;
 @Component("flowLogService")
 public class FlowLogService {
 
-    @Resource
+    @Autowired(required = false)
     private FlowLogMapper flowLogMapper;
 
     public Integer create(FlowLog flowLog, IMetaConfig metaConfig) {

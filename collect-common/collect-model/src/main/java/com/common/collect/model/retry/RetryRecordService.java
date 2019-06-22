@@ -3,9 +3,9 @@ package com.common.collect.model.retry;
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.model.retry.mapper.RetryRecordMapper;
 import lombok.NonNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -15,7 +15,7 @@ import java.util.List;
 @Component("retryRecordService")
 public class RetryRecordService {
 
-    @Resource
+    @Autowired(required = false)
     private RetryRecordMapper retryRecordMapper;
 
     public Integer record(RetryRecord retryRecord, IMetaConfig metaConfig) {

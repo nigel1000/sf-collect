@@ -8,10 +8,9 @@ import collect.debug.mybatis.dao.TestMapper;
 import collect.debug.mybatis.domain.Test;
 import com.common.collect.api.excps.UnifiedException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.Resource;
 
 /**
  * Created by hznijianfeng on 2019/2/22.
@@ -21,7 +20,7 @@ import javax.annotation.Resource;
 @Component
 public class AopOrder {
 
-    @Resource
+    @Autowired
     private TestMapper testMapper;
 
     @IAopOrderAspect1
