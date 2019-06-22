@@ -14,5 +14,8 @@ create table `flow_log` (
   `operator_name` varchar(127) not null comment '操作人 姓名',
   `create_at` datetime default current_timestamp not null comment '创建时间',
   `update_at` datetime default current_timestamp not null on update current_timestamp comment '修改时间',
+  index idx_biz (biz_id,biz_type),
   primary key (`id`)
 ) engine=innodb default charset=utf8mb4 comment='操作日志记录流程表' ;
+
+

@@ -27,14 +27,20 @@ public class FlowLogTest {
         TransactionHelper transactionHelper = (TransactionHelper) applicationContext.getBean("transactionHelper");
         transactionHelper.aroundBiz(() -> {
             // 获取执行 sql
-            MybatisContext.setEnableSqlRecord(true);
             FlowLog flowLog = FlowLog.gen("bizId", "null", "test", "test");
-            flowLogService.record(FlowLogConfig.DEMO, flowLog);
-            String sql = MybatisContext.getSqlRecord(true);
+            log.info("flowLog -> {}", flowLog);
+
+            MybatisContext.setEnableSqlRecord(true);
+            flowLogService.record(flowLog, FlowLogConfig.DEMO);
+            log.info("sql -> {}", MybatisContext.getSqlRecord(true));
+            log.info("load -> return:{},id:{}", flowLogMapper.load(flowLog.getId()), flowLog.getId());
             log.info("delete -> return:{},id:{}", flowLogMapper.delete(flowLog.getId()), flowLog.getId());
 
-            flowLog = FlowLog.gen("bizId", "null", "test", "test", sql);
-            flowLogService.record(FlowLogConfig.DEMO, flowLog);
+            flowLog.setId(null);
+
+            MybatisContext.setEnableSqlRecord(true);
+            flowLogService.create(flowLog, FlowLogConfig.DEMO);
+            log.info("sql -> {}", MybatisContext.getSqlRecord(true));
             log.info("load -> return:{},id:{}", flowLogMapper.load(flowLog.getId()), flowLog.getId());
             log.info("delete -> return:{},id:{}", flowLogMapper.delete(flowLog.getId()), flowLog.getId());
         });
@@ -52,6 +58,12 @@ public class FlowLogTest {
         FlowLogConfig(String bizType, String bizName) {
             this.bizType = bizType;
             this.bizName = bizName;
+        }
+
+
+        @Override
+        public String getTableName() {
+            return "flow_log";
         }
     }
 

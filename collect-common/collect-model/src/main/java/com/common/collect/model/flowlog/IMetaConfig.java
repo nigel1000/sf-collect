@@ -11,4 +11,6 @@ public interface IMetaConfig {
         return "";
     }
 
+    String getTableName();
+
 }

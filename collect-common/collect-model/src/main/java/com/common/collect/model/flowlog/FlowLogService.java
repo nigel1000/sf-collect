@@ -16,7 +16,7 @@ public class FlowLogService {
     @Resource
     private FlowLogMapper flowLogMapper;
 
-    public Integer record(IMetaConfig metaConfig, FlowLog flowLog) {
+    public Integer create(FlowLog flowLog, IMetaConfig metaConfig) {
         if (flowLog == null || metaConfig == null ||
                 metaConfig.getBizType() == null) {
             throw UnifiedException.gen("流程日志参数不合法");
@@ -25,4 +25,15 @@ public class FlowLogService {
         flowLog.setBizTypeName(metaConfig.getBizName());
         return flowLogMapper.create(flowLog);
     }
+
+    public Integer record(FlowLog flowLog, IMetaConfig metaConfig) {
+        if (flowLog == null || metaConfig == null ||
+                metaConfig.getBizType() == null) {
+            throw UnifiedException.gen("流程日志参数不合法");
+        }
+        flowLog.setBizType(metaConfig.getBizType());
+        flowLog.setBizTypeName(metaConfig.getBizName());
+        return flowLogMapper.record(flowLog, metaConfig);
+    }
+
 }

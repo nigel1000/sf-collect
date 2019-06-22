@@ -187,6 +187,11 @@
             <artifactId>jsch</artifactId>
             <version>0.1.54</version>
         </dependency>
+        <!-- redis -->
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+        </dependency>
     </dependencies>
     
 </project>
