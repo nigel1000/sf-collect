@@ -8,6 +8,7 @@ import com.alibaba.dubbo.config.ReferenceConfig;
 import com.alibaba.dubbo.registry.Registry;
 import com.alibaba.dubbo.registry.RegistryFactory;
 import com.common.collect.api.excps.UnifiedException;
+import com.common.collect.util.ThreadLocalUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -22,14 +23,25 @@ public class InvokerFactory {
     private static final RegistryFactory registryFactory = ExtensionLoader.getExtensionLoader(RegistryFactory.class).getAdaptiveExtension();
 
     public static <T> T getInstance(InvokerParam invokerParam) {
-        URL registryUrl = URL.valueOf(invokerParam.getZkAddress());
-        log.info("registryUrl:[{}]", registryUrl.toFullString());
-        Registry registry = registryFactory.getRegistry(registryUrl);
+        String zkAddress = invokerParam.getZkAddress();
+        URL registryUrl = URL.valueOf(zkAddress);
+        String registryUrlStr = registryUrl.toFullString();
+        log.info("registryUrl:[{}]", registryUrlStr);
+        Registry registry = ThreadLocalUtil.pull(registryUrlStr);
+        if (registry == null) {
+            registry = registryFactory.getRegistry(registryUrl);
+            ThreadLocalUtil.push(registryUrlStr, registry);
+        }
         if (registry == null) {
             throw UnifiedException.gen("没有找到 registry, registryUrl is " + registryUrl.toFullString());
         }
         URL url = new URL(invokerParam.getProtocol(), invokerParam.getHost(), invokerParam.getPort(), invokerParam.getMockClassName(), InvokerParam.getParams(invokerParam));
-        log.info("url:[{}]", url.toFullString());
+        String providerUrlStr = url.toFullString();
+        log.info("url:[{}]", providerUrlStr);
+        T retCache = ThreadLocalUtil.pull(providerUrlStr);
+        if (retCache != null) {
+            return retCache;
+        }
         try {
             List<URL> providerUrls = registry.lookup(url);
             if (providerUrls != null && providerUrls.size() > 0) {
@@ -49,7 +61,9 @@ public class InvokerFactory {
                         referenceConfig.setInterface(Class.forName(providerUrl.getServiceInterface()));
                         referenceConfig.setVersion(invokerParam.getVersion());
                         referenceConfig.setApplication(applicationConfig);
-                        return referenceConfig.get();
+                        T ret = referenceConfig.get();
+                        ThreadLocalUtil.push(providerUrlStr, ret);
+                        return ret;
                     } catch (ClassNotFoundException ex) {
                         throw UnifiedException.gen("没有找到 class " + providerUrl.getServiceInterface());
                     } catch (Exception ex) {
