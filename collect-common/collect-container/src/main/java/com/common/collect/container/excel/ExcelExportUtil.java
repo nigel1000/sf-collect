@@ -2,6 +2,7 @@ package com.common.collect.container.excel;
 
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.excel.base.ExcelConstants;
+import com.common.collect.container.excel.client.PoiClient;
 import com.common.collect.container.excel.context.ExcelContext;
 import com.common.collect.container.excel.define.ICellConfig;
 import com.common.collect.container.excel.define.IConvertExportHandler;
@@ -64,7 +65,7 @@ public class ExcelExportUtil extends ExcelSession {
             if (BIG_XLSX == getExcelType()) {
                 // https://blog.csdn.net/qq_31615049/article/details/82228812
                 Sheet sheet = ((SXSSFWorkbook) getWorkbook()).getXSSFWorkbook().getSheetAt(getActiveSheetIndex());
-                return ExcelUtil.getRow(sheet, rowIndex);
+                return PoiClient.getRow(sheet, rowIndex);
             } else {
                 throw ex;
             }
@@ -98,7 +99,7 @@ public class ExcelExportUtil extends ExcelSession {
             if (getExistRowNum() == -1) {
                 Sheet sheet = ((SXSSFWorkbook) getWorkbook()).getXSSFWorkbook().getSheetAt(getActiveSheetIndex());
                 // 已存在模板的最大行数
-                int existRowNum = ExcelUtil.getLastRowNum(sheet);
+                int existRowNum = PoiClient.getLastRowNum(sheet);
                 setExistRowNum(existRowNum);
             }
             log.info("sheetIndex:{}, existRowNum:{}", getSheetIndex(), getExistRowNum());

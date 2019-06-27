@@ -2,6 +2,7 @@ package com.common.collect.container.excel;
 
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.excel.base.ExcelConstants;
+import com.common.collect.container.excel.client.PoiClient;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -65,178 +66,178 @@ public class ExcelSession {
     }
 
     public Sheet createSheet(@NonNull String sheetName) {
-        return ExcelUtil.getSheet(getWorkbook(), sheetName);
+        return PoiClient.getSheet(getWorkbook(), sheetName);
     }
 
     public void removeSheet(@NonNull String sheetName) {
-        ExcelUtil.removeSheet(getWorkbook(), sheetName);
+        PoiClient.removeSheet(getWorkbook(), sheetName);
     }
 
     public int getSheetIndex() {
-        return ExcelUtil.getSheetIndex(getWorkbook(), getSheet());
+        return PoiClient.getSheetIndex(getWorkbook(), getSheet());
     }
 
     public void changeSheet(@NonNull String sheetName) {
-        setSheet(ExcelUtil.getSheet(getWorkbook(), sheetName));
-        ExcelUtil.setActiveSheet(getWorkbook(), ExcelUtil.getSheetIndex(getWorkbook(), getSheet()));
+        setSheet(PoiClient.getSheet(getWorkbook(), sheetName));
+        PoiClient.setActiveSheet(getWorkbook(), getSheetIndex());
     }
 
     public void changeSheet(int sheetIndex) {
-        setSheet(ExcelUtil.getSheet(getWorkbook(), sheetIndex));
-        ExcelUtil.setActiveSheet(getWorkbook(), ExcelUtil.getSheetIndex(getWorkbook(), getSheet()));
+        setSheet(PoiClient.getSheet(getWorkbook(), sheetIndex));
+        PoiClient.setActiveSheet(getWorkbook(), getSheetIndex());
     }
 
     public void setSheetName(int sheetIndex, String sheetName) {
-        ExcelUtil.setSheetName(getWorkbook(), sheetIndex, sheetName);
+        PoiClient.setSheetName(getWorkbook(), sheetIndex, sheetName);
     }
 
     public int getActiveSheetIndex() {
-        return ExcelUtil.getActiveSheetIndex(getWorkbook());
+        return PoiClient.getActiveSheetIndex(getWorkbook());
     }
 
     public void setCellWidth(int colIndex, int colWidth) {
-        ExcelUtil.setColumnWidth(getSheet(), colIndex, colWidth);
+        PoiClient.setColumnWidth(getSheet(), colIndex, colWidth);
     }
 
     public int getCellWidth(int colIndex) {
-        return ExcelUtil.getColumnWidth(getSheet(), colIndex);
+        return PoiClient.getColumnWidth(getSheet(), colIndex);
     }
 
     public void setHiddenColumn(int colIndex, boolean isHidden) {
-        ExcelUtil.setColumnHidden(getSheet(), colIndex, isHidden);
+        PoiClient.setColumnHidden(getSheet(), colIndex, isHidden);
     }
 
     public boolean isHiddenColumn(int colIndex) {
-        return ExcelUtil.isColumnHidden(getSheet(), colIndex);
+        return PoiClient.isColumnHidden(getSheet(), colIndex);
     }
 
     public Cell setCellValue(int rowIndex, int colIndex, Object value) {
-        return ExcelUtil.setCellValue(getSheet(), rowIndex, colIndex, value);
+        return PoiClient.setCellValue(getSheet(), rowIndex, colIndex, value);
     }
 
     public String getCellValue(int rowIndex, int colIndex) {
-        return ExcelUtil.getCellValue(getSheet(), rowIndex, colIndex);
+        return PoiClient.getCellValue(getSheet(), rowIndex, colIndex);
     }
 
     public Cell setCellStyle(int rowIndex, int colIndex, CellStyle cellStyle) {
-        return ExcelUtil.setCellStyle(getSheet(), rowIndex, colIndex, cellStyle);
+        return PoiClient.setCellStyle(getSheet(), rowIndex, colIndex, cellStyle);
     }
 
     public CellStyle getCellStyle(int rowIndex, int colIndex) {
-        return ExcelUtil.getCellStyle(getSheet(), rowIndex, colIndex);
+        return PoiClient.getCellStyle(getSheet(), rowIndex, colIndex);
     }
 
     public CellStyle createDefaultCellStyle() {
-        return ExcelUtil.createDefaultCellStyle(getWorkbook());
+        return PoiClient.createDefaultCellStyle(getWorkbook());
     }
 
     public CellStyle createDefaultDoubleCellStyle() {
-        return ExcelUtil.createDefaultDoubleCellStyle(getWorkbook());
+        return PoiClient.createDefaultDoubleCellStyle(getWorkbook());
     }
 
     public Cell setCellComment(int rowIndex, int colIndex, Comment comment) {
-        return ExcelUtil.setCellComment(getSheet(), rowIndex, colIndex, comment);
+        return PoiClient.setCellComment(getSheet(), rowIndex, colIndex, comment);
     }
 
     public Comment getCellComment(int rowIndex, int colIndex) {
-        return ExcelUtil.getCellComment(getSheet(), rowIndex, colIndex);
+        return PoiClient.getCellComment(getSheet(), rowIndex, colIndex);
     }
 
     public short getCellFontSize(int rowIndex, int colIndex) {
-        return ExcelUtil.getCellFontSize(getSheet(), rowIndex, colIndex);
+        return PoiClient.getCellFontSize(getSheet(), rowIndex, colIndex);
     }
 
     public Cell getCell(int rowIndex, int colIndex) {
-        return ExcelUtil.getCell(getSheet(), rowIndex, colIndex);
+        return PoiClient.getCell(getSheet(), rowIndex, colIndex);
     }
 
     public void setRowHeight(int rowIndex, short rowHeight) {
-        ExcelUtil.setRowHeight(getSheet(), rowIndex, rowHeight);
+        PoiClient.setRowHeight(getSheet(), rowIndex, rowHeight);
     }
 
     public short getRowHeight(int rowIndex) {
-        return ExcelUtil.getRowHeight(getSheet(), rowIndex);
+        return PoiClient.getRowHeight(getSheet(), rowIndex);
     }
 
     public Row getRow(int rowIndex) {
-        return ExcelUtil.getRow(getSheet(), rowIndex);
+        return PoiClient.getRow(getSheet(), rowIndex);
     }
 
     public void removeRow(int rowIndex) {
-        ExcelUtil.removeRow(getSheet(), rowIndex);
+        PoiClient.removeRow(getSheet(), rowIndex);
     }
 
     public boolean isEmptyRow(int rowIndex) {
-        return ExcelUtil.isEmptyRow(getSheet(), rowIndex);
+        return PoiClient.isEmptyRow(getSheet(), rowIndex);
     }
 
     public int getLastRowNum() {
-        return ExcelUtil.getLastRowNum(getSheet());
+        return PoiClient.getLastRowNum(getSheet());
     }
 
     public void freezePane(int colSplit, int rowSplit, int leftmostColumn, int topRow) {
-        ExcelUtil.freezePane(getSheet(), colSplit, rowSplit, leftmostColumn, topRow);
+        PoiClient.freezePane(getSheet(), colSplit, rowSplit, leftmostColumn, topRow);
     }
 
     public void copyMergeRegionToTargetSheet(Sheet toSheet, int startRowNum) {
-        ExcelUtil.copyMergeRegion(getSheet(), toSheet, startRowNum);
+        PoiClient.copyMergeRegion(getSheet(), toSheet, startRowNum);
     }
 
     public void copyMergeRegionFromTargetSheet(Sheet fromSheet, int startRowNum) {
-        ExcelUtil.copyMergeRegion(fromSheet, getSheet(), startRowNum);
+        PoiClient.copyMergeRegion(fromSheet, getSheet(), startRowNum);
     }
 
     public Map<Integer, String> getRowValueMap(int rowIndex) {
-        return ExcelUtil.getRowValueMap(getSheet(), rowIndex);
+        return PoiClient.getRowValueMap(getSheet(), rowIndex);
     }
 
     public List<String> getRowValueList(int rowIndex) {
-        return ExcelUtil.getRowValueList(getSheet(), rowIndex);
+        return PoiClient.getRowValueList(getSheet(), rowIndex);
     }
 
     public void insertRows(int startRow, int rowCount) {
-        ExcelUtil.insertRows(getSheet(), startRow, rowCount);
+        PoiClient.insertRows(getSheet(), startRow, rowCount);
     }
 
     public void copyCellValue(int fromRowIndex, int fromColIndex, int toRowIndex, int toColIndex) {
-        ExcelUtil.copyCellValue(getSheet(), fromRowIndex, fromColIndex, getSheet(), toRowIndex, toColIndex);
+        PoiClient.copyCellValue(getSheet(), fromRowIndex, fromColIndex, getSheet(), toRowIndex, toColIndex);
     }
 
     public void copyRow(int fromRowIndex, int toRowIndex, boolean isCopyCellValue, boolean isCopyRowHeight,
                         boolean isCopyCellStyle, boolean isCopyCellComment) {
-        ExcelUtil.copyRow(getSheet(), fromRowIndex, getSheet(), toRowIndex, isCopyCellValue, isCopyRowHeight, isCopyCellStyle, isCopyCellComment);
+        PoiClient.copyRow(getSheet(), fromRowIndex, getSheet(), toRowIndex, isCopyCellValue, isCopyRowHeight, isCopyCellStyle, isCopyCellComment);
     }
 
     public void copySheetRowFollowToTargetSheet(String toSheetName, boolean ignoreEmptyRow) {
-        ExcelUtil.copySheetFollow(getSheet(), createSheet(toSheetName), ignoreEmptyRow);
+        PoiClient.copySheetFollow(getSheet(), createSheet(toSheetName), ignoreEmptyRow);
     }
 
     public void rowHeightAutoFit(CellRangeAddress cellRangeAddress) {
-        ExcelUtil.rowHeightAutoFit(getSheet(), cellRangeAddress);
+        PoiClient.rowHeightAutoFit(getSheet(), cellRangeAddress);
     }
 
     public byte[] getBytes() {
-        return ExcelUtil.getBytes(getWorkbook());
+        return PoiClient.getBytes(getWorkbook());
     }
 
     public InputStream getInputStream() {
-        return ExcelUtil.getInputStream(getWorkbook());
+        return PoiClient.getInputStream(getWorkbook());
     }
 
     public ByteArrayOutputStream getOutputStream() {
-        return ExcelUtil.getOutputStream(getWorkbook());
+        return PoiClient.getOutputStream(getWorkbook());
     }
 
     public File save(@NonNull String filePath) {
-        return ExcelUtil.save(getWorkbook(), filePath);
+        return PoiClient.save(getWorkbook(), filePath);
     }
 
     public File saveTemp(@NonNull String prefix, @NonNull String suffix) {
-        return ExcelUtil.saveTemp(getWorkbook(), prefix, suffix);
+        return PoiClient.saveTemp(getWorkbook(), prefix, suffix);
     }
 
     public void closeSource() {
-        ExcelUtil.closeSource(getWorkbook());
+        PoiClient.closeSource(getWorkbook());
     }
 
 }

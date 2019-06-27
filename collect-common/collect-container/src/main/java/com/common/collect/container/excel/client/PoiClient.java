@@ -1,4 +1,4 @@
-package com.common.collect.container.excel;
+package com.common.collect.container.excel.client;
 
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.excel.base.ExcelConstants;
@@ -38,7 +38,7 @@ import java.util.Map;
 /**
  * Created by nijianfeng on 2019/4/12.
  */
-public class ExcelUtil {
+public class PoiClient {
 
     public static int getSheetIndex(@NonNull Workbook workbook, @NonNull Sheet sheet) {
         return workbook.getSheetIndex(sheet);
