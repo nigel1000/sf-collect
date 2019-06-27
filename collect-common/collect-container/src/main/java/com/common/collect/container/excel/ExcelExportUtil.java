@@ -12,7 +12,11 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -21,6 +25,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.common.collect.container.excel.ExcelExportUtil.ExcelType.BIG_XLSX;
 
@@ -38,7 +44,8 @@ public class ExcelExportUtil extends ExcelSession {
 
     // BIG_XLSX 由于其实现方式 不能回写
     public enum ExcelType {
-        BIG_XLSX("xlsx"), XLSX("xlsx"), XLS("xls"),;
+        BIG_XLSX("xlsx"), XLSX("xlsx"), XLS("xls"),
+        ;
         @Getter
         private String type;
 
@@ -64,36 +71,57 @@ public class ExcelExportUtil extends ExcelSession {
         }
     }
 
-    private int existRowNum = 0;
+    private Map<Integer, Integer> existRowNumMap = new ConcurrentHashMap<>();
 
-    public void initExistRowNum() {
-        int tplRowNum;
-        if (BIG_XLSX == getExcelType()) {
-            Sheet sheet = ((SXSSFWorkbook) getWorkbook()).getXSSFWorkbook().getSheetAt(getActiveSheetIndex());
-            // 已存在模板的最大行数
-            tplRowNum = ExcelUtil.getLastRowNum(sheet);
-        } else {
-            tplRowNum = super.getLastRowNum();
+    private Integer getExistRowNum() {
+        return existRowNumMap.getOrDefault(getSheetIndex(), -1);
+    }
+
+    private Integer setExistRowNum(int num) {
+        return existRowNumMap.put(getSheetIndex(), num);
+    }
+
+    @Override
+    public void changeSheet(String sheetName) {
+        super.changeSheet(sheetName);
+        initExistRowNum();
+    }
+
+    @Override
+    public void changeSheet(int sheetIndex) {
+        super.changeSheet(sheetIndex);
+        initExistRowNum();
+    }
+
+    private void initExistRowNum() {
+        if (excelType == BIG_XLSX) {
+            if (getExistRowNum() == -1) {
+                Sheet sheet = ((SXSSFWorkbook) getWorkbook()).getXSSFWorkbook().getSheetAt(getActiveSheetIndex());
+                // 已存在模板的最大行数
+                int existRowNum = ExcelUtil.getLastRowNum(sheet);
+                setExistRowNum(existRowNum);
+            }
+            log.info("sheetIndex:{}, existRowNum:{}", getSheetIndex(), getExistRowNum());
         }
-        existRowNum = existRowNum + tplRowNum;
-        log.info("existRowNum:{}", existRowNum);
     }
 
     @Override
     public int getLastRowNum() {
-        return existRowNum;
-    }
-
-    public void setExistRowNum(int rowNum) {
-        if (existRowNum < rowNum) {
-            existRowNum = rowNum;
+        if (excelType == BIG_XLSX) {
+            return getExistRowNum();
+        } else {
+            return super.getLastRowNum();
         }
     }
 
     @Override
     public Cell setCellValue(int rowIndex, int colIndex, Object value) {
         Cell cell = super.setCellValue(rowIndex, colIndex, value);
-        setExistRowNum(rowIndex);
+        if (excelType == BIG_XLSX) {
+            if (getExistRowNum() < rowIndex) {
+                setExistRowNum(rowIndex);
+            }
+        }
         return cell;
     }
 
@@ -108,9 +136,8 @@ public class ExcelExportUtil extends ExcelSession {
         } else {
             throw UnifiedException.gen(ExcelConstants.MODULE, "没有此类型的excel");
         }
-        setSheet(createSheet(sheetName));
         this.excelType = excelType;
-        initExistRowNum();
+        changeSheet(sheetName);
     }
 
     // 从已有模板中导出
@@ -121,9 +148,8 @@ public class ExcelExportUtil extends ExcelSession {
             } else {
                 setWorkbook(WorkbookFactory.create(inputStream));
             }
-            changeSheet(0);
             this.excelType = excelType;
-            initExistRowNum();
+            changeSheet(0);
         } catch (Exception e) {
             throw UnifiedException.gen(ExcelConstants.MODULE, "excel 文件流有误!", e);
         }
@@ -136,9 +162,8 @@ public class ExcelExportUtil extends ExcelSession {
             } else {
                 setWorkbook(WorkbookFactory.create(new FileInputStream(filePath)));
             }
-            changeSheet(0);
             this.excelType = excelType;
-            initExistRowNum();
+            changeSheet(0);
         } catch (Exception e) {
             throw UnifiedException.gen(ExcelConstants.MODULE, filePath + " 文件流有误!", e);
         }
@@ -147,13 +172,11 @@ public class ExcelExportUtil extends ExcelSession {
     public ExcelExportUtil(@NonNull ExcelType excelType, @NonNull Workbook workbook, Sheet sheet) {
         if (excelType == BIG_XLSX) {
             setWorkbook(new SXSSFWorkbook((XSSFWorkbook) workbook));
-            setSheet(getWorkbook().getSheet(sheet.getSheetName()));
         } else {
             setWorkbook(workbook);
-            setSheet(sheet);
         }
         this.excelType = excelType;
-        initExistRowNum();
+        changeSheet(sheet.getSheetName());
     }
 
     public ExcelExportUtil(@NonNull ExcelType excelType, @NonNull Workbook workbook) {
@@ -162,9 +185,8 @@ public class ExcelExportUtil extends ExcelSession {
         } else {
             setWorkbook(workbook);
         }
-        changeSheet(0);
         this.excelType = excelType;
-        initExistRowNum();
+        changeSheet(0);
     }
 
     // 导出 一行数据 到 excel

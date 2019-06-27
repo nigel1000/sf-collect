@@ -44,8 +44,8 @@ public class ExcelSessionTest {
         }
 //        Slf4jUtil.setLogLevel("debug");
 
-        log.info("eventModelReader ##########");
-        eventModelReader();
+//        log.info("eventModelReader ##########");
+//        eventModelReader();
 
 //        log.info("sessionExcel ##########");
 //        sessionExcel();
@@ -59,8 +59,8 @@ public class ExcelSessionTest {
 //        log.info("exportNew ##########");
 //        exportNew();
 //
-//        log.info("exportTpl ##########");
-//        exportTpl();
+        log.info("exportTpl ##########");
+        exportTpl();
 
     }
 
@@ -127,6 +127,26 @@ public class ExcelSessionTest {
         ExcelComposeEO excelComposeEO = ExcelComposeEO.gen();
         long time = System.currentTimeMillis();
         ExcelClient.fileTplExport("ExcelExportTpl.xlsx", (excelExportUtil -> {
+            for (int i = 0; i < 10; i++) {
+                excelExportUtil.exportForward(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
+            }
+            excelExportUtil.changeSheet("changeSheet");
+            for (int i = 0; i < 10; i++) {
+                excelExportUtil.exportForward(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
+            }
+            excelExportUtil.changeSheet(1);
+            for (int i = 0; i < 10; i++) {
+                excelExportUtil.exportForward(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
+            }
+            excelExportUtil.changeSheet(0);
+            for (int i = 0; i < 10; i++) {
+                excelExportUtil.exportForward(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
+            }
+            excelExportUtil.changeSheet(1);
+            for (int i = 0; i < 10; i++) {
+                excelExportUtil.exportForward(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
+            }
+            excelExportUtil.changeSheet("changeSheet");
             for (int i = 0; i < 10; i++) {
                 excelExportUtil.exportForward(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
             }

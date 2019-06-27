@@ -5,7 +5,13 @@ import com.common.collect.container.excel.base.ExcelConstants;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Comment;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.io.ByteArrayOutputStream;
@@ -66,12 +72,18 @@ public class ExcelSession {
         ExcelUtil.removeSheet(getWorkbook(), sheetName);
     }
 
+    public int getSheetIndex() {
+        return ExcelUtil.getSheetIndex(getWorkbook(), getSheet());
+    }
+
     public void changeSheet(@NonNull String sheetName) {
         setSheet(ExcelUtil.getSheet(getWorkbook(), sheetName));
+        ExcelUtil.setActiveSheet(getWorkbook(), ExcelUtil.getSheetIndex(getWorkbook(), getSheet()));
     }
 
     public void changeSheet(int sheetIndex) {
         setSheet(ExcelUtil.getSheet(getWorkbook(), sheetIndex));
+        ExcelUtil.setActiveSheet(getWorkbook(), ExcelUtil.getSheetIndex(getWorkbook(), getSheet()));
     }
 
     public void setSheetName(int sheetIndex, String sheetName) {
