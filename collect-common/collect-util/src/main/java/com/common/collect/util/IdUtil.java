@@ -58,7 +58,7 @@ public final class IdUtil implements Serializable {
      * <p>
      * 10位序列，毫秒内的计数，支持每个节点每毫秒(同一机器，同一时间戳)产生1023个ID序号 加起来刚好64位，为一个 Long 型。
      * <p>
-     * SnowFlake的优点是，整体上按照时间自增排序，并且整个分布式系统内不会产生ID碰撞(由数据中心ID和机器ID作区分)，并且效率较高，经测试，SnowFlake每秒能够产生26万ID左右。
+     * SnowFlake的优点是，整体上按照时间自增排序，并且整个分布式系统内不会产生ID碰撞(由数据中心ID和机器ID作区分)，并且效率较高，经测试，SnowFlake每秒能够产生100万ID左右。
      */
     private static class SnowFlake {
 
@@ -202,10 +202,13 @@ public final class IdUtil implements Serializable {
                     while (timestamp <= snowFlake.lastTimestamp) {
                         timestamp = System.currentTimeMillis();
                     }
+                    // 序列号总是归0，会使得序列号为0的ID比较多，导致生成的ID取模后不均匀。
+                    snowFlake.sequence = (long) (Math.random() * 10);
                 }
             } else {
                 // 时间戳改变，毫秒内序列重置
-                snowFlake.sequence = 0L;
+                // 序列号总是归0，会使得序列号为0的ID比较多，导致生成的ID取模后不均匀。
+                snowFlake.sequence = (long) (Math.random() * 10);
             }
 
             // 上次生成ID的时间戳
