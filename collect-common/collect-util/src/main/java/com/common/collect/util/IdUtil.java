@@ -11,8 +11,6 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.security.SecureRandom;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.UUID;
 
 @Slf4j
@@ -21,8 +19,7 @@ public final class IdUtil implements Serializable {
     private static final SecureRandom _RNG = new SecureRandom();
 
     public static String timeDiy(String diy) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
-        String timePrefix = sdf.format(new Date());
+        String timePrefix = DateUtil.format(DateUtil.now(), "yyyyMMddHHmmssSSS");
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 8; ++i) {
             sb.append("0123456789".charAt(_RNG.nextInt("0123456789".length())));
