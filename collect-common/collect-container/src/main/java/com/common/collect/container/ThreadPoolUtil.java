@@ -43,7 +43,7 @@ public class ThreadPoolUtil {
                 SecurityManager s = System.getSecurityManager();
                 group = (s != null) ? s.getThreadGroup() :
                         Thread.currentThread().getThreadGroup();
-                namePrefix = "pool-" + poolNumber.getAndIncrement() + "-thread-";
+                namePrefix = "thread-pool-util-" + poolNumber.getAndIncrement() + "-";
             }
 
             public Thread newThread(Runnable r) {
@@ -51,10 +51,12 @@ public class ThreadPoolUtil {
                         namePrefix + threadNumber.getAndIncrement(),
                         0);
                 t.setUncaughtExceptionHandler(new LogUncaughtExceptionHandler());
-                if (t.isDaemon())
+                if (t.isDaemon()) {
                     t.setDaemon(false);
-                if (t.getPriority() != Thread.NORM_PRIORITY)
+                }
+                if (t.getPriority() != Thread.NORM_PRIORITY) {
                     t.setPriority(Thread.NORM_PRIORITY);
+                }
                 return t;
             }
         }
