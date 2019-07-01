@@ -114,7 +114,7 @@ public class ExcelSessionTest {
         long time = System.currentTimeMillis();
         Consumer<ExcelExportUtil> execute = (excelExportUtil) -> {
             for (int i = 0; i < 2000; i++) {
-                excelExportUtil.exportForward(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
+                excelExportUtil.exportModel(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
             }
             log.info("从0开始 lastRowNum:{} ", excelExportUtil.getLastRowNum());
         };
@@ -128,27 +128,27 @@ public class ExcelSessionTest {
         long time = System.currentTimeMillis();
         ExcelClient.fileTplExport("ExcelExportTpl.xlsx", (excelExportUtil -> {
             for (int i = 0; i < 10; i++) {
-                excelExportUtil.exportForward(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
+                excelExportUtil.exportModel(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
             }
             excelExportUtil.changeSheet("changeSheet");
             for (int i = 0; i < 10; i++) {
-                excelExportUtil.exportForward(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
+                excelExportUtil.exportModel(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
             }
             excelExportUtil.changeSheet(1);
             for (int i = 0; i < 10; i++) {
-                excelExportUtil.exportForward(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
+                excelExportUtil.exportModel(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
             }
             excelExportUtil.changeSheet(0);
             for (int i = 0; i < 10; i++) {
-                excelExportUtil.exportForward(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
+                excelExportUtil.exportModel(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
             }
             excelExportUtil.changeSheet(1);
             for (int i = 0; i < 10; i++) {
-                excelExportUtil.exportForward(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
+                excelExportUtil.exportModel(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
             }
             excelExportUtil.changeSheet("changeSheet");
             for (int i = 0; i < 10; i++) {
-                excelExportUtil.exportForward(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
+                excelExportUtil.exportModel(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
             }
             log.info("从0开始 lastRowNum:{} ", excelExportUtil.getLastRowNum());
         }));

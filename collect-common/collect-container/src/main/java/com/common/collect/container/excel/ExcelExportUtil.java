@@ -24,6 +24,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -122,6 +123,13 @@ public class ExcelExportUtil extends ExcelSession {
         return startRowIndex;
     }
 
+    public int getRowIndex(Integer rowIndex) {
+        if (rowIndex == null) {
+            rowIndex = this.getNextRowNum();
+        }
+        return rowIndex;
+    }
+
     @Override
     public Cell setCellValue(int rowIndex, int colIndex, Object value) {
         Cell cell = super.setCellValue(rowIndex, colIndex, value);
@@ -198,48 +206,50 @@ public class ExcelExportUtil extends ExcelSession {
     }
 
     // 导出 一行数据 到 excel
-    public void exportData(List<?> oneRow, List<Integer> colIndex, int rowIndex) {
+    public void exportRow(List<?> oneRow, List<Integer> colIndex, Integer rowIndex) {
         if (EmptyUtil.isEmpty(oneRow) || EmptyUtil.isEmpty(colIndex) || oneRow.size() != colIndex.size()) {
             throw UnifiedException.gen(ExcelConstants.MODULE, "oneRow 和 colIndex 必须不为空并且size相等");
         }
         // 组装数据
-        Row row = this.getRow(rowIndex);
+        Row row = this.getRow(getRowIndex(rowIndex));
         for (int i = 0; i < oneRow.size(); i++) {
             setCellValue(row.getRowNum(), colIndex.get(i), oneRow.get(i));
         }
     }
 
-    public void exportData(List<?> oneRow, int rowIndex) {
+    public void exportRow(List<?> oneRow, Integer rowIndex) {
         if (EmptyUtil.isEmpty(oneRow)) {
             throw UnifiedException.gen(ExcelConstants.MODULE, "oneRow 必须不为空");
         }
         // 组装数据
-        Row row = this.getRow(rowIndex);
-        for (int i = 0; i < oneRow.size(); i++) {
-            setCellValue(row.getRowNum(), i, oneRow.get(i));
+        List<Integer> colIndex = new ArrayList<>();
+        int colNum = oneRow.size();
+        for (int i = 0; i < colNum; i++) {
+            colIndex.add(i);
         }
+        exportRow(oneRow, colIndex, rowIndex);
     }
 
-    public void exportData(List<List<?>> rows) {
+    public void exportRows(List<List<?>> rows, Integer rowIndex) {
         if (EmptyUtil.isEmpty(rows)) {
             throw UnifiedException.gen(ExcelConstants.MODULE, "rows 必须不为空");
         }
         // 组装数据
-        for (List<?> oneRow : rows) {
-            Row row = this.getRow(this.getNextRowNum());
-            for (int i = 0; i < oneRow.size(); i++) {
-                setCellValue(row.getRowNum(), i, oneRow.get(i));
+        if (rowIndex == null) {
+            for (List<?> oneRow : rows) {
+                exportRow(oneRow, null);
+            }
+        } else {
+            for (List<?> oneRow : rows) {
+                exportRow(oneRow, rowIndex++);
             }
         }
     }
 
-    // 导出 title 到 excel 的 第一行
-    public <C> void exportTitle(Class<C> type) {
-        exportTitle(type, 0);
-    }
-
     // 导出 title 到 excel 的 指定行
-    public <C> void exportTitle(Class<C> type, int rowIndex) {
+    public <C> void exportTitle(Class<C> type, Integer rowIndex) {
+        // 解析 行号
+        rowIndex = this.getRowIndex(rowIndex);
         // 组装数据
         ExcelContext excelContext = ExcelContext.excelContext(type);
         // 设置标题列
@@ -262,27 +272,20 @@ public class ExcelExportUtil extends ExcelSession {
         }
     }
 
-    // 通过 模型 导出 数据 到excel
-    public <C> void export(@NonNull List<C> data, Class<C> type) {
-        // 导出 title
-        exportTitle(type);
+    // 导出数据从下一行
+    public <C> void exportModel(@NonNull List<C> data, Class<C> type) {
         // 导出数据
-        export(data, type, 1);
+        exportModel(data, type, null);
     }
 
-    // 只导数据不导出标题
-    public <C> void exportForward(@NonNull List<C> data, Class<C> type) {
-        // 导出数据
-        int startRowIndex = this.getNextRowNum();
-        export(data, type, startRowIndex);
-    }
-
-    public <C> void export(@NonNull List<C> data, Class<C> type, int startRowIndex) {
+    // 导出数据从指定行
+    public <C> void exportModel(@NonNull List<C> data, Class<C> type, Integer startRowIndex) {
         ExcelContext excelContext = ExcelContext.excelContext(type);
-        exportData(data, excelContext, startRowIndex);
+        exportData(data, excelContext, this.getRowIndex(startRowIndex));
     }
 
-    private <C> void exportData(@NonNull List<C> data, ExcelContext excelContext, int rowOffset) {
+    private <C> void exportData(@NonNull List<C> data, ExcelContext excelContext, Integer rowOffset) {
+        rowOffset = this.getRowIndex(rowOffset);
         for (C obj : data) {
             if (obj == null) {
                 continue;

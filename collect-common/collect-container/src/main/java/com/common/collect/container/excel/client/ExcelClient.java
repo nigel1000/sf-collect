@@ -46,7 +46,7 @@ public class ExcelClient {
     public static <T> File fileExport(@NonNull Class<T> clazz, @NonNull String sheetName, Consumer<ExcelExportUtil> execute) {
         // 导出excel
         ExcelExportUtil excelExportUtil = new ExcelExportUtil(sheetName, ExcelExportUtil.ExcelType.BIG_XLSX);
-        excelExportUtil.exportTitle(clazz);
+        excelExportUtil.exportTitle(clazz, 0);
         execute.accept(excelExportUtil);
         File file = excelExportUtil.saveTemp(IdUtil.uuidHex());
         log.info("导出文件地址:\n{}", file.getAbsolutePath());
