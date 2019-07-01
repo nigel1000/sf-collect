@@ -11,7 +11,6 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -115,6 +114,14 @@ public class ExcelExportUtil extends ExcelSession {
         }
     }
 
+    public int getNextRowNum() {
+        int startRowIndex = this.getLastRowNum();
+        if (startRowIndex != 0 || !this.isEmptyRow(0)) {
+            startRowIndex++;
+        }
+        return startRowIndex;
+    }
+
     @Override
     public Cell setCellValue(int rowIndex, int colIndex, Object value) {
         Cell cell = super.setCellValue(rowIndex, colIndex, value);
@@ -191,25 +198,38 @@ public class ExcelExportUtil extends ExcelSession {
     }
 
     // 导出 一行数据 到 excel
-    public void exportData(List<?> data, List<Integer> colIndex, int rowIndex) {
-        if (EmptyUtil.isEmpty(data) || EmptyUtil.isEmpty(colIndex) || data.size() != colIndex.size()) {
-            throw UnifiedException.gen(ExcelConstants.MODULE, "data和colIndex 必须不为空并且size相等");
+    public void exportData(List<?> oneRow, List<Integer> colIndex, int rowIndex) {
+        if (EmptyUtil.isEmpty(oneRow) || EmptyUtil.isEmpty(colIndex) || oneRow.size() != colIndex.size()) {
+            throw UnifiedException.gen(ExcelConstants.MODULE, "oneRow 和 colIndex 必须不为空并且size相等");
         }
         // 组装数据
         Row row = this.getRow(rowIndex);
-        for (int i = 0; i < data.size(); i++) {
-            setCellValue(row.getRowNum(), colIndex.get(i), data.get(i));
+        for (int i = 0; i < oneRow.size(); i++) {
+            setCellValue(row.getRowNum(), colIndex.get(i), oneRow.get(i));
         }
     }
 
-    public void exportData(List<?> data, int rowIndex) {
-        if (CollectionUtils.isEmpty(data)) {
-            throw UnifiedException.gen(ExcelConstants.MODULE, "data 必须不为空");
+    public void exportData(List<?> oneRow, int rowIndex) {
+        if (EmptyUtil.isEmpty(oneRow)) {
+            throw UnifiedException.gen(ExcelConstants.MODULE, "oneRow 必须不为空");
         }
         // 组装数据
         Row row = this.getRow(rowIndex);
-        for (int i = 0; i < data.size(); i++) {
-            setCellValue(row.getRowNum(), i, data.get(i));
+        for (int i = 0; i < oneRow.size(); i++) {
+            setCellValue(row.getRowNum(), i, oneRow.get(i));
+        }
+    }
+
+    public void exportData(List<List<?>> rows) {
+        if (EmptyUtil.isEmpty(rows)) {
+            throw UnifiedException.gen(ExcelConstants.MODULE, "rows 必须不为空");
+        }
+        // 组装数据
+        for (List<?> oneRow : rows) {
+            Row row = this.getRow(this.getNextRowNum());
+            for (int i = 0; i < oneRow.size(); i++) {
+                setCellValue(row.getRowNum(), i, oneRow.get(i));
+            }
         }
     }
 
@@ -253,10 +273,7 @@ public class ExcelExportUtil extends ExcelSession {
     // 只导数据不导出标题
     public <C> void exportForward(@NonNull List<C> data, Class<C> type) {
         // 导出数据
-        int startRowIndex = this.getLastRowNum();
-        if (startRowIndex != 0 || !this.isEmptyRow(0)) {
-            startRowIndex++;
-        }
+        int startRowIndex = this.getNextRowNum();
         export(data, type, startRowIndex);
     }
 
