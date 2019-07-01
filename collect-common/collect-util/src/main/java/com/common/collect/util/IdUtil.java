@@ -44,14 +44,14 @@ public final class IdUtil implements Serializable {
     /**
      * Twitter_Snowflake,SnowFlake的结构如下(每部分用-分开):
      * <p>
-     * 0 - 0000000000 0000000000 0000000000 0000000000 000 - 00000 - 00000 - 0000000000
+     * 0 - 0000000000 0000000000 0000000000 0000000000 000 - 0000000000 - 0000000000
      * <p>
      * 1位标识，由于long基本类型在Java中是带符号的，最高位是符号位，正数是0，负数是1，所以id一般是正数，最高位是0
      * <p>
      * 43位时间戳(毫秒级)，注意，43位时间戳（当前时间戳 - 开始时间戳)得到的值，开始时间戳一般是我们的id生成器开始使用的时间，由我们程序来指定的（如下面程序类的 twEpoch 属性）。
      * 43位时间戳，可以使用278年，(1L << 43) / (1000L * 60 * 60 * 24 * 365) = 278
      * <p>
-     * 10位的数据机器位，可以部署在1024个节点，包括5位 dataCenterId 和5位 workerId
+     * 10位的数据机器位，可以部署在1024个节点
      * <p>
      * 10位序列，毫秒内的计数，支持每个节点每毫秒(同一机器，同一时间戳)产生1023个ID序号 加起来刚好64位，为一个 Long 型。
      * <p>
@@ -67,11 +67,8 @@ public final class IdUtil implements Serializable {
         /**
          * 机器id所占的位数
          */
-        private static final long workerIdBits = 5L;
-        /**
-         * 数据标识id所占的位数
-         */
-        private static final long dataCenterIdBits = 5L;
+        private static final long workerIdBits = 10L;
+
         /**
          * 序列在id中占的位数
          */
@@ -81,10 +78,7 @@ public final class IdUtil implements Serializable {
          * 支持的最大机器id (这个移位算法可以很快的计算出几位二进制数所能表示的最大十进制数)
          */
         private static final long maxWorkerId = ~(-1L << workerIdBits);
-        /**
-         * 支持的最大数据中心id，结果是31 （0x11111）
-         */
-        private static final long maxDataCenterId = ~(-1L << dataCenterIdBits);
+
         /**
          * 生成序列的掩码
          */
@@ -94,27 +88,22 @@ public final class IdUtil implements Serializable {
          * 机器ID向左移5位
          */
         private static final long workerIdLeftShift = sequenceBits;
-        /**
-         * 数据标识id向左移位数
-         */
-        private static final long dataCenterIdLeftShift = sequenceBits + workerIdBits;
+
         /**
          * 时间戳向左移位数
          */
-        private static final long timestampLeftShift = sequenceBits + workerIdBits + dataCenterIdBits;
+        private static final long timestampLeftShift = sequenceBits + workerIdBits;
 
         /**
-         * 工作机器ID(0~31)
+         * 工作机器ID(0~1024)
          */
         private long workerId;
-        /**
-         * 数据中心ID(0~31)
-         */
-        private long dataCenterId;
+
         /**
          * 毫秒内序列 2的sequenceBits次减1
          */
-        private long sequence = 0L;
+        private long sequence = -1L;
+
         /**
          * 上次生成ID的时间戳
          */
@@ -123,18 +112,13 @@ public final class IdUtil implements Serializable {
         /**
          * 构造函数
          *
-         * @param workerId     工作ID (0~31)
-         * @param dataCenterId 数据中心ID (0~31)
+         * @param workerId 工作ID (0~31)
          */
-        private SnowFlake(long workerId, long dataCenterId) {
+        private SnowFlake(long workerId) {
             if (workerId > maxWorkerId || workerId < 0) {
                 throw UnifiedException.gen(String.format("工作ID不能大于 %d 或者小于 0", maxWorkerId));
             }
-            if (dataCenterId > maxDataCenterId || dataCenterId < 0) {
-                throw UnifiedException.gen(String.format("数据中心ID不能大于 %d 或者小于 0", maxDataCenterId));
-            }
             this.workerId = workerId;
-            this.dataCenterId = dataCenterId;
         }
 
         /**
@@ -142,7 +126,6 @@ public final class IdUtil implements Serializable {
          */
         private static class SingletonInstance {
             private static long workId;
-            private static long dataCenterId;
 
             static {
                 // 配置比较麻烦 按服务器mac的属性做md5定workId值
@@ -163,16 +146,14 @@ public final class IdUtil implements Serializable {
                     // hash倒数10-5位
                     int hash = macAddress.hashCode();
                     log.info("初始化SnowFlake的 mac address:{}，hashCode:{}", macAddress, hash);
-                    dataCenterId = (hash >> workerIdBits) & maxDataCenterId;
-                    // hash倒数五位
                     workId = hash & maxWorkerId;
                 } catch (Exception ex) {
-                    throw UnifiedException.gen("初始化 workId 和 dataCenterId 失败!!", ex);
+                    throw UnifiedException.gen("初始化 workId 失败!!", ex);
                 }
-                log.info("初始化SnowFlake的 workId:{}，dataCenterId：{}", workId, dataCenterId);
+                log.info("初始化SnowFlake的 workId:{}", workId);
             }
 
-            private static SnowFlake SNOW_FLAKE = new SnowFlake(workId, dataCenterId);
+            private static SnowFlake SNOW_FLAKE = new SnowFlake(workId);
         }
 
         /**
@@ -213,7 +194,6 @@ public final class IdUtil implements Serializable {
 
             // 移位并通过或运算拼到一起组成64位的ID
             return ((timestamp - twEpoch) << timestampLeftShift) //
-                    | (snowFlake.dataCenterId << dataCenterIdLeftShift) //
                     | (snowFlake.workerId << workerIdLeftShift) //
                     | snowFlake.sequence;
         }

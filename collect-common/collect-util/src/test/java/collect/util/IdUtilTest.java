@@ -38,6 +38,7 @@ public class IdUtilTest {
             ids.add(id);
             time = System.currentTimeMillis();
         }
+        log.info("done");
         log.info("cost time:{} ms", time - beginTime - 1);
         log.info("sequence 达到最大值次数:{}", out);
         log.info("max size:{}, list size:{} , set size:{}", ms * (2 << (sequence - 1)), ids.size(), Sets.newHashSet(ids).size());
