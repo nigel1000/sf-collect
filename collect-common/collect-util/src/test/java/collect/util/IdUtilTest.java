@@ -32,7 +32,8 @@ public class IdUtilTest {
         String sequenceTail = String.join("", Collections.nCopies(sequence, "1"));
         for (; time - beginTime <= ms; ) {
             long id = IdUtil.snowflakeId();
-            if (sequenceTail.equals(Long.toBinaryString(id).substring(47, 57))) {
+            String binary = Long.toBinaryString(id);
+            if (sequenceTail.equals(binary.substring(binary.length() - 10))) {
                 out++;
             }
             ids.add(id);
