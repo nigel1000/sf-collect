@@ -95,7 +95,7 @@ public final class IdUtil implements Serializable {
         private static final long timestampLeftShift = sequenceBits + workerIdBits;
 
         /**
-         * 工作机器ID(0~1024)
+         * 工作机器ID(0~1023)
          */
         private long workerId;
 
@@ -112,7 +112,7 @@ public final class IdUtil implements Serializable {
         /**
          * 构造函数
          *
-         * @param workerId 工作ID (0~31)
+         * @param workerId 工作ID (0~1023)
          */
         private SnowFlake(long workerId) {
             if (workerId > maxWorkerId || workerId < 0) {
