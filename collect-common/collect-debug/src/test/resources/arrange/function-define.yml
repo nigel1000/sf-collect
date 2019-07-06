@@ -1,0 +1,45 @@
+
+functions_define:
+  # 功能 key
+  test_function:
+    # 功能 描述
+    function_desc: 对输入的参数进行叠加 返回 计算数字out2 和 总和out1
+    # 是否保存输入和返回
+    function_in_keep: true
+    function_out_keep: true
+    # 功能 类 优先使用 function_clazz_by_spring，次之 function_clazz_by_reflect
+    function_clazz_by_spring: functionClazz
+    function_clazz_by_reflect: collect.debug.arrange.FunctionClazz
+    # 功能 方法
+    function_method: testFunction
+    # 功能 方法 入参少于等于 1
+    function_method_type: inputLessEqualOne
+    function_method_in_clazz: collect.debug.arrange.FunctionTestContext
+    # 入参 关键属性 可为空 必须是 function_method_clazz 的 field
+    function_method_in_fields:
+      - in
+    # 导出来自 入参 input | 返回 output
+    function_method_out_from: input
+    #  返回 关键属性 可为空 必须是 function_method_clazz 的 field，生成 json 作为 下一个 function_name 的 function_method_in_json
+    function_method_out_fields:
+      - out1
+      - out2
+
+
+biz_define:
+  cal_sum:
+    arranges:
+      - type: function
+        name: test_function
+      # 类型是 biz 的 input 不能为空
+      - type: biz
+        name: cal_sub_sum
+        input: [out2->in]
+      - type: function
+        name: test_function
+        input: [out2->in]
+  cal_sub_sum:
+    arranges:
+      - type: function
+        name: test_function
+

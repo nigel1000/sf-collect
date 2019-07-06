@@ -4,6 +4,8 @@ import com.common.collect.api.excps.UnifiedException;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -59,6 +61,57 @@ public class ClassUtil {
         result.addAll(getSuperclasses(clazz.getSuperclass()));
         return result;
     }
+
+    public static Object newInstance(String clazz) {
+        try {
+            return getClass(clazz).newInstance();
+        } catch (Exception e) {
+            throw UnifiedException.gen(clazz + " class 无法初始化", e);
+        }
+    }
+
+    public static <T> T newInstance(Class<?> clazz) {
+        try {
+            return (T)clazz.newInstance();
+        } catch (Exception e) {
+            throw UnifiedException.gen(clazz + " class 无法初始化", e);
+        }
+    }
+
+    public static Method getDeclaredMethod(Class<?> clazz, String methodName, Class<?>... args) {
+        try {
+            return clazz.getDeclaredMethod(methodName, args);
+        } catch (Exception e) {
+            throw UnifiedException.gen(methodName + " 方法找不到", e);
+        }
+    }
+
+    public static Class<?> getClass(String clazz) {
+        try {
+            return Class.forName(clazz);
+        } catch (Exception e) {
+            throw UnifiedException.gen(clazz + " class 无法找到实例", e);
+        }
+    }
+
+    public static Object invoke(Object target, Method method, Object... args) {
+        try {
+            return method.invoke(target, args);
+        } catch (Exception e) {
+            throw UnifiedException.gen(" 调用方法失败 ", e);
+        }
+    }
+
+    public static Object getFieldValue(Object target, String name) {
+        try {
+            Field field = target.getClass().getDeclaredField(name);
+            field.setAccessible(true);
+            return field.get(target);
+        } catch (Exception e) {
+            throw UnifiedException.gen(" 获取属性失败 ", e);
+        }
+    }
+
 
     /**
      * 获得包下面的所有的class

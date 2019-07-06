@@ -19,6 +19,7 @@ import com.common.collect.container.excel.define.check.RegexCheckImportHandler;
 import com.common.collect.container.excel.define.check.RequireCheckImportHandler;
 import com.common.collect.container.excel.define.convert.ByTypeConvertExportHandler;
 import com.common.collect.container.excel.define.convert.ByTypeConvertImportHandler;
+import com.common.collect.util.ClassUtil;
 import com.common.collect.util.CollectionUtil;
 import com.common.collect.util.ConvertUtil;
 import com.common.collect.util.EmptyUtil;
@@ -267,27 +268,15 @@ public class ExcelContext {
     }
 
     public <C> C newInstance() {
-        try {
-            return (C) clazz.newInstance();
-        } catch (Exception e) {
-            throw UnifiedException.gen(ExcelConstants.MODULE, "新建" + clazz.getName() + "出错", e);
-        }
+        return ClassUtil.newInstance(clazz);
     }
 
     public void setFieldValue(String fieldName, Object target, Object value) {
-        try {
-            fieldSetMethodMap.get(fieldName).invoke(target, value);
-        } catch (Exception e) {
-            throw UnifiedException.gen(ExcelConstants.MODULE, "设值" + clazz.getName() + "出错", e);
-        }
+        ClassUtil.invoke(target, fieldSetMethodMap.get(fieldName), value);
     }
 
     public Object getFieldValue(String fieldName, Object target) {
-        try {
-            return fieldGetMethodMap.get(fieldName).invoke(target);
-        } catch (Exception e) {
-            throw UnifiedException.gen(ExcelConstants.MODULE, "取值" + clazz.getName() + "出错", e);
-        }
+        return ClassUtil.invoke(target, fieldGetMethodMap.get(fieldName));
     }
 
     public boolean isExport(String fieldName) {
