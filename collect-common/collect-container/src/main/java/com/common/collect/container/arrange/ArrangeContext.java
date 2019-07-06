@@ -95,13 +95,15 @@ public class ArrangeContext {
         }
         initExecuteChains(bizParamMap);
         ArrangeContext.bizParamMap.putAll(bizParamMap);
+        log.info("current biz param map :");
+        log.info("{}", ArrangeContext.bizParamMap);
     }
 
     private static List<String> currentBizKeys = new ArrayList<>();
 
     private static void initExecuteChains(Map<String, BizParam> bizParamMap) {
-        currentBizKeys.clear();
         for (Map.Entry<String, BizParam> entry : bizParamMap.entrySet()) {
+            currentBizKeys.clear();
             BizParam bizContext = entry.getValue();
             initExecuteChains(bizContext, bizParamMap);
         }
