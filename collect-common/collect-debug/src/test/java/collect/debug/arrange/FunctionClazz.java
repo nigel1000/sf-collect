@@ -16,7 +16,7 @@ public class FunctionClazz {
     private static int count = 1;
 
     public FunctionTestContext testFunction(FunctionTestContext context) {
-        log.info("param:{}", JsonUtil.bean2json(context));
+        log.info("FunctionClazz param:{}", JsonUtil.bean2json(context));
         FunctionTestContext ret = new FunctionTestContext();
         ret.setOut2(Lists.newArrayList(count++));
         return ret;

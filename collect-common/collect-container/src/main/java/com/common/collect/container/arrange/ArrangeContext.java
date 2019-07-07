@@ -74,10 +74,10 @@ public class ArrangeContext {
                 }
                 ret = ClassUtil.invoke(executeParam.getTarget(), executeParam.getMethod(), arg);
                 if (executeParam.getFunctionInKeep()) {
-                    retContext.putInputMap(executeParam.getFunctionKey() + "-" + i, arg == null ? "null" : arg);
+                    retContext.putInputMap(SplitUtil.join(executeParam.getBizKeyRoute(), "-") + "-" + executeParam.getFunctionKey() + "-" + i, arg == null ? "null" : arg);
                 }
                 if (executeParam.getFunctionOutKeep()) {
-                    retContext.putOutputMap(executeParam.getFunctionKey() + "-" + i, ret == null ? "null" : ret);
+                    retContext.putOutputMap(SplitUtil.join(executeParam.getBizKeyRoute(), "-") + "-" + executeParam.getFunctionKey() + "-" + i, ret == null ? "null" : ret);
                 }
             } else {
                 throw UnifiedException.gen(executeParam.getTarget().getClass().getName() + "#" + executeParam.getMethod().getName() + " 入参只能是一个");
@@ -96,54 +96,68 @@ public class ArrangeContext {
         initExecuteChains(bizParamMap);
         ArrangeContext.bizParamMap.putAll(bizParamMap);
         log.info("current biz param map :");
-        log.info("{}", ArrangeContext.bizParamMap);
+        log.info("{}", JsonUtil.bean2jsonPretty(ArrangeContext.bizParamMap));
     }
 
     private static List<String> currentBizKeys = new ArrayList<>();
 
     private static void initExecuteChains(Map<String, BizParam> bizParamMap) {
         for (Map.Entry<String, BizParam> entry : bizParamMap.entrySet()) {
-            currentBizKeys.clear();
+            currentBizKeys = new ArrayList<>();
             BizParam bizContext = entry.getValue();
             initExecuteChains(bizContext, bizParamMap);
         }
+        currentBizKeys = null;
     }
 
     private static void initExecuteChains(BizParam bizParam, Map<String, BizParam> bizParamMap) {
+        if (EmptyUtil.isNotEmpty(bizParam.getExecuteChains())) {
+            return;
+        }
         currentBizKeys.add(bizParam.getBizKey());
         int size = bizParam.getArranges().size();
         List<ExecuteParam> executeParamList = new ArrayList<>();
         for (int i = 0; i < size; i++) {
-            ArrangeParam context = bizParam.getArranges().get(i);
-            if (context.getType().equals(ArrangeTypeEnum.function.name())) {
-                FunctionParam functionContext = functionParamMap.get(context.getName());
+            ArrangeParam arrangeParam = bizParam.getArranges().get(i);
+            if (arrangeParam.getType().equals(ArrangeTypeEnum.function.name())) {
+                FunctionParam functionContext = functionParamMap.get(arrangeParam.getName());
                 if (functionContext == null) {
-                    throw UnifiedException.gen("biz: " + bizParam.getBizKey() + " 找不到 function:" + context.getName());
+                    throw UnifiedException.gen("biz: " + bizParam.getBizKey() + " 找不到 function:" + arrangeParam.getName());
                 }
                 ExecuteParam executeParam = ExecuteParam.gen(functionContext);
                 executeParam.setBizKey(bizParam.getBizKey());
-                fillInOutputMap(context, executeParam);
+                fillInOutputMap(arrangeParam, executeParam);
+                executeParam.setBizKeyRoute(Lists.newArrayList(bizParam.getBizKey()));
                 executeParamList.add(executeParam);
-            } else if (context.getType().equals(ArrangeTypeEnum.biz.name())) {
-                BizParam innerBizParam = bizParamMap.get(context.getName());
+            } else if (arrangeParam.getType().equals(ArrangeTypeEnum.biz.name())) {
+                BizParam innerBizParam = bizParamMap.get(arrangeParam.getName());
                 if (innerBizParam == null) {
-                    innerBizParam = ArrangeContext.bizParamMap.get(context.getName());
+                    innerBizParam = ArrangeContext.bizParamMap.get(arrangeParam.getName());
                 }
                 if (innerBizParam == null) {
-                    throw UnifiedException.gen("biz: " + bizParam.getBizKey() + " 找不到 biz:" + context.getName());
+                    throw UnifiedException.gen("biz: " + bizParam.getBizKey() + " 找不到 biz:" + arrangeParam.getName());
                 }
                 if (currentBizKeys.contains(innerBizParam.getBizKey())) {
+                    // 当前正在加载的被再次加载
                     currentBizKeys.add(innerBizParam.getBizKey());
                     throw UnifiedException.gen("有循环依赖 " + JsonUtil.bean2json(currentBizKeys));
                 }
                 initExecuteChains(innerBizParam, bizParamMap);
-                List<ExecuteParam> executeParams = Lists.newArrayList(bizParamMap.get(context.getName()).getExecuteChains());
+                // 拷贝一份 区分在不同biz中个别参数的异同
+                List<ExecuteParam> executeParams = ExecuteParam.copy(bizParamMap.get(arrangeParam.getName()).getExecuteChains());
                 ExecuteParam executeParam = executeParams.get(0);
-                fillInOutputMap(context, executeParam);
+                fillInOutputMap(arrangeParam, executeParam);
+                for (ExecuteParam param : executeParams) {
+                    List<String> routes = new ArrayList<>();
+                    routes.add(bizParam.getBizKey());
+                    routes.addAll(param.getBizKeyRoute());
+                    param.setBizKeyRoute(routes);
+                }
                 executeParamList.addAll(executeParams);
             }
         }
         bizParam.setExecuteChains(executeParamList);
+        currentBizKeys.remove(currentBizKeys.size() - 1);
     }
 
     private static void fillInOutputMap(ArrangeParam context, ExecuteParam executeParam) {

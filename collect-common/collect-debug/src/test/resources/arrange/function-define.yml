@@ -27,19 +27,40 @@ functions_define:
 
 
 biz_define:
-  cal_sum:
+  compose_biz_1:
     arranges:
       - type: function
         name: test_function
       # 类型是 biz 的 input 不能为空
       - type: biz
-        name: cal_sub_sum
+        name: sub_biz
         input: [out2->in]
       - type: function
         name: test_function
         input: [out2->in]
-  cal_sub_sum:
+      - type: biz
+        name: sub_biz
+        input: [out2->in]
+      - type: biz
+        name: sub_biz
+        input: [out2->in]
+  sub_biz:
     arranges:
       - type: function
         name: test_function
+  compose_biz_2:
+    arranges:
+      - type: function
+        name: test_function
+      # 类型是 biz 的 input 不能为空
+      - type: biz
+        name: sub_biz
+        input: [out2->in]
+      - type: function
+        name: test_function
+        input: [out2->in]
+      - type: biz
+        name: compose_biz_1
+        input: [out2->in]
+
 

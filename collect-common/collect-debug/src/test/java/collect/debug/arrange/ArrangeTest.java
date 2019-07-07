@@ -27,8 +27,8 @@ public class ArrangeTest {
         FunctionTestContext param = new FunctionTestContext();
         param.setIn(Lists.newArrayList(0));
 
-//        ArrangeRetContext context = ArrangeContext.runBiz("cal_sum", null);
-        ArrangeRetContext context = ArrangeContext.runBiz("cal_sum", JsonUtil.bean2json(param));
+//        ArrangeRetContext context = ArrangeContext.runBiz("compose_biz_2", null);
+        ArrangeRetContext context = ArrangeContext.runBiz("compose_biz_2", JsonUtil.bean2json(param));
 
         log.info(JsonUtil.bean2jsonPretty(context));
     }
