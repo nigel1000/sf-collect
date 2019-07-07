@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class FunctionClazz {
 
-    private static int count = 1;
+    private static int count = 0;
 
     public FunctionTestContext testFunction(FunctionTestContext context) {
         log.info("FunctionClazz param:{}", JsonUtil.bean2json(context));

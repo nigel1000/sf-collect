@@ -32,9 +32,12 @@ public class ArrangeTest {
         ArrangeRetContext context = ArrangeContext.runBiz("compose_biz_2", JsonUtil.bean2json(param));
 
         log.info(JsonUtil.bean2jsonPretty(context));
-
         FunctionTestContext ret = context.getLastRet();
         log.info(LogConstant.getObjString(ret));
+
+        ret = context.getByIndexFromMap(1, context.getOutputMap());
+        log.info(LogConstant.getObjString(ret));
+
     }
 
 }

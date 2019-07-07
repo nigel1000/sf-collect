@@ -83,6 +83,7 @@ public class ArrangeContext {
                 throw UnifiedException.gen(executeParam.getTarget().getClass().getName() + "#" + executeParam.getMethod().getName() + " 入参只能是一个");
             }
         }
+        retContext.setLastRet(ret);
         return retContext;
     }
 
