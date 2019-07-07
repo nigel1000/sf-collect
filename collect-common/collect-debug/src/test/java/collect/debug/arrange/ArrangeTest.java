@@ -1,6 +1,7 @@
 package collect.debug.arrange;
 
 import com.common.collect.container.JsonUtil;
+import com.common.collect.container.aops.LogConstant;
 import com.common.collect.container.arrange.ArrangeContext;
 import com.common.collect.container.arrange.ArrangeRetContext;
 import com.google.common.collect.Lists;
@@ -31,6 +32,9 @@ public class ArrangeTest {
         ArrangeRetContext context = ArrangeContext.runBiz("compose_biz_2", JsonUtil.bean2json(param));
 
         log.info(JsonUtil.bean2jsonPretty(context));
+
+        FunctionTestContext ret = context.getLastRet();
+        log.info(LogConstant.getObjString(ret));
     }
 
 }
