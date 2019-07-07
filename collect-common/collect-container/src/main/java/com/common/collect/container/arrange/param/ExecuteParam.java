@@ -2,6 +2,7 @@ package com.common.collect.container.arrange.param;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.common.collect.container.BeanUtil;
+import com.common.collect.container.arrange.enums.FunctionMethodOutFromEnum;
 import com.common.collect.container.arrange.enums.FunctionMethodTypeEnum;
 import com.common.collect.util.EmptyUtil;
 import com.google.common.collect.Lists;
@@ -25,6 +26,7 @@ public class ExecuteParam {
     private List<String> bizKeyRoute = new ArrayList<>();
     private String functionKey;
     private FunctionMethodTypeEnum functionMethodTypeEnum;
+    private FunctionMethodOutFromEnum functionMethodOutFromEnum;
     // 执行类
     @JSONField(serialize = false)
     private Object target;
@@ -48,6 +50,7 @@ public class ExecuteParam {
         ExecuteParam executeParam = new ExecuteParam();
         executeParam.setFunctionKey(functionParam.getFunctionKey());
         executeParam.setFunctionMethodTypeEnum(FunctionMethodTypeEnum.valueOf(functionParam.getFunctionMethodType()));
+        executeParam.setFunctionMethodOutFromEnum(FunctionMethodOutFromEnum.valueOf(functionParam.getFunctionMethodOutFrom()));
         executeParam.setTarget(functionParam.getFunctionClazz());
         Method method = functionParam.getMethod();
         executeParam.setMethod(method);

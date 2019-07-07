@@ -2,6 +2,7 @@ package com.common.collect.container.arrange.param;
 
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.SpringContextUtil;
+import com.common.collect.container.arrange.enums.FunctionMethodOutFromEnum;
 import com.common.collect.container.arrange.enums.FunctionMethodTypeEnum;
 import com.common.collect.util.ClassUtil;
 import com.common.collect.util.EmptyUtil;
@@ -58,9 +59,9 @@ public class FunctionParam {
         if (EmptyUtil.isEmpty(functionMethod)) {
             throw UnifiedException.gen("FunctionContext functionMethod 不能为空");
         }
-        if (EmptyUtil.isEmpty(functionMethodType)) {
-            throw UnifiedException.gen("FunctionContext functionMethodType 不能为空 ");
-        }
+        FunctionMethodTypeEnum.valueOf(functionMethodType);
+        FunctionMethodOutFromEnum.valueOf(functionMethodOutFrom);
+
         functionClazz = initFunctionClazz();
         method = initFunctionClazzMethod();
 

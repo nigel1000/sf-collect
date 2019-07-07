@@ -19,7 +19,7 @@ functions_define:
     function_method_in_fields:
       - in
     # 导出来自 入参 input | 返回 output
-    function_method_out_from: input
+    function_method_out_from: output
     #  返回 关键属性 可为空 必须是 function_method_clazz 的 field，生成 json 作为 下一个 function_name 的 function_method_in_json
     function_method_out_fields:
       - out1

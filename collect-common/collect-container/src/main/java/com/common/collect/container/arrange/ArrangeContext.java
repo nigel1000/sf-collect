@@ -10,6 +10,7 @@ import com.common.collect.container.JsonUtil;
 import com.common.collect.container.YamlUtil;
 import com.common.collect.container.arrange.constants.Constants;
 import com.common.collect.container.arrange.enums.ArrangeTypeEnum;
+import com.common.collect.container.arrange.enums.FunctionMethodOutFromEnum;
 import com.common.collect.container.arrange.enums.FunctionMethodTypeEnum;
 import com.common.collect.container.arrange.param.ArrangeParam;
 import com.common.collect.container.arrange.param.BizParam;
@@ -49,10 +50,10 @@ public class ArrangeContext {
         List<ExecuteParam> executeParams = bizContext.getExecuteChains();
         int size = executeParams.size();
         Object ret = null;
+        Object arg = null;
         for (int i = 0; i < size; i++) {
             ExecuteParam executeParam = executeParams.get(i);
             if (executeParam.getFunctionMethodTypeEnum().equals(FunctionMethodTypeEnum.inputLessEqualOne)) {
-                Object arg = null;
                 Class<?> paramType = executeParam.getParamTypes()[0];
                 if (i == 0) {
                     if (paramJson != null) {
@@ -60,16 +61,25 @@ public class ArrangeContext {
                     }
                 } else {
                     Map<String, Object> paramMap = new HashMap<>();
-                    if (ret != null) {
-                        Map<String, String> inOutMap = executeParam.getInOutMap();
-                        for (Map.Entry<String, String> entry : inOutMap.entrySet()) {
-                            String outField = entry.getKey();
-                            String inField = entry.getValue();
-                            paramMap.put(inField, ClassUtil.getFieldValue(ret, outField));
+                    Map<String, String> inOutMap = executeParam.getInOutMap();
+                    for (Map.Entry<String, String> entry : inOutMap.entrySet()) {
+                        String outField = entry.getKey();
+                        String inField = entry.getValue();
+                        FunctionMethodOutFromEnum outFrom = executeParam.getFunctionMethodOutFromEnum();
+                        if (outFrom.equals(FunctionMethodOutFromEnum.output)) {
+                            if (ret != null) {
+                                paramMap.put(inField, ClassUtil.getFieldValue(ret, outField));
+                            }
+                        } else if (outFrom.equals(FunctionMethodOutFromEnum.input)) {
+                            if (arg != null) {
+                                paramMap.put(inField, ClassUtil.getFieldValue(arg, outField));
+                            }
                         }
                     }
                     if (EmptyUtil.isNotEmpty(paramMap)) {
                         arg = JsonUtil.json2bean(JsonUtil.bean2json(paramMap), paramType);
+                    } else {
+                        arg = null;
                     }
                 }
                 ret = ClassUtil.invoke(executeParam.getTarget(), executeParam.getMethod(), arg);
