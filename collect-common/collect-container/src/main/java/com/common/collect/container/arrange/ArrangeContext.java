@@ -16,10 +16,7 @@ import com.common.collect.container.arrange.param.ArrangeParam;
 import com.common.collect.container.arrange.param.BizParam;
 import com.common.collect.container.arrange.param.ExecuteParam;
 import com.common.collect.container.arrange.param.FunctionParam;
-import com.common.collect.util.ClassUtil;
-import com.common.collect.util.ConvertUtil;
-import com.common.collect.util.EmptyUtil;
-import com.common.collect.util.SplitUtil;
+import com.common.collect.util.*;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -105,9 +102,43 @@ public class ArrangeContext {
             bizParamMap.putAll(initBiz((LinkedHashMap) content.get(Constants.biz_define)));
         }
         initExecuteChains(bizParamMap);
-        ArrangeContext.bizParamMap.putAll(bizParamMap);
+        Map<String, BizParam> allBizParamMap = new LinkedHashMap<>();
+        allBizParamMap.putAll(ArrangeContext.bizParamMap);
+        allBizParamMap.putAll(bizParamMap);
+        validAllBizContext(allBizParamMap);
+        ArrangeContext.bizParamMap = allBizParamMap;
         log.info("current biz param map :");
         log.info("{}", JsonUtil.bean2jsonPretty(ArrangeContext.bizParamMap));
+    }
+
+    private static void validAllBizContext(Map<String, BizParam> allBizParamMap) {
+        for (Map.Entry<String, BizParam> entry : allBizParamMap.entrySet()) {
+            BizParam bizParam = entry.getValue();
+            List<ExecuteParam> executeParams = bizParam.getExecuteChains();
+            ExecuteParam lastExecuteParam = null;
+            for (ExecuteParam executeParam : executeParams) {
+                FunctionParam functionParam = functionParamMap.get(executeParam.getFunctionKey());
+                List<String> inFields = NullUtil.validDefault(functionParam.getFunctionMethodInFields(), new ArrayList<>());
+                for (String in : executeParam.getInOutMap().values()) {
+                    if (!inFields.contains(in)) {
+                        throw UnifiedException.gen(SplitUtil.join(executeParam.getBizKeyRoute(), "#") + " 的 input " + in + " 属性设置有误");
+                    }
+                }
+                if (lastExecuteParam != null) {
+                    List<String> outFields = NullUtil.validDefault(functionParam.getFunctionMethodOutFields(), new ArrayList<>());
+                    for (String out : executeParam.getInOutMap().keySet()) {
+                        if (!outFields.contains(out)) {
+                            throw UnifiedException.gen(SplitUtil.join(executeParam.getBizKeyRoute(), "#") + " 的 input " + out + " 属性设置有误");
+                        }
+                    }
+                } else {
+                    if (EmptyUtil.isNotEmpty(executeParam.getInOutMap())) {
+                        throw UnifiedException.gen(SplitUtil.join(executeParam.getBizKeyRoute(), "#") + " 不能有 input ");
+                    }
+                }
+                lastExecuteParam = executeParam;
+            }
+        }
     }
 
     private static List<String> currentBizKeys = new ArrayList<>();
@@ -131,11 +162,11 @@ public class ArrangeContext {
         for (int i = 0; i < size; i++) {
             ArrangeParam arrangeParam = bizParam.getArranges().get(i);
             if (arrangeParam.getType().equals(ArrangeTypeEnum.function.name())) {
-                FunctionParam functionContext = functionParamMap.get(arrangeParam.getName());
-                if (functionContext == null) {
+                FunctionParam functionParam = functionParamMap.get(arrangeParam.getName());
+                if (functionParam == null) {
                     throw UnifiedException.gen("biz: " + bizParam.getBizKey() + " 找不到 function:" + arrangeParam.getName());
                 }
-                ExecuteParam executeParam = ExecuteParam.gen(functionContext);
+                ExecuteParam executeParam = ExecuteParam.gen(functionParam);
                 executeParam.setBizKey(bizParam.getBizKey());
                 fillInOutputMap(arrangeParam, executeParam);
                 executeParam.setBizKeyRoute(Lists.newArrayList(bizParam.getBizKey()));

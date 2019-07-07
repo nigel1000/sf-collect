@@ -60,7 +60,9 @@ public class FunctionParam {
             throw UnifiedException.gen("FunctionContext functionMethod 不能为空");
         }
         FunctionMethodTypeEnum.valueOf(functionMethodType);
-        FunctionMethodOutFromEnum.valueOf(functionMethodOutFrom);
+        if (EmptyUtil.isNotEmpty(functionMethodOutFrom) || EmptyUtil.isNotEmpty(functionMethodOutFields)) {
+            FunctionMethodOutFromEnum.valueOf(functionMethodOutFrom);
+        }
 
         functionClazz = initFunctionClazz();
         method = initFunctionClazzMethod();
@@ -93,6 +95,27 @@ public class FunctionParam {
                 int paramCount = method.getParameterCount();
                 if (paramCount > 1) {
                     throw UnifiedException.gen("方法参数多余一个");
+                }
+                // 校验输入输出属性存在
+                if (EmptyUtil.isNotEmpty(functionMethodInFields)) {
+                    if (paramCount != 1) {
+                        throw UnifiedException.gen(functionClazz.getClass().getName() + "#" + functionMethod + " 方法没有参数，不能设置 functionMethodInFields");
+                    }
+                    for (String functionMethodInField : functionMethodInFields) {
+                        ClassUtil.getField(method.getParameterTypes()[0], functionMethodInField);
+                    }
+                }
+                if (EmptyUtil.isNotEmpty(functionMethodOutFields)) {
+                    if (paramCount != 1) {
+                        throw UnifiedException.gen(functionClazz.getClass().getName() + "#" + functionMethod + " 方法没有参数，不能设置 functionMethodOutFields");
+                    }
+                    for (String functionMethodOutField : functionMethodOutFields) {
+                        if (FunctionMethodOutFromEnum.valueOf(functionMethodOutFrom).equals(FunctionMethodOutFromEnum.output)) {
+                            ClassUtil.getField(method.getReturnType(), functionMethodOutField);
+                        } else if (FunctionMethodOutFromEnum.valueOf(functionMethodOutFrom).equals(FunctionMethodOutFromEnum.input)) {
+                            ClassUtil.getField(method.getParameterTypes()[0], functionMethodOutField);
+                        }
+                    }
                 }
                 break;
             default:

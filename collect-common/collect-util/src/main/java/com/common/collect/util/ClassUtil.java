@@ -72,7 +72,7 @@ public class ClassUtil {
 
     public static <T> T newInstance(Class<?> clazz) {
         try {
-            return (T)clazz.newInstance();
+            return (T) clazz.newInstance();
         } catch (Exception e) {
             throw UnifiedException.gen(clazz + " class 无法初始化", e);
         }
@@ -108,10 +108,19 @@ public class ClassUtil {
             field.setAccessible(true);
             return field.get(target);
         } catch (Exception e) {
-            throw UnifiedException.gen(" 获取属性失败 ", e);
+            throw UnifiedException.gen(target.getClass().getName() + "#" + name + " 获取属性值失败 ", e);
         }
     }
 
+    public static Field getField(Class<?> clazz, String name) {
+        try {
+            Field field = clazz.getDeclaredField(name);
+            field.setAccessible(true);
+            return field;
+        } catch (Exception e) {
+            throw UnifiedException.gen(clazz.getName() + "#" + name + " 获取属性失败 ", e);
+        }
+    }
 
     /**
      * 获得包下面的所有的class

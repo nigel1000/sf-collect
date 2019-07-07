@@ -26,7 +26,6 @@ public class ExecuteParam {
     private List<String> bizKeyRoute = new ArrayList<>();
     private String functionKey;
     private FunctionMethodTypeEnum functionMethodTypeEnum;
-    private FunctionMethodOutFromEnum functionMethodOutFromEnum;
     // 执行类
     @JSONField(serialize = false)
     private Object target;
@@ -44,6 +43,7 @@ public class ExecuteParam {
     // 是否保存返回
     private Boolean functionOutKeep;
     // 方法参数 输入
+    private FunctionMethodOutFromEnum functionMethodOutFromEnum;
     private Map<String, String> inOutMap = new LinkedHashMap<>();
 
     public static ExecuteParam gen(FunctionParam functionParam) {
