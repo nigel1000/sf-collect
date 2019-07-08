@@ -16,12 +16,21 @@ import com.common.collect.container.arrange.param.ArrangeParam;
 import com.common.collect.container.arrange.param.BizParam;
 import com.common.collect.container.arrange.param.ExecuteParam;
 import com.common.collect.container.arrange.param.FunctionParam;
-import com.common.collect.util.*;
+import com.common.collect.util.ClassUtil;
+import com.common.collect.util.ConvertUtil;
+import com.common.collect.util.EmptyUtil;
+import com.common.collect.util.NullUtil;
+import com.common.collect.util.SplitUtil;
+import com.common.collect.util.StringUtil;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by nijianfeng on 2019/7/6.
@@ -91,6 +100,7 @@ public class ArrangeContext {
             }
         }
         retContext.setLastRet(ret);
+        retContext.setLastArg(arg);
         return retContext;
     }
 
@@ -105,10 +115,10 @@ public class ArrangeContext {
         Map<String, BizParam> allBizParamMap = new LinkedHashMap<>();
         allBizParamMap.putAll(ArrangeContext.bizParamMap);
         allBizParamMap.putAll(bizParamMap);
+        log.info("current biz param map :");
+        log.info("{}", JsonUtil.bean2jsonPretty(allBizParamMap));
         validAllBizContext(allBizParamMap);
         ArrangeContext.bizParamMap = allBizParamMap;
-        log.info("current biz param map :");
-        log.info("{}", JsonUtil.bean2jsonPretty(ArrangeContext.bizParamMap));
     }
 
     private static void validAllBizContext(Map<String, BizParam> allBizParamMap) {
@@ -121,6 +131,7 @@ public class ArrangeContext {
                 List<String> inFields = NullUtil.validDefault(functionParam.getFunctionMethodInFields(), new ArrayList<>());
                 for (String in : executeParam.getInOutMap().values()) {
                     if (!inFields.contains(in)) {
+                        log.warn("属性应该在此范围内:{}", JsonUtil.bean2json(inFields));
                         throw UnifiedException.gen(SplitUtil.join(executeParam.getBizKeyRoute(), "#") + " 的 input " + in + " 属性设置有误");
                     }
                 }
@@ -128,12 +139,9 @@ public class ArrangeContext {
                     List<String> outFields = NullUtil.validDefault(functionParam.getFunctionMethodOutFields(), new ArrayList<>());
                     for (String out : executeParam.getInOutMap().keySet()) {
                         if (!outFields.contains(out)) {
+                            log.warn("属性应该在此范围内:{}", JsonUtil.bean2json(outFields));
                             throw UnifiedException.gen(SplitUtil.join(executeParam.getBizKeyRoute(), "#") + " 的 input " + out + " 属性设置有误");
                         }
-                    }
-                } else {
-                    if (EmptyUtil.isNotEmpty(executeParam.getInOutMap())) {
-                        throw UnifiedException.gen(SplitUtil.join(executeParam.getBizKeyRoute(), "#") + " 不能有 input ");
                     }
                 }
                 lastExecuteParam = executeParam;
@@ -161,6 +169,11 @@ public class ArrangeContext {
         List<ExecuteParam> executeParamList = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             ArrangeParam arrangeParam = bizParam.getArranges().get(i);
+            if (i == 0 && arrangeParam.getType().equals(ArrangeTypeEnum.function.name())) {
+                if (EmptyUtil.isNotEmpty(arrangeParam.getInput())) {
+                    throw UnifiedException.gen(StringUtil.format("业务:{},第一个功能链的input:{}必须为空", bizParam.getBizKey(), arrangeParam.getInput()));
+                }
+            }
             if (arrangeParam.getType().equals(ArrangeTypeEnum.function.name())) {
                 FunctionParam functionParam = functionParamMap.get(arrangeParam.getName());
                 if (functionParam == null) {

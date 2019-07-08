@@ -18,6 +18,7 @@ public class ArrangeRetContext {
 
     public String bizKey;
     public Object lastRet;
+    public Object lastArg;
     private Map<String, Object> inputMap = new LinkedHashMap<>();
     private Map<String, Object> outputMap = new LinkedHashMap<>();
 

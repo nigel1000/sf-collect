@@ -1,10 +1,10 @@
 package collect.debug.arrange;
 
+import collect.debug.arrange.demo.ProductContext;
 import com.common.collect.container.JsonUtil;
 import com.common.collect.container.aops.LogConstant;
 import com.common.collect.container.arrange.ArrangeContext;
 import com.common.collect.container.arrange.ArrangeRetContext;
-import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -27,21 +27,25 @@ public class ArrangeTest {
         ArrangeContext.load(new ClassPathResource("arrange/function-define.yml").getInputStream());
 
         // 定义第一个入参
-        FunctionTestContext param = new FunctionTestContext();
-        param.setIn(Lists.newArrayList(0));
+        ProductContext param = new ProductContext();
+        param.setGoodsId(5882654L);
 
         // 启动一个业务调用链并传入入参
-//        ArrangeRetContext context = ArrangeContext.runBiz("compose_biz_2", null);
-        ArrangeRetContext context = ArrangeContext.runBiz("compose_biz_2", JsonUtil.bean2json(param));
+        ArrangeRetContext context = ArrangeContext.runBiz("biz_queryProductAll", JsonUtil.bean2json(param));
 
-        // 返回最后一个功能的返回
-        log.info(JsonUtil.bean2jsonPretty(context));
-        FunctionTestContext ret = context.getLastRet();
-        log.info(LogConstant.getObjString(ret));
+        log.info("最后一个入参：" + LogConstant.getObjString(context.getLastArg()));
+        // 返回最后一个入参
+        ProductContext in = context.getByIndexFromMap(context.getInputMap().size(), context.getInputMap());
+        log.info("最后一个入参：" + LogConstant.getObjString(in));
 
-        // 返回随意一个功能返回
-        ret = context.getByIndexFromMap(1, context.getOutputMap());
-        log.info(LogConstant.getObjString(ret));
+        log.info("最后一个返回：" + LogConstant.getObjString(context.getLastRet()));
+        // 返回最后一个返回
+        ProductContext out = context.getByIndexFromMap(context.getOutputMap().size(), context.getOutputMap());
+        log.info("最后一个返回：" + LogConstant.getObjString(out));
+
+        context = ArrangeContext.runBiz("biz_fillProductSkuAndSale", JsonUtil.bean2json(out));
+        log.info("最后一个入参：" + LogConstant.getObjString(context.getLastArg()));
+        log.info("最后一个返回：" + LogConstant.getObjString(context.getLastRet()));
 
     }
 

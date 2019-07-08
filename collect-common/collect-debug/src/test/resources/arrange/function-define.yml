@@ -1,66 +1,100 @@
 functions_define:
   # 功能 key
-  # 对输入的参数进行叠加 返回 计算数字out2 和 总和out1
-  test_function:
+  # 查询商品数据
+  fun_queryProduct:
     # 是否保存输入和返回
     function_in_keep: true
     function_out_keep: true
     # 功能 类 优先使用 function_clazz_by_spring，次之 function_clazz_by_reflect
-    function_clazz_by_spring: functionClazz
-    function_clazz_by_reflect: collect.debug.arrange.FunctionClazz
+    function_clazz_by_spring: productProvider
+    function_clazz_by_reflect: collect.debug.arrange.demo.ProductProvider
     # 功能 方法
-    function_method: testFunction
+    function_method: queryProduct
     # 功能 方法 入参少于等于 1
     function_method_type: inputLessEqualOne
-    function_method_in_clazz: collect.debug.arrange.FunctionTestContext
+    function_method_in_clazz: collect.debug.arrange.demo.ProductContext
     # 入参属性 可为空 必须是 function_method_in_clazz 的 field
     function_method_in_fields:
-    - in
+    - goodsId
     # 导出来自 入参 input | 返回 output
-    function_method_out_from: output
+    function_method_out_from: input
     # 返回属性 可为空 必须是 返回对象|入参对象 的 field，生成 json 作为 下一个 function_name 的 function_method_in_json
     function_method_out_fields:
-    - out2
+    - productModel
 
+  # 填充商品sku数据
+  fun_fillProductSku:
+    # 是否保存输入和返回
+    function_in_keep: true
+    function_out_keep: true
+    # 功能 类 优先使用 function_clazz_by_spring，次之 function_clazz_by_reflect
+    function_clazz_by_spring: productProvider
+    function_clazz_by_reflect: collect.debug.arrange.demo.ProductProvider
+    # 功能 方法
+    function_method: fillProductSku
+    # 功能 方法 入参少于等于 1
+    function_method_type: inputLessEqualOne
+    function_method_in_clazz: collect.debug.arrange.demo.ProductContext
+    # 入参属性 可为空 必须是 function_method_in_clazz 的 field
+    function_method_in_fields:
+    - productModel
+    # 导出来自 入参 input | 返回 output
+    function_method_out_from: input
+    # 返回属性 可为空 必须是 返回对象|入参对象 的 field，生成 json 作为 下一个 function_name 的 function_method_in_json
+    function_method_out_fields:
+    - productModel
+
+  # 填充商品sku销量数据
+  fun_fillProductSkuSale:
+    # 是否保存输入和返回
+    function_in_keep: true
+    function_out_keep: true
+    # 功能 类 优先使用 function_clazz_by_spring，次之 function_clazz_by_reflect
+    function_clazz_by_spring: productProvider
+    function_clazz_by_reflect: collect.debug.arrange.demo.ProductProvider
+    # 功能 方法
+    function_method: fillProductSkuSale
+    # 功能 方法 入参少于等于 1
+    function_method_type: inputLessEqualOne
+    function_method_in_clazz: collect.debug.arrange.demo.ProductContext
+    # 入参属性 可为空 必须是 function_method_in_clazz 的 field
+    function_method_in_fields:
+    - productModel
+    # 导出来自 入参 input | 返回 output
+    function_method_out_from: input
+    # 返回属性 可为空 必须是 返回对象|入参对象 的 field，生成 json 作为 下一个 function_name 的 function_method_in_json
+    function_method_out_fields:
+    - productModel
 
 biz_define:
-  # 业务 1
-  compose_biz_1:
+  # 获取全部数据
+  biz_queryProductAll:
     arranges:
     - type: function
-      name: test_function
+      name: fun_queryProduct
     # 类型是 biz 的 input 不能为空
     - type: biz
-      name: sub_biz
-      input: [out2->in]
-    - type: function
-      name: test_function
-      input: [out2->in]
-    - type: biz
-      name: sub_biz
-      input: [out2->in]
-    - type: biz
-      name: sub_biz
-      input: [out2->in]
-  # 业务 2
-  sub_biz:
-    arranges:
-    - type: function
-      name: test_function
+      name: biz_fillProductSkuAndSale
+      input: [productModel->productModel]
   # 业务 3
-  compose_biz_2:
+  biz_fillProductSkuAndSale:
+    arranges:
+    - type: biz
+      name: biz_fillProductSku
+      input: [productModel->productModel]
+    - type: biz
+      name: biz_fillProductSkuSale
+      input: [productModel->productModel]
+  # 业务 2
+  biz_fillProductSku:
     arranges:
     - type: function
-      name: test_function
-    # 类型是 biz 的 input 不能为空
-    - type: biz
-      name: sub_biz
-      input: [out2->in]
+      name: fun_fillProductSku
+  # 业务 3
+  biz_fillProductSkuSale:
+    arranges:
     - type: function
-      name: test_function
-      input: [out2->in]
-    - type: biz
-      name: compose_biz_1
-      input: [out2->in]
+      name: fun_fillProductSkuSale
+
 
 
