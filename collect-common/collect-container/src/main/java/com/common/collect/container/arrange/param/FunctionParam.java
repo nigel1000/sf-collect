@@ -19,8 +19,6 @@ public class FunctionParam {
 
     // 功能 key
     private String functionKey;
-    // 功能 描述
-    private String functionDesc;
     // 是否保存输入
     private Boolean functionInKeep;
     // 是否保存返回

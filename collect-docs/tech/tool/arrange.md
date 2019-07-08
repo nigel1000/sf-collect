@@ -1,3 +1,14 @@
+## 扩展点和使用点
+
+### 使用目标
+
+- 产品提起上线工单内容为业务定义，开发进行语法审核上预发，测试回归测试通过预发，leader审核上线，测试回归通过。
+
+### 扩展设计
+
+- 功能上可以加 事务或者降级等标签，看后续使用情况
+- 业务上可以按需打上标签以控制逻辑调用
+
 ## 解决的问题
 
 - 人员迭代导致的代码冗余，你我他都有自己的实现
@@ -46,9 +57,8 @@
 ```yaml
 functions_define:
   # 功能 key
+  # 对输入的参数进行叠加 返回 计算数字out2 和 总和out1
   test_function:
-    # 功能 描述
-    function_desc: 对输入的参数进行叠加 返回 计算数字out2 和 总和out1
     # 是否保存输入和返回
     function_in_keep: true
     function_out_keep: true
@@ -60,15 +70,14 @@ functions_define:
     # 功能 方法 入参少于等于 1
     function_method_type: inputLessEqualOne
     function_method_in_clazz: collect.debug.arrange.FunctionTestContext
-    # 入参 关键属性 可为空 必须是 function_method_clazz 的 field
+    # 入参属性 可为空 必须是 function_method_in_clazz 的 field
     function_method_in_fields:
-      - in
+    - in
     # 导出来自 入参 input | 返回 output
-    function_method_out_from: input
-    #  返回 关键属性 可为空 必须是 function_method_clazz 的 field，生成 json 作为 下一个 function_name 的 function_method_in_json
+    function_method_out_from: output
+    # 返回属性 可为空 必须是 返回对象|入参对象 的 field，生成 json 作为 下一个 function_name 的 function_method_in_json
     function_method_out_fields:
-      - out1
-      - out2
+    - out2
 
 ```
 
@@ -81,42 +90,44 @@ functions_define:
 ```yaml
 
 biz_define:
+  # 业务 1
   compose_biz_1:
     arranges:
-      - type: function
-        name: test_function
-      # 类型是 biz 的 input 不能为空
-      - type: biz
-        name: sub_biz
-        input: [out2->in]
-      - type: function
-        name: test_function
-        input: [out2->in]
-      - type: biz
-        name: sub_biz
-        input: [out2->in]
-      - type: biz
-        name: sub_biz
-        input: [out2->in]
+    - type: function
+      name: test_function
+    # 类型是 biz 的 input 不能为空
+    - type: biz
+      name: sub_biz
+      input: [out2->in]
+    - type: function
+      name: test_function
+      input: [out2->in]
+    - type: biz
+      name: sub_biz
+      input: [out2->in]
+    - type: biz
+      name: sub_biz
+      input: [out2->in]
+  # 业务 2
   sub_biz:
     arranges:
-      - type: function
-        name: test_function
+    - type: function
+      name: test_function
+  # 业务 3
   compose_biz_2:
     arranges:
-      - type: function
-        name: test_function
-      # 类型是 biz 的 input 不能为空
-      - type: biz
-        name: sub_biz
-        input: [out2->in]
-      - type: function
-        name: test_function
-        input: [out2->in]
-      - type: biz
-        name: compose_biz_1
-        input: [out2->in]
-
+    - type: function
+      name: test_function
+    # 类型是 biz 的 input 不能为空
+    - type: biz
+      name: sub_biz
+      input: [out2->in]
+    - type: function
+      name: test_function
+      input: [out2->in]
+    - type: biz
+      name: compose_biz_1
+      input: [out2->in]
 
 ```
 
