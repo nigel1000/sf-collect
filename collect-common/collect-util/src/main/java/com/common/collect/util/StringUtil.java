@@ -28,4 +28,15 @@ public class StringUtil {
         return oldString.replaceAll(regex, newString);
     }
 
+    public static String format(String str, Object... args) {
+        if (EmptyUtil.isEmpty(str) || args == null || args.length == 0) {
+            return str;
+        }
+        String ret = str;
+        for (Object arg : args) {
+            ret = ret.replaceFirst("\\{}", String.valueOf(arg));
+        }
+        return ret;
+    }
+
 }
