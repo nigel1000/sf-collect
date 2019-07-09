@@ -1,34 +1,19 @@
 package com.common.collect.container.arrange;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.NameFilter;
-import com.alibaba.fastjson.serializer.SerializeFilter;
-import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.alibaba.fastjson.serializer.ValueFilter;
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.JsonUtil;
-import com.common.collect.container.YamlUtil;
-import com.common.collect.container.arrange.constants.Constants;
-import com.common.collect.container.arrange.enums.ArrangeTypeEnum;
+import com.common.collect.container.arrange.context.BizContext;
+import com.common.collect.container.arrange.context.BizFunctionChain;
+import com.common.collect.container.arrange.context.ConfigContext;
 import com.common.collect.container.arrange.enums.FunctionMethodOutFromEnum;
 import com.common.collect.container.arrange.enums.FunctionMethodTypeEnum;
-import com.common.collect.container.arrange.param.ArrangeParam;
-import com.common.collect.container.arrange.param.BizParam;
-import com.common.collect.container.arrange.param.ExecuteParam;
-import com.common.collect.container.arrange.param.FunctionParam;
 import com.common.collect.util.ClassUtil;
-import com.common.collect.util.ConvertUtil;
 import com.common.collect.util.EmptyUtil;
-import com.common.collect.util.NullUtil;
 import com.common.collect.util.SplitUtil;
-import com.common.collect.util.StringUtil;
-import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,38 +25,33 @@ import java.util.Map;
 @Slf4j
 public class ArrangeContext {
 
-    private static Map<String, BizParam> bizParamMap = new LinkedHashMap<>();
-    private static Map<String, FunctionParam> functionParamMap = new LinkedHashMap<>();
 
     private ArrangeContext() {
     }
 
     public static ArrangeRetContext runBiz(String bizKey, String paramJson) {
-        BizParam bizContext = bizParamMap.get(bizKey);
-        if (bizContext == null) {
-            throw UnifiedException.gen("不存在此业务编排 " + bizKey);
-        }
+        BizContext bizContext = BizContext.getBizContextByKey(bizKey);
         ArrangeRetContext retContext = new ArrangeRetContext();
         retContext.setBizKey(bizContext.getBizKey());
-        List<ExecuteParam> executeParams = bizContext.getExecuteChains();
-        int size = executeParams.size();
+        List<BizFunctionChain> bizFunctionChains = bizContext.getBizFunctionChains();
+        int size = bizFunctionChains.size();
         Object ret = null;
         Object arg = null;
         for (int i = 0; i < size; i++) {
-            ExecuteParam executeParam = executeParams.get(i);
-            if (executeParam.getFunctionMethodTypeEnum().equals(FunctionMethodTypeEnum.inputLessEqualOne)) {
-                Class<?> paramType = executeParam.getParamTypes()[0];
+            BizFunctionChain bizFunctionChain = bizFunctionChains.get(i);
+            if (bizFunctionChain.getFunctionMethodTypeEnum().equals(FunctionMethodTypeEnum.inputLessEqualOne)) {
+                Class<?> paramType = bizFunctionChain.getParamTypes()[0];
                 if (i == 0) {
                     if (paramJson != null) {
                         arg = JsonUtil.json2bean(paramJson, paramType);
                     }
                 } else {
                     Map<String, Object> paramMap = new HashMap<>();
-                    Map<String, String> inOutMap = executeParam.getInOutMap();
+                    Map<String, String> inOutMap = bizFunctionChain.getInOutMap();
                     for (Map.Entry<String, String> entry : inOutMap.entrySet()) {
                         String outField = entry.getKey();
                         String inField = entry.getValue();
-                        FunctionMethodOutFromEnum outFrom = executeParam.getFunctionMethodOutFromEnum();
+                        FunctionMethodOutFromEnum outFrom = bizFunctionChain.getFunctionMethodOutFromEnum();
                         if (outFrom.equals(FunctionMethodOutFromEnum.output)) {
                             if (ret != null) {
                                 paramMap.put(inField, ClassUtil.getFieldValue(ret, outField));
@@ -88,15 +68,15 @@ public class ArrangeContext {
                         arg = null;
                     }
                 }
-                ret = ClassUtil.invoke(executeParam.getTarget(), executeParam.getMethod(), arg);
-                if (executeParam.getFunctionInKeep()) {
-                    retContext.putInputMap(SplitUtil.join(executeParam.getBizKeyRoute(), "-") + "-" + executeParam.getFunctionKey() + "-" + i, arg == null ? "null" : arg);
+                ret = ClassUtil.invoke(bizFunctionChain.getTarget(), bizFunctionChain.getMethod(), arg);
+                if (bizFunctionChain.getFunctionInKeep()) {
+                    retContext.putInputMap(SplitUtil.join(bizFunctionChain.getBizKeyRoute(), "-") + "-" + bizFunctionChain.getFunctionKey() + "-" + i, arg == null ? "null" : arg);
                 }
-                if (executeParam.getFunctionOutKeep()) {
-                    retContext.putOutputMap(SplitUtil.join(executeParam.getBizKeyRoute(), "-") + "-" + executeParam.getFunctionKey() + "-" + i, ret == null ? "null" : ret);
+                if (bizFunctionChain.getFunctionOutKeep()) {
+                    retContext.putOutputMap(SplitUtil.join(bizFunctionChain.getBizKeyRoute(), "-") + "-" + bizFunctionChain.getFunctionKey() + "-" + i, ret == null ? "null" : ret);
                 }
             } else {
-                throw UnifiedException.gen(executeParam.getTarget().getClass().getName() + "#" + executeParam.getMethod().getName() + " 入参只能是一个");
+                throw UnifiedException.gen(bizFunctionChain.getTarget().getClass().getName() + "#" + bizFunctionChain.getMethod().getName() + " 入参只能是一个");
             }
         }
         retContext.setLastRet(ret);
@@ -105,172 +85,7 @@ public class ArrangeContext {
     }
 
     public synchronized static void load(Object... obj) {
-        Map<String, BizParam> bizParamMap = new LinkedHashMap<>();
-        for (Object o : obj) {
-            LinkedHashMap content = YamlUtil.parse(o);
-            functionParamMap.putAll(initFunctions((LinkedHashMap) content.get(Constants.functions_define)));
-            bizParamMap.putAll(initBiz((LinkedHashMap) content.get(Constants.biz_define)));
-        }
-        initExecuteChains(bizParamMap);
-        Map<String, BizParam> allBizParamMap = new LinkedHashMap<>();
-        allBizParamMap.putAll(ArrangeContext.bizParamMap);
-        allBizParamMap.putAll(bizParamMap);
-        log.info("current biz param map :");
-        log.info("{}", JsonUtil.bean2jsonPretty(allBizParamMap));
-        validAllBizContext(allBizParamMap);
-        ArrangeContext.bizParamMap = allBizParamMap;
-    }
-
-    private static void validAllBizContext(Map<String, BizParam> allBizParamMap) {
-        for (Map.Entry<String, BizParam> entry : allBizParamMap.entrySet()) {
-            BizParam bizParam = entry.getValue();
-            List<ExecuteParam> executeParams = bizParam.getExecuteChains();
-            ExecuteParam lastExecuteParam = null;
-            for (ExecuteParam executeParam : executeParams) {
-                FunctionParam functionParam = functionParamMap.get(executeParam.getFunctionKey());
-                List<String> inFields = NullUtil.validDefault(functionParam.getFunctionMethodInFields(), new ArrayList<>());
-                for (String in : executeParam.getInOutMap().values()) {
-                    if (!inFields.contains(in)) {
-                        log.warn("属性应该在此范围内:{}", JsonUtil.bean2json(inFields));
-                        throw UnifiedException.gen(SplitUtil.join(executeParam.getBizKeyRoute(), "#") + " 的 input " + in + " 属性设置有误");
-                    }
-                }
-                if (lastExecuteParam != null) {
-                    List<String> outFields = NullUtil.validDefault(functionParam.getFunctionMethodOutFields(), new ArrayList<>());
-                    for (String out : executeParam.getInOutMap().keySet()) {
-                        if (!outFields.contains(out)) {
-                            log.warn("属性应该在此范围内:{}", JsonUtil.bean2json(outFields));
-                            throw UnifiedException.gen(SplitUtil.join(executeParam.getBizKeyRoute(), "#") + " 的 input " + out + " 属性设置有误");
-                        }
-                    }
-                }
-                lastExecuteParam = executeParam;
-            }
-        }
-    }
-
-    private static List<String> currentBizKeys = new ArrayList<>();
-
-    private static void initExecuteChains(Map<String, BizParam> bizParamMap) {
-        for (Map.Entry<String, BizParam> entry : bizParamMap.entrySet()) {
-            currentBizKeys = new ArrayList<>();
-            BizParam bizContext = entry.getValue();
-            initExecuteChains(bizContext, bizParamMap);
-        }
-        currentBizKeys = null;
-    }
-
-    private static void initExecuteChains(BizParam bizParam, Map<String, BizParam> bizParamMap) {
-        if (EmptyUtil.isNotEmpty(bizParam.getExecuteChains())) {
-            return;
-        }
-        currentBizKeys.add(bizParam.getBizKey());
-        int size = bizParam.getArranges().size();
-        List<ExecuteParam> executeParamList = new ArrayList<>();
-        for (int i = 0; i < size; i++) {
-            ArrangeParam arrangeParam = bizParam.getArranges().get(i);
-            if (i == 0 && arrangeParam.getType().equals(ArrangeTypeEnum.function.name())) {
-                if (EmptyUtil.isNotEmpty(arrangeParam.getInput())) {
-                    throw UnifiedException.gen(StringUtil.format("业务:{},第一个功能链的input:{}必须为空", bizParam.getBizKey(), arrangeParam.getInput()));
-                }
-            }
-            if (arrangeParam.getType().equals(ArrangeTypeEnum.function.name())) {
-                FunctionParam functionParam = functionParamMap.get(arrangeParam.getName());
-                if (functionParam == null) {
-                    throw UnifiedException.gen("biz: " + bizParam.getBizKey() + " 找不到 function:" + arrangeParam.getName());
-                }
-                ExecuteParam executeParam = ExecuteParam.gen(functionParam);
-                executeParam.setBizKey(bizParam.getBizKey());
-                fillInOutputMap(arrangeParam, executeParam);
-                executeParam.setBizKeyRoute(Lists.newArrayList(bizParam.getBizKey()));
-                executeParamList.add(executeParam);
-            } else if (arrangeParam.getType().equals(ArrangeTypeEnum.biz.name())) {
-                BizParam innerBizParam = bizParamMap.get(arrangeParam.getName());
-                if (innerBizParam == null) {
-                    innerBizParam = ArrangeContext.bizParamMap.get(arrangeParam.getName());
-                }
-                if (innerBizParam == null) {
-                    throw UnifiedException.gen("biz: " + bizParam.getBizKey() + " 找不到 biz:" + arrangeParam.getName());
-                }
-                if (currentBizKeys.contains(innerBizParam.getBizKey())) {
-                    // 当前正在加载的被再次加载
-                    currentBizKeys.add(innerBizParam.getBizKey());
-                    throw UnifiedException.gen("有循环依赖 " + JsonUtil.bean2json(currentBizKeys));
-                }
-                initExecuteChains(innerBizParam, bizParamMap);
-                // 拷贝一份 区分在不同biz中个别参数的异同
-                List<ExecuteParam> executeParams = ExecuteParam.copy(bizParamMap.get(arrangeParam.getName()).getExecuteChains());
-                ExecuteParam executeParam = executeParams.get(0);
-                fillInOutputMap(arrangeParam, executeParam);
-                for (ExecuteParam param : executeParams) {
-                    List<String> routes = new ArrayList<>();
-                    routes.add(bizParam.getBizKey());
-                    routes.addAll(param.getBizKeyRoute());
-                    param.setBizKeyRoute(routes);
-                }
-                executeParamList.addAll(executeParams);
-            }
-        }
-        bizParam.setExecuteChains(executeParamList);
-        currentBizKeys.remove(currentBizKeys.size() - 1);
-    }
-
-    private static void fillInOutputMap(ArrangeParam context, ExecuteParam executeParam) {
-        if (EmptyUtil.isNotEmpty(context.getInput())) {
-            for (String input : context.getInput()) {
-                List<String> inOutput = SplitUtil.split(input, Constants.input_split, (t) -> t);
-                if (inOutput.size() != 2) {
-                    throw UnifiedException.gen("biz: " + executeParam.getBizKey() + " input:" + input + "不合法");
-                }
-                executeParam.putInOutputMap(inOutput.get(0), inOutput.get(1));
-            }
-        }
-    }
-
-    private static Map<String, FunctionParam> initFunctions(LinkedHashMap functionDefines) {
-        Map<String, FunctionParam> functionContextMap = new LinkedHashMap<>();
-        if (EmptyUtil.isEmpty(functionDefines)) {
-            return functionContextMap;
-        }
-//        log.info("function init start");
-        for (Object obj : functionDefines.keySet()) {
-            String key = (String) obj;
-            Object value = functionDefines.get(key);
-            FunctionParam functionContext = parse(JsonUtil.bean2json(value), FunctionParam.class);
-            functionContext.setFunctionKey(key);
-//            log.info("function {} , functionContext:{}", key, JsonUtil.bean2jsonPretty(functionContext));
-            functionContext.validSelf();
-            functionContextMap.put(key, functionContext);
-        }
-        return functionContextMap;
-    }
-
-    private static Map<String, BizParam> initBiz(LinkedHashMap bizDefines) {
-        Map<String, BizParam> bizContextMap = new LinkedHashMap<>();
-        if (EmptyUtil.isEmpty(bizDefines)) {
-            return bizContextMap;
-        }
-//        log.info("biz init start");
-        for (Object obj : bizDefines.keySet()) {
-            String key = (String) obj;
-            Object value = bizDefines.get(key);
-            BizParam bizContext = parse(JsonUtil.bean2json(value), BizParam.class);
-            bizContext.setBizKey(key);
-//            log.info("biz {} , bizContext:{}", key, JsonUtil.bean2jsonPretty(bizContext));
-            bizContext.validSelf();
-            bizContextMap.put(key, bizContext);
-        }
-        return bizContextMap;
-
-    }
-
-    private static <T> T parse(String text, Class<T> clazz) {
-        NameFilter name2CamelCaseFilter = (object, name, value) -> ConvertUtil.underline2Camel(name);
-        ValueFilter valueFilter = (object, name, value) -> value;
-        SerializeFilter[] serializeFilters = new SerializeFilter[]{name2CamelCaseFilter, valueFilter};
-        return JSON.parseObject(
-                JSON.toJSONString(JSON.parse(text), serializeFilters, SerializerFeature.DisableCircularReferenceDetect),
-                clazz);
+        ConfigContext.load(obj);
     }
 
 }

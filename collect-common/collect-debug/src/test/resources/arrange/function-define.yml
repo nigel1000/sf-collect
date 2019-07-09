@@ -3,35 +3,44 @@ functions_define:
   # 查询商品数据
   fun_queryProduct:
     # 是否保存输入和返回
+    # 可为空 默认为false
     function_in_keep: true
     function_out_keep: true
-    # 功能 类 优先使用 function_clazz_by_spring，次之 function_clazz_by_reflect
-    function_clazz_by_spring: productProvider
-    function_clazz_by_reflect: collect.debug.arrange.demo.ProductProvider
+    # 功能 类实例获取方式 springByName|reflect
+    # 可为空 默认 springByName
+    function_clazz_type: springByName
+    function_clazz_key: productProvider
+    #function_clazz_key: collect.debug.arrange.demo.ProductProvider
     # 功能 方法
-    function_method: queryProduct
-    # 功能 方法 入参少于等于 1
+    function_method_name: queryProduct
+    # 功能 方法
+    # 可为空 默认为 inputLessEqualOne 入参少于等于 1
     function_method_type: inputLessEqualOne
     function_method_in_clazz: collect.debug.arrange.demo.ProductContext
-    # 入参属性 可为空 必须是 function_method_in_clazz 的 field
+    # 入参属性 必须是 function_method_in_clazz 的 field
+    # 可为空
     function_method_in_fields:
     - goodsId
     # 导出来自 入参 input | 返回 output
+    # 可为空 默认为 output
     function_method_out_from: input
-    # 返回属性 可为空 必须是 返回对象|入参对象 的 field，生成 json 作为 下一个 function_name 的 function_method_in_json
+    # 返回属性 必须是 返回对象|入参对象 的 field
+    # 可为空
     function_method_out_fields:
     - productModel
 
   # 填充商品sku数据
   fun_fillProductSku:
     # 是否保存输入和返回
+    # 可为空 默认为false
     function_in_keep: true
     function_out_keep: true
-    # 功能 类 优先使用 function_clazz_by_spring，次之 function_clazz_by_reflect
-    function_clazz_by_spring: productProvider
-    function_clazz_by_reflect: collect.debug.arrange.demo.ProductProvider
-    # 功能 方法
-    function_method: fillProductSku
+    # 功能 类实例获取方式 springByName|reflect
+    # 可为空 默认 springByName
+    function_clazz_type: springByName
+    function_clazz_key: productProvider
+    #function_clazz_key: collect.debug.arrange.demo.ProductProvider
+    function_method_name: fillProductSku
     # 功能 方法 入参少于等于 1
     function_method_type: inputLessEqualOne
     function_method_in_clazz: collect.debug.arrange.demo.ProductContext
@@ -47,13 +56,16 @@ functions_define:
   # 填充商品sku销量数据
   fun_fillProductSkuSale:
     # 是否保存输入和返回
+    # 可为空 默认为false
     function_in_keep: true
     function_out_keep: true
-    # 功能 类 优先使用 function_clazz_by_spring，次之 function_clazz_by_reflect
-    function_clazz_by_spring: productProvider
-    function_clazz_by_reflect: collect.debug.arrange.demo.ProductProvider
+    # 功能 类实例获取方式 springByName|reflect
+    # 可为空 默认 springByName
+    function_clazz_type: springByName
+    function_clazz_key: productProvider
+    #function_clazz_key: collect.debug.arrange.demo.ProductProvider
     # 功能 方法
-    function_method: fillProductSkuSale
+    function_method_name: fillProductSkuSale
     # 功能 方法 入参少于等于 1
     function_method_type: inputLessEqualOne
     function_method_in_clazz: collect.debug.arrange.demo.ProductContext
@@ -69,6 +81,9 @@ functions_define:
 biz_define:
   # 获取全部数据
   biz_queryProductAll:
+    # 是否保存配置数据
+    # 可为空 默认为false
+    save_model: true
     arranges:
     - type: function
       name: fun_queryProduct
@@ -92,6 +107,8 @@ biz_define:
       name: fun_fillProductSku
   # 业务 3
   biz_fillProductSkuSale:
+    # 是否保存配置数据
+    save_model: false
     arranges:
     - type: function
       name: fun_fillProductSkuSale

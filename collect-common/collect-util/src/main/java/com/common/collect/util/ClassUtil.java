@@ -66,7 +66,7 @@ public class ClassUtil {
         try {
             return getClass(clazz).newInstance();
         } catch (Exception e) {
-            throw UnifiedException.gen(clazz + " class 无法初始化", e);
+            throw UnifiedException.gen(StringUtil.format(" {} 无法初始化", clazz), e);
         }
     }
 
@@ -74,7 +74,7 @@ public class ClassUtil {
         try {
             return (T) clazz.newInstance();
         } catch (Exception e) {
-            throw UnifiedException.gen(clazz + " class 无法初始化", e);
+            throw UnifiedException.gen(StringUtil.format(" {} 无法初始化", clazz.getName()), e);
         }
     }
 
@@ -82,7 +82,7 @@ public class ClassUtil {
         try {
             return clazz.getDeclaredMethod(methodName, args);
         } catch (Exception e) {
-            throw UnifiedException.gen(methodName + " 方法找不到", e);
+            throw UnifiedException.gen(StringUtil.format("class:{},method:{},找不到", clazz.getName(), methodName), e);
         }
     }
 
@@ -90,7 +90,7 @@ public class ClassUtil {
         try {
             return Class.forName(clazz);
         } catch (Exception e) {
-            throw UnifiedException.gen(clazz + " class 无法找到实例", e);
+            throw UnifiedException.gen(StringUtil.format(" {} 无法找到类定义", clazz), e);
         }
     }
 
@@ -98,7 +98,7 @@ public class ClassUtil {
         try {
             return method.invoke(target, args);
         } catch (Exception e) {
-            throw UnifiedException.gen(" 调用方法失败 ", e);
+            throw UnifiedException.gen(StringUtil.format(" class:{},method:{} 调用方法失败", target.getClass().getName(), method.getName()), e);
         }
     }
 
@@ -108,7 +108,7 @@ public class ClassUtil {
             field.setAccessible(true);
             return field.get(target);
         } catch (Exception e) {
-            throw UnifiedException.gen(target.getClass().getName() + "#" + name + " 获取属性值失败 ", e);
+            throw UnifiedException.gen(StringUtil.format(" class:{},field:{} 获取属性值失败", target.getClass().getName(), name), e);
         }
     }
 
@@ -118,7 +118,7 @@ public class ClassUtil {
             field.setAccessible(true);
             return field;
         } catch (Exception e) {
-            throw UnifiedException.gen(clazz.getName() + "#" + name + " 获取属性失败 ", e);
+            throw UnifiedException.gen(StringUtil.format(" class:{},field:{} 获取属性值失败", clazz.getName(), name), e);
         }
     }
 

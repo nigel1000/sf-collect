@@ -10,4 +10,7 @@ public class Constants {
 
     public static final String input_split = "->";
 
+    public static final String thread_local_current_biz_key = "current_biz_key";
+
+
 }
