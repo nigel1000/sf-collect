@@ -40,9 +40,12 @@ public class ArrangeContext {
         for (int i = 0; i < size; i++) {
             BizFunctionChain bizFunctionChain = bizFunctionChains.get(i);
             if (bizFunctionChain.getFunctionMethodTypeEnum().equals(FunctionMethodTypeEnum.inputLessEqualOne)) {
-                Class<?> paramType = bizFunctionChain.getParamTypes()[0];
+                Class<?> paramType = null;
+                if (bizFunctionChain.getParamCount() == 1) {
+                    paramType = bizFunctionChain.getParamTypes()[0];
+                }
                 if (i == 0) {
-                    if (paramJson != null) {
+                    if (paramJson != null && paramType != null) {
                         arg = JsonUtil.json2bean(paramJson, paramType);
                     }
                 } else {
@@ -62,7 +65,7 @@ public class ArrangeContext {
                             }
                         }
                     }
-                    if (EmptyUtil.isNotEmpty(paramMap)) {
+                    if (EmptyUtil.isNotEmpty(paramMap) && paramType != null) {
                         arg = JsonUtil.json2bean(JsonUtil.bean2json(paramMap), paramType);
                     } else {
                         arg = null;

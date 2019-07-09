@@ -14,6 +14,7 @@ import com.common.collect.container.arrange.model.FunctionDefineModel;
 import com.common.collect.util.ConvertUtil;
 import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.StringUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -22,6 +23,7 @@ import java.util.Map;
  * Created by hznijianfeng on 2019/7/9.
  */
 
+@Slf4j
 public class ConfigContext {
 
     private static Map<String, FunctionDefineModel> functionDefineModelMap = new LinkedHashMap<>();
@@ -37,6 +39,8 @@ public class ConfigContext {
             Map<String, BizDefineModel> bizDefineModelMap = parseBizDefine((LinkedHashMap) content.get(Constants.biz_define));
             allBizDefineModelMap.putAll(bizDefineModelMap);
         }
+        log.info("current function context map :");
+        log.info("{}", JsonUtil.bean2jsonPretty(ConfigContext.functionDefineModelMap));
         // 添加到内存中
         BizContext.add2BizContextMap(allBizDefineModelMap);
     }

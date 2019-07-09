@@ -12,6 +12,7 @@ import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.StringUtil;
 import lombok.Data;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -95,18 +96,26 @@ public class FunctionDefineModel {
         }
 
         if (EmptyUtil.isNotEmpty(functionMethodInClazz)) {
-            ClassUtil.getClass(functionMethodInClazz);
-        }
-
-        if (EmptyUtil.isEmpty(functionMethodInFields)) {
+            Class<?> paramType = ClassUtil.getClass(functionMethodInClazz);
+            if (EmptyUtil.isEmpty(functionMethodInFields)) {
+                functionMethodInFields = new ArrayList<>();
+                for (Field declaredField : paramType.getDeclaredFields()) {
+                    functionMethodInFields.add(declaredField.getName());
+                }
+            }
+        } else {
             functionMethodInFields = new ArrayList<>();
-        }
-        if (EmptyUtil.isEmpty(functionMethodOutFields)) {
-            functionMethodOutFields = new ArrayList<>();
         }
 
         functionClazz = FunctionClazzFactory.getInstance(this);
         functionMethod = FunctionMethodFactory.getInstance(this);
+        Class<?> returnType = functionMethod.getReturnType();
+        if (EmptyUtil.isEmpty(functionMethodOutFields)) {
+            functionMethodOutFields = new ArrayList<>();
+            for (Field declaredField : returnType.getDeclaredFields()) {
+                functionMethodOutFields.add(declaredField.getName());
+            }
+        }
 
     }
 

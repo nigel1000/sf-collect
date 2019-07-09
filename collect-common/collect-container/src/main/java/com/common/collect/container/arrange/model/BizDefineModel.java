@@ -14,7 +14,6 @@ import java.util.List;
 public class BizDefineModel {
 
     private String bizKey;
-    private Boolean saveModel;
     private List<BizDefineArrangeModel> arranges;
 
     public void validSelf() {
@@ -23,9 +22,6 @@ public class BizDefineModel {
         }
         if (EmptyUtil.isEmpty(arranges)) {
             throw UnifiedException.gen(" arranges 不能为空");
-        }
-        if (saveModel == null) {
-            saveModel = false;
         }
 
         for (BizDefineArrangeModel arrange : arranges) {

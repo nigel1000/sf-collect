@@ -18,88 +18,72 @@ functions_define:
     function_method_type: inputLessEqualOne
     function_method_in_clazz: collect.debug.arrange.demo.ProductContext
     # 入参属性 必须是 function_method_in_clazz 的 field
-    # 可为空
+    # 可为空 默认全部
     function_method_in_fields:
-    - goodsId
+    #    - goodsId
     # 导出来自 入参 input | 返回 output
     # 可为空 默认为 output
     function_method_out_from: input
     # 返回属性 必须是 返回对象|入参对象 的 field
-    # 可为空
+    # 可为空 默认全部
     function_method_out_fields:
-    - productModel
+  #    - productModel
 
   # 填充商品sku数据
   fun_fillProductSku:
-    # 是否保存输入和返回
-    # 可为空 默认为false
     function_in_keep: true
     function_out_keep: true
-    # 功能 类实例获取方式 springByName|reflect
-    # 可为空 默认 springByName
     function_clazz_type: springByName
     function_clazz_key: productProvider
-    #function_clazz_key: collect.debug.arrange.demo.ProductProvider
     function_method_name: fillProductSku
-    # 功能 方法 入参少于等于 1
     function_method_type: inputLessEqualOne
     function_method_in_clazz: collect.debug.arrange.demo.ProductContext
-    # 入参属性 可为空 必须是 function_method_in_clazz 的 field
     function_method_in_fields:
-    - productModel
-    # 导出来自 入参 input | 返回 output
+    #    - productModel
     function_method_out_from: input
-    # 返回属性 可为空 必须是 返回对象|入参对象 的 field，生成 json 作为 下一个 function_name 的 function_method_in_json
     function_method_out_fields:
-    - productModel
+  #    - productModel
 
   # 填充商品sku销量数据
   fun_fillProductSkuSale:
-    # 是否保存输入和返回
-    # 可为空 默认为false
     function_in_keep: true
     function_out_keep: true
-    # 功能 类实例获取方式 springByName|reflect
-    # 可为空 默认 springByName
     function_clazz_type: springByName
     function_clazz_key: productProvider
-    #function_clazz_key: collect.debug.arrange.demo.ProductProvider
-    # 功能 方法
     function_method_name: fillProductSkuSale
-    # 功能 方法 入参少于等于 1
     function_method_type: inputLessEqualOne
     function_method_in_clazz: collect.debug.arrange.demo.ProductContext
-    # 入参属性 可为空 必须是 function_method_in_clazz 的 field
     function_method_in_fields:
-    - productModel
-    # 导出来自 入参 input | 返回 output
+    #    - productModel
     function_method_out_from: input
-    # 返回属性 可为空 必须是 返回对象|入参对象 的 field，生成 json 作为 下一个 function_name 的 function_method_in_json
     function_method_out_fields:
-    - productModel
+#    - productModel
 
 biz_define:
   # 获取全部数据
   biz_queryProductAll:
-    # 是否保存配置数据
-    # 可为空 默认为false
-    save_model: true
     arranges:
     - type: function
       name: fun_queryProduct
     # 类型是 biz 的 input 不能为空
     - type: biz
       name: biz_fillProductSkuAndSale
-      input: [productModel->productModel]
+      # 可以为空 默认为自动 auto|assign
+      # auto input_mapping + 上一个产出和当前输入 属性名一样的自动映射 - input_exclude
+      input_type: assign
+      input_mapping: [productModel->productModel]
+      input_exclude: [goodsId]
   # 业务 3
   biz_fillProductSkuAndSale:
     arranges:
     - type: biz
       name: biz_fillProductSku
-      input: [productModel->productModel]
+      input_type: auto
+      input_exclude: [goodsId]
+    #      input_mapping: [productModel->productModel]
     - type: biz
       name: biz_fillProductSkuSale
-      input: [productModel->productModel]
+  #      input_mapping: [productModel->productModel]
   # 业务 2
   biz_fillProductSku:
     arranges:
@@ -107,8 +91,6 @@ biz_define:
       name: fun_fillProductSku
   # 业务 3
   biz_fillProductSkuSale:
-    # 是否保存配置数据
-    save_model: false
     arranges:
     - type: function
       name: fun_fillProductSkuSale

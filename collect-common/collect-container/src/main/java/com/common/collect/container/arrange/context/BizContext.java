@@ -7,7 +7,6 @@ import com.common.collect.container.arrange.model.BizDefineArrangeModel;
 import com.common.collect.container.arrange.model.BizDefineModel;
 import com.common.collect.container.arrange.model.FunctionDefineModel;
 import com.common.collect.util.EmptyUtil;
-import com.common.collect.util.NullUtil;
 import com.common.collect.util.SplitUtil;
 import com.common.collect.util.StringUtil;
 import com.common.collect.util.ThreadLocalUtil;
@@ -49,12 +48,12 @@ public class BizContext {
         // 解析 biz_define 的功能链
         Map<String, BizContext> bizContextMap = initFunctionChain(bizDefineModelMap);
         allBizContextMap.putAll(bizContextMap);
-        log.info("current biz context map :");
-        log.info("{}", JsonUtil.bean2jsonPretty(allBizContextMap));
         // 验证全部的业务定义是否配置正确
         validAllBizContext(allBizContextMap);
         // 更新内存中的业务配置
         BizContext.bizContextMap = allBizContextMap;
+        log.info("current biz context map :");
+        log.info("{}", JsonUtil.bean2jsonPretty(allBizContextMap));
     }
 
     private static void validAllBizContext(Map<String, BizContext> allBizContextMap) {
@@ -64,19 +63,31 @@ public class BizContext {
             BizFunctionChain lastFunctionChain = null;
             for (BizFunctionChain bizFunctionChain : bizFunctionChains) {
                 FunctionDefineModel functionDefineModel = ConfigContext.getFunctionByKey(bizFunctionChain.getFunctionKey());
-                List<String> inFields = NullUtil.validDefault(functionDefineModel.getFunctionMethodInFields(), new ArrayList<>());
-                for (String in : bizFunctionChain.getInOutMap().values()) {
-                    if (!inFields.contains(in)) {
-                        log.warn("属性应该在此范围内:{}", JsonUtil.bean2json(inFields));
-                        throw UnifiedException.gen(StringUtil.format("{} 的 input:{} 属性设置有误", SplitUtil.join(bizFunctionChain.getBizKeyRoute(), "#"), in));
-                    }
-                }
+                List<String> inFields = functionDefineModel.getFunctionMethodInFields();
+                List<String> outFields = functionDefineModel.getFunctionMethodOutFields();
                 if (lastFunctionChain != null) {
-                    List<String> outFields = NullUtil.validDefault(functionDefineModel.getFunctionMethodOutFields(), new ArrayList<>());
-                    for (String out : bizFunctionChain.getInOutMap().keySet()) {
-                        if (!outFields.contains(out)) {
-                            log.warn("属性应该在此范围内:{}", JsonUtil.bean2json(outFields));
-                            throw UnifiedException.gen(StringUtil.format("{} 的 input:{} 属性设置有误", SplitUtil.join(bizFunctionChain.getBizKeyRoute(), "#"), out));
+                    Map<String, String> inOutMap = bizFunctionChain.getInOutMap();
+                    if (EmptyUtil.isNotEmpty(inOutMap)) {
+                        for (String in : inOutMap.values()) {
+                            if (!inFields.contains(in)) {
+                                log.warn("属性应该在此范围内:{}", JsonUtil.bean2json(inFields));
+                                throw UnifiedException.gen(StringUtil.format("{} 的 input:{} 属性设置有误", SplitUtil.join(bizFunctionChain.getBizKeyRoute(), "#"), in));
+                            }
+                        }
+                        for (String out : inOutMap.keySet()) {
+                            if (!outFields.contains(out)) {
+                                log.warn("属性应该在此范围内:{}", JsonUtil.bean2json(outFields));
+                                throw UnifiedException.gen(StringUtil.format("{} 的 input:{} 属性设置有误", SplitUtil.join(bizFunctionChain.getBizKeyRoute(), "#"), out));
+                            }
+                        }
+                    }
+                    if (bizFunctionChain.getInputTypeEnum().equals(BizDefineArrangeModel.InputTypeEnum.auto)) {
+                        // 取交集 默认进行属性对应
+                        List<String> retain = new ArrayList<>(inFields);
+                        retain.retainAll(outFields);
+                        retain.removeAll(bizFunctionChain.getInOutExclude());
+                        for (String field : retain) {
+                            bizFunctionChain.putIfAbsentInOutputMap(field, field);
                         }
                     }
                 }
@@ -95,9 +106,6 @@ public class BizContext {
             bizContext.setBizKey(bizDefineModel.getBizKey());
             bizContext.setBizDefineModel(bizDefineModel);
             initFunctionChain(bizContext, bizDefineModelMap);
-            if (!bizDefineModel.getSaveModel()) {
-                bizContext.setBizDefineModel(null);
-            }
             ret.put(entry.getKey(), bizContext);
         }
         ThreadLocalUtil.clear(Constants.thread_local_current_biz_key);
@@ -119,8 +127,8 @@ public class BizContext {
         for (int i = 0; i < size; i++) {
             BizDefineArrangeModel arrangeModel = bizDefineModel.getArranges().get(i);
             if (i == 0 && arrangeModel.getType().equals(BizDefineArrangeModel.TypeEnum.function.name())) {
-                if (EmptyUtil.isNotEmpty(arrangeModel.getInput())) {
-                    throw UnifiedException.gen(StringUtil.format("业务:{},第一个功能链的input:{}必须为空", bizKey, arrangeModel.getInput()));
+                if (EmptyUtil.isNotEmpty(arrangeModel.getInputMapping())) {
+                    throw UnifiedException.gen(StringUtil.format("业务:{},第一个功能链的input:{}必须为空", bizKey, arrangeModel.getInputMapping()));
                 }
             }
             if (arrangeModel.getType().equals(BizDefineArrangeModel.TypeEnum.function.name())) {
@@ -153,9 +161,6 @@ public class BizContext {
                 innerBizContext.setBizKey(innerBizDefineModel.getBizKey());
                 innerBizContext.setBizDefineModel(innerBizDefineModel);
                 initFunctionChain(innerBizContext, bizDefineModelMap);
-                if (!innerBizDefineModel.getSaveModel()) {
-                    innerBizContext.setBizDefineModel(null);
-                }
                 // 拷贝一份 区分在不同 biz_define 中参数的异同
                 List<BizFunctionChain> functionChains = BizFunctionChain.copy(innerBizContext.getBizFunctionChains());
                 BizFunctionChain functionChain = functionChains.get(0);
@@ -174,15 +179,18 @@ public class BizContext {
     }
 
     private static void parseBizDefineInput(BizDefineArrangeModel arrangeModel, BizFunctionChain functionChain) {
-        if (EmptyUtil.isNotEmpty(arrangeModel.getInput())) {
-            for (String input : arrangeModel.getInput()) {
-                List<String> inOutput = SplitUtil.split(input, Constants.input_split, (t) -> t);
-                if (inOutput.size() != 2) {
-                    throw UnifiedException.gen("biz: " + functionChain.getBizKey() + " input:" + input + "不合法");
-                }
+        List<String> excludes = arrangeModel.getInputExclude();
+        for (String input : arrangeModel.getInputMapping()) {
+            List<String> inOutput = SplitUtil.split(input, Constants.input_split, (t) -> t);
+            if (inOutput.size() != 2) {
+                throw UnifiedException.gen("biz: " + functionChain.getBizKey() + " input:" + input + "不合法");
+            }
+            if (!excludes.contains(inOutput.get(1))) {
                 functionChain.putInOutputMap(inOutput.get(0), inOutput.get(1));
             }
         }
+        functionChain.setInputTypeEnum(arrangeModel.getInputTypeEnum());
+        functionChain.setInOutExclude(excludes);
     }
 }
 

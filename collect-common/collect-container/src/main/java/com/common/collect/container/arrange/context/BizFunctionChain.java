@@ -4,6 +4,7 @@ import com.alibaba.fastjson.annotation.JSONField;
 import com.common.collect.container.BeanUtil;
 import com.common.collect.container.arrange.enums.FunctionMethodOutFromEnum;
 import com.common.collect.container.arrange.enums.FunctionMethodTypeEnum;
+import com.common.collect.container.arrange.model.BizDefineArrangeModel;
 import com.common.collect.container.arrange.model.FunctionDefineModel;
 import com.common.collect.util.EmptyUtil;
 import com.google.common.collect.Lists;
@@ -21,6 +22,7 @@ public class BizFunctionChain {
     private String bizKey;
     private List<String> bizKeyRoute = new ArrayList<>();
     private String functionKey;
+    @JSONField(deserialize = false, serialize = false)
     private FunctionMethodTypeEnum functionMethodTypeEnum;
     // 执行类
     @JSONField(deserialize = false, serialize = false)
@@ -30,17 +32,25 @@ public class BizFunctionChain {
     private Method method;
     // 方法入参
     @JSONField(deserialize = false, serialize = false)
+    private Integer paramCount;
+    @JSONField(deserialize = false, serialize = false)
     private Class<?>[] paramTypes;
     // 返回类型
     @JSONField(deserialize = false, serialize = false)
     private Class<?> returnType;
     // 是否保存输入
+    @JSONField(deserialize = false, serialize = false)
     private Boolean functionInKeep;
     // 是否保存返回
+    @JSONField(deserialize = false, serialize = false)
     private Boolean functionOutKeep;
     // 方法参数 输入
     private FunctionMethodOutFromEnum functionMethodOutFromEnum;
     private Map<String, String> inOutMap = new LinkedHashMap<>();
+    @JSONField(deserialize = false, serialize = false)
+    private List<String> inOutExclude = new ArrayList<>();
+    @JSONField(deserialize = false, serialize = false)
+    private BizDefineArrangeModel.InputTypeEnum inputTypeEnum;
 
 
     public static BizFunctionChain gen(FunctionDefineModel functionDefineModel) {
@@ -51,6 +61,7 @@ public class BizFunctionChain {
         bizFunctionChain.setTarget(functionDefineModel.getFunctionClazz());
         Method method = functionDefineModel.getFunctionMethod();
         bizFunctionChain.setMethod(method);
+        bizFunctionChain.setParamCount(method.getParameterCount());
         bizFunctionChain.setParamTypes(method.getParameterTypes());
         bizFunctionChain.setReturnType(method.getReturnType());
         bizFunctionChain.setFunctionInKeep(functionDefineModel.getFunctionInKeep());
@@ -60,6 +71,10 @@ public class BizFunctionChain {
 
     public void putInOutputMap(String out, String in) {
         inOutMap.put(out, in);
+    }
+
+    public void putIfAbsentInOutputMap(String out, String in) {
+        inOutMap.putIfAbsent(out, in);
     }
 
     public static List<BizFunctionChain> copy(List<BizFunctionChain> from) {
