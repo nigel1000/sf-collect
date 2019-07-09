@@ -95,8 +95,8 @@ public class FunctionDefineModel {
             throw UnifiedException.gen(StringUtil.format("functionMethodOutFrom 不合法，{}", functionMethodOutFrom), ex);
         }
 
+        Class<?> paramType = ClassUtil.getClass(functionMethodInClazz);
         if (EmptyUtil.isNotEmpty(functionMethodInClazz)) {
-            Class<?> paramType = ClassUtil.getClass(functionMethodInClazz);
             if (EmptyUtil.isEmpty(functionMethodInFields)) {
                 functionMethodInFields = new ArrayList<>();
                 for (Field declaredField : paramType.getDeclaredFields()) {
@@ -114,6 +114,18 @@ public class FunctionDefineModel {
             functionMethodOutFields = new ArrayList<>();
             for (Field declaredField : returnType.getDeclaredFields()) {
                 functionMethodOutFields.add(declaredField.getName());
+            }
+        }
+
+        for (String functionMethodInField : functionMethodInFields) {
+            ClassUtil.getField(paramType, functionMethodInField);
+        }
+
+        for (String functionMethodOutField : functionMethodOutFields) {
+            if (functionMethodOutFromEnum.equals(FunctionMethodOutFromEnum.output)) {
+                ClassUtil.getField(returnType, functionMethodOutField);
+            } else if (functionMethodOutFromEnum.equals(FunctionMethodOutFromEnum.input)) {
+                ClassUtil.getField(paramType, functionMethodOutField);
             }
         }
 

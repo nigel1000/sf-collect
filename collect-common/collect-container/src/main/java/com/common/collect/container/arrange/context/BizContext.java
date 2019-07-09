@@ -62,10 +62,11 @@ public class BizContext {
             List<BizFunctionChain> bizFunctionChains = bizContext.getBizFunctionChains();
             BizFunctionChain lastFunctionChain = null;
             for (BizFunctionChain bizFunctionChain : bizFunctionChains) {
-                FunctionDefineModel functionDefineModel = ConfigContext.getFunctionByKey(bizFunctionChain.getFunctionKey());
+                FunctionDefineModel currentFunctionDefineModel = ConfigContext.getFunctionByKey(bizFunctionChain.getFunctionKey());
                 if (lastFunctionChain != null) {
-                    List<String> inFields = functionDefineModel.getFunctionMethodInFields();
-                    List<String> outFields = functionDefineModel.getFunctionMethodOutFields();
+                    FunctionDefineModel lastFunctionDefineModel = ConfigContext.getFunctionByKey(lastFunctionChain.getFunctionKey());
+                    List<String> inFields = currentFunctionDefineModel.getFunctionMethodInFields();
+                    List<String> lastOutFields = lastFunctionDefineModel.getFunctionMethodOutFields();
                     Map<String, String> inOutMap = bizFunctionChain.getInOutMap();
                     if (EmptyUtil.isNotEmpty(inOutMap)) {
                         for (String in : inOutMap.values()) {
@@ -75,8 +76,8 @@ public class BizContext {
                             }
                         }
                         for (String out : inOutMap.keySet()) {
-                            if (!outFields.contains(out)) {
-                                log.warn("属性应该在此范围内:{}", JsonUtil.bean2json(outFields));
+                            if (!lastOutFields.contains(out)) {
+                                log.warn("属性应该在此范围内:{}", JsonUtil.bean2json(lastOutFields));
                                 throw UnifiedException.gen(StringUtil.format("{} 的 input:{} 属性设置有误", SplitUtil.join(bizFunctionChain.getBizKeyRoute(), "#"), out));
                             }
                         }
