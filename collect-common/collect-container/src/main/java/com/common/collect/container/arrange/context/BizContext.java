@@ -155,6 +155,7 @@ public class BizContext {
                 // 拷贝一份 区分在不同 biz_define 中参数的异同
                 List<BizFunctionChain> functionChains = BizFunctionChain.copy(innerBizContext.getBizFunctionChains());
                 BizFunctionChain functionChain = functionChains.get(0);
+                // 传递biz类型的input配置到此biz对应的功能
                 parseBizDefineInput(arrangeModel, functionChain);
                 for (BizFunctionChain param : functionChains) {
                     List<String> routes = new ArrayList<>();
