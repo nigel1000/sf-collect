@@ -63,9 +63,9 @@ public class BizContext {
             BizFunctionChain lastFunctionChain = null;
             for (BizFunctionChain bizFunctionChain : bizFunctionChains) {
                 FunctionDefineModel functionDefineModel = ConfigContext.getFunctionByKey(bizFunctionChain.getFunctionKey());
-                List<String> inFields = functionDefineModel.getFunctionMethodInFields();
-                List<String> outFields = functionDefineModel.getFunctionMethodOutFields();
                 if (lastFunctionChain != null) {
+                    List<String> inFields = functionDefineModel.getFunctionMethodInFields();
+                    List<String> outFields = functionDefineModel.getFunctionMethodOutFields();
                     Map<String, String> inOutMap = bizFunctionChain.getInOutMap();
                     if (EmptyUtil.isNotEmpty(inOutMap)) {
                         for (String in : inOutMap.values()) {
@@ -79,15 +79,6 @@ public class BizContext {
                                 log.warn("属性应该在此范围内:{}", JsonUtil.bean2json(outFields));
                                 throw UnifiedException.gen(StringUtil.format("{} 的 input:{} 属性设置有误", SplitUtil.join(bizFunctionChain.getBizKeyRoute(), "#"), out));
                             }
-                        }
-                    }
-                    if (bizFunctionChain.getInputTypeEnum().equals(BizDefineArrangeModel.InputTypeEnum.auto)) {
-                        // 取交集 默认进行属性对应
-                        List<String> retain = new ArrayList<>(inFields);
-                        retain.retainAll(outFields);
-                        retain.removeAll(bizFunctionChain.getInOutExclude());
-                        for (String field : retain) {
-                            bizFunctionChain.putIfAbsentInOutputMap(field, field);
                         }
                     }
                 }
@@ -189,8 +180,18 @@ public class BizContext {
                 functionChain.putInOutputMap(inOutput.get(0), inOutput.get(1));
             }
         }
-        functionChain.setInputTypeEnum(arrangeModel.getInputTypeEnum());
-        functionChain.setInOutExclude(excludes);
+        if (arrangeModel.getInputTypeEnum().equals(BizDefineArrangeModel.InputTypeEnum.auto)) {
+            FunctionDefineModel functionDefineModel = ConfigContext.getFunctionByKey(functionChain.getFunctionKey());
+            List<String> inFields = functionDefineModel.getFunctionMethodInFields();
+            List<String> outFields = functionDefineModel.getFunctionMethodOutFields();
+            // 取交集 默认进行属性对应
+            List<String> retain = new ArrayList<>(inFields);
+            retain.retainAll(outFields);
+            retain.removeAll(excludes);
+            for (String field : retain) {
+                functionChain.putIfAbsentInOutputMap(field, field);
+            }
+        }
     }
 }
 

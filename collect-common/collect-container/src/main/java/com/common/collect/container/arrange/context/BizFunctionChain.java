@@ -47,11 +47,6 @@ public class BizFunctionChain {
     // 方法参数 输入
     private FunctionMethodOutFromEnum functionMethodOutFromEnum;
     private Map<String, String> inOutMap = new LinkedHashMap<>();
-    @JSONField(deserialize = false, serialize = false)
-    private List<String> inOutExclude = new ArrayList<>();
-    @JSONField(deserialize = false, serialize = false)
-    private BizDefineArrangeModel.InputTypeEnum inputTypeEnum;
-
 
     public static BizFunctionChain gen(FunctionDefineModel functionDefineModel) {
         BizFunctionChain bizFunctionChain = new BizFunctionChain();
