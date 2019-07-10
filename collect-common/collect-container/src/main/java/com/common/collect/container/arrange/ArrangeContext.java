@@ -9,7 +9,6 @@ import com.common.collect.container.arrange.enums.FunctionMethodOutFromEnum;
 import com.common.collect.container.arrange.enums.FunctionMethodTypeEnum;
 import com.common.collect.util.ClassUtil;
 import com.common.collect.util.EmptyUtil;
-import com.common.collect.util.SplitUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -73,10 +72,10 @@ public class ArrangeContext {
                 }
                 ret = ClassUtil.invoke(bizFunctionChain.getTarget(), bizFunctionChain.getMethod(), arg);
                 if (bizFunctionChain.getFunctionInKeep()) {
-                    retContext.putInputMap(SplitUtil.join(bizFunctionChain.getBizKeyRoute(), "-") + "-" + bizFunctionChain.getFunctionKey() + "-" + i, arg == null ? "null" : arg);
+                    retContext.putInputMap(bizFunctionChain.bizKeyRoutePath() + "-" + i, arg);
                 }
                 if (bizFunctionChain.getFunctionOutKeep()) {
-                    retContext.putOutputMap(SplitUtil.join(bizFunctionChain.getBizKeyRoute(), "-") + "-" + bizFunctionChain.getFunctionKey() + "-" + i, ret == null ? "null" : ret);
+                    retContext.putOutputMap(bizFunctionChain.bizKeyRoutePath() + "-" + i, ret);
                 }
             } else {
                 throw UnifiedException.gen(bizFunctionChain.getTarget().getClass().getName() + "#" + bizFunctionChain.getMethod().getName() + " 入参只能是一个");

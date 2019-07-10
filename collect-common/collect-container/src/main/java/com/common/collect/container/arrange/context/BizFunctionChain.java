@@ -4,9 +4,9 @@ import com.alibaba.fastjson.annotation.JSONField;
 import com.common.collect.container.BeanUtil;
 import com.common.collect.container.arrange.enums.FunctionMethodOutFromEnum;
 import com.common.collect.container.arrange.enums.FunctionMethodTypeEnum;
-import com.common.collect.container.arrange.model.BizDefineArrangeModel;
 import com.common.collect.container.arrange.model.FunctionDefineModel;
 import com.common.collect.util.EmptyUtil;
+import com.common.collect.util.SplitUtil;
 import com.google.common.collect.Lists;
 import lombok.Data;
 
@@ -87,4 +87,7 @@ public class BizFunctionChain {
         return ret;
     }
 
+    public String bizKeyRoutePath() {
+        return SplitUtil.join(this.getBizKeyRoute(), "#") + "#" + this.getFunctionKey();
+    }
 }

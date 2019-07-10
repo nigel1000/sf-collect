@@ -48,44 +48,10 @@ public class BizContext {
         // 解析 biz_define 的功能链
         Map<String, BizContext> bizContextMap = initFunctionChain(bizDefineModelMap);
         allBizContextMap.putAll(bizContextMap);
-        // 验证全部的业务定义是否配置正确
-        validAllBizContext(allBizContextMap);
         // 更新内存中的业务配置
         BizContext.bizContextMap = allBizContextMap;
         log.info("current biz context map :");
         log.info("{}", JsonUtil.bean2jsonPretty(allBizContextMap));
-    }
-
-    private static void validAllBizContext(Map<String, BizContext> allBizContextMap) {
-        for (Map.Entry<String, BizContext> entry : allBizContextMap.entrySet()) {
-            BizContext bizContext = entry.getValue();
-            List<BizFunctionChain> bizFunctionChains = bizContext.getBizFunctionChains();
-            BizFunctionChain lastFunctionChain = null;
-            for (BizFunctionChain bizFunctionChain : bizFunctionChains) {
-                FunctionDefineModel currentFunctionDefineModel = ConfigContext.getFunctionByKey(bizFunctionChain.getFunctionKey());
-                if (lastFunctionChain != null) {
-                    FunctionDefineModel lastFunctionDefineModel = ConfigContext.getFunctionByKey(lastFunctionChain.getFunctionKey());
-                    List<String> inFields = currentFunctionDefineModel.getFunctionMethodInFields();
-                    List<String> lastOutFields = lastFunctionDefineModel.getFunctionMethodOutFields();
-                    Map<String, String> inOutMap = bizFunctionChain.getInOutMap();
-                    if (EmptyUtil.isNotEmpty(inOutMap)) {
-                        for (String in : inOutMap.values()) {
-                            if (!inFields.contains(in)) {
-                                log.warn("属性应该在此范围内:{}", JsonUtil.bean2json(inFields));
-                                throw UnifiedException.gen(StringUtil.format("{} 的 input:{} 属性设置有误", SplitUtil.join(bizFunctionChain.getBizKeyRoute(), "#"), in));
-                            }
-                        }
-                        for (String out : inOutMap.keySet()) {
-                            if (!lastOutFields.contains(out)) {
-                                log.warn("属性应该在此范围内:{}", JsonUtil.bean2json(lastOutFields));
-                                throw UnifiedException.gen(StringUtil.format("{} 的 input:{} 属性设置有误", SplitUtil.join(bizFunctionChain.getBizKeyRoute(), "#"), out));
-                            }
-                        }
-                    }
-                }
-                lastFunctionChain = bizFunctionChain;
-            }
-        }
     }
 
     private static Map<String, BizContext> initFunctionChain(Map<String, BizDefineModel> bizDefineModelMap) {
@@ -131,7 +97,7 @@ public class BizContext {
                 // 设置业务 key
                 functionChain.setBizKey(bizKey);
                 // 解析业务定义的input映射
-                parseBizDefineInput(arrangeModel, functionChain);
+                parseBizDefineInput(arrangeModel, functionChain, bizFunctionChains);
                 // 设置功能链的路径
                 functionChain.setBizKeyRoute(Lists.newArrayList(bizKey));
                 bizFunctionChains.add(functionChain);
@@ -157,7 +123,7 @@ public class BizContext {
                 List<BizFunctionChain> functionChains = BizFunctionChain.copy(innerBizContext.getBizFunctionChains());
                 BizFunctionChain functionChain = functionChains.get(0);
                 // 传递biz类型的input配置到此biz对应的功能
-                parseBizDefineInput(arrangeModel, functionChain);
+                parseBizDefineInput(arrangeModel, functionChain, bizFunctionChains);
                 for (BizFunctionChain param : functionChains) {
                     List<String> routes = new ArrayList<>();
                     routes.add(bizKey);
@@ -171,29 +137,59 @@ public class BizContext {
         currentBizKeys.remove(currentBizKeys.size() - 1);
     }
 
-    private static void parseBizDefineInput(BizDefineArrangeModel arrangeModel, BizFunctionChain functionChain) {
+    private static void parseBizDefineInput(BizDefineArrangeModel arrangeModel, BizFunctionChain functionChain, List<BizFunctionChain> beforeFunctionChains) {
         List<String> excludes = arrangeModel.getInputExclude();
+        if (EmptyUtil.isEmpty(beforeFunctionChains)) {
+            if (EmptyUtil.isNotEmpty(arrangeModel.getInputMapping())) {
+                throw UnifiedException.gen(StringUtil.format("{} 的第一个功能 input_mapping 必须为空", functionChain.bizKeyRoutePath()));
+            }
+        }
         for (String input : arrangeModel.getInputMapping()) {
             List<String> inOutput = SplitUtil.split(input, Constants.input_split, (t) -> t);
             if (inOutput.size() != 2) {
-                throw UnifiedException.gen("biz: " + functionChain.getBizKey() + " input:" + input + "不合法");
+                throw UnifiedException.gen(StringUtil.format("{} 的 input_mapping(lastOut->currentIn):{} 不合法", functionChain.bizKeyRoutePath(), input));
             }
             if (!excludes.contains(inOutput.get(1))) {
                 functionChain.putInOutputMap(inOutput.get(0), inOutput.get(1));
             }
         }
-        if (arrangeModel.getInputTypeEnum().equals(BizDefineArrangeModel.InputTypeEnum.auto)) {
-            FunctionDefineModel functionDefineModel = ConfigContext.getFunctionByKey(functionChain.getFunctionKey());
-            List<String> inFields = functionDefineModel.getFunctionMethodInFields();
-            List<String> outFields = functionDefineModel.getFunctionMethodOutFields();
-            // 取交集 默认进行属性对应
-            List<String> retain = new ArrayList<>(inFields);
-            retain.retainAll(outFields);
-            retain.removeAll(excludes);
-            for (String field : retain) {
-                functionChain.putIfAbsentInOutputMap(field, field);
+
+        if (EmptyUtil.isNotEmpty(beforeFunctionChains)) {
+            BizFunctionChain lastFunctionChain = beforeFunctionChains.get(beforeFunctionChains.size() - 1);
+            FunctionDefineModel currentFunctionDefineModel = ConfigContext.getFunctionByKey(functionChain.getFunctionKey());
+            FunctionDefineModel lastFunctionDefineModel = ConfigContext.getFunctionByKey(lastFunctionChain.getFunctionKey());
+            List<String> inFields = currentFunctionDefineModel.getFunctionMethodInFields();
+            List<String> lastOutFields = lastFunctionDefineModel.getFunctionMethodOutFields();
+
+            if (arrangeModel.getInputTypeEnum().equals(BizDefineArrangeModel.InputTypeEnum.auto)) {
+                // 取交集 默认进行属性对应
+                List<String> retain = new ArrayList<>(inFields);
+                retain.retainAll(lastOutFields);
+                retain.removeAll(excludes);
+                for (String field : retain) {
+                    functionChain.putIfAbsentInOutputMap(field, field);
+                }
             }
+
+            Map<String, String> inOutMap = functionChain.getInOutMap();
+            if (EmptyUtil.isNotEmpty(inOutMap)) {
+                for (String in : inOutMap.values()) {
+                    if (!inFields.contains(in)) {
+                        log.warn("当前功能的输入 input_mapping[1] 属性应该在此范围内:{}", JsonUtil.bean2json(inFields));
+                        throw UnifiedException.gen(StringUtil.format("{} 的 当前功能的输入 input_mapping[1]:{} 属性设置有误", functionChain.bizKeyRoutePath(), in));
+                    }
+                }
+                for (String out : inOutMap.keySet()) {
+                    if (!lastOutFields.contains(out)) {
+                        log.warn("上一个功能的产出 属性应该在此范围内:{}", JsonUtil.bean2json(lastOutFields));
+                        throw UnifiedException.gen(StringUtil.format("{} 的 上一个功能的产出 input_mapping[0]:{} 属性设置有误", functionChain.bizKeyRoutePath(), out));
+                    }
+                }
+            }
+
         }
+
+
     }
 }
 
