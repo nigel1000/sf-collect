@@ -5,6 +5,7 @@ import com.common.collect.container.JsonUtil;
 import com.common.collect.container.aops.LogConstant;
 import com.common.collect.container.arrange.ArrangeContext;
 import com.common.collect.container.arrange.ArrangeRetContext;
+import com.common.collect.util.EmptyUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -45,15 +46,20 @@ public class ArrangeTest {
 
         log.info("最后一个入参：" + LogConstant.getObjString(context.getLastArg()));
         // 返回最后一个入参
-        ProductContext in = context.getByIndexFromMap(context.getInputMap().size(), context.getInputMap());
-        log.info("最后一个入参：" + LogConstant.getObjString(in));
+        if (EmptyUtil.isNotEmpty(context.getInputMap())) {
+            ProductContext in = context.getByIndexFromMap(context.getInputMap().size(), context.getInputMap());
+            log.info("最后一个入参：" + LogConstant.getObjString(in));
+        }
 
+        ProductContext lastOut = context.getLastRet();
         log.info("最后一个返回：" + LogConstant.getObjString(context.getLastRet()));
         // 返回最后一个返回
-        ProductContext out = context.getByIndexFromMap(context.getOutputMap().size(), context.getOutputMap());
-        log.info("最后一个返回：" + LogConstant.getObjString(out));
+        if (EmptyUtil.isNotEmpty(context.getOutputMap())) {
+            ProductContext out = context.getByIndexFromMap(context.getOutputMap().size(), context.getOutputMap());
+            log.info("最后一个返回：" + LogConstant.getObjString(out));
+        }
 
-        context = ArrangeContext.runBiz("biz_fillProductSkuAndSale", JsonUtil.bean2json(out));
+        context = ArrangeContext.runBiz("biz_fillProductSkuAndSale", JsonUtil.bean2json(lastOut));
         log.info("最后一个入参：" + LogConstant.getObjString(context.getLastArg()));
         log.info("最后一个返回：" + LogConstant.getObjString(context.getLastRet()));
 

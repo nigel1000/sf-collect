@@ -62,7 +62,7 @@ public class FunctionDefineModel {
             functionInKeep = false;
         }
         if (functionOutKeep == null) {
-            functionInKeep = false;
+            functionOutKeep = false;
         }
         if (EmptyUtil.isEmpty(functionClazzType)) {
             functionClazzType = FunctionClassTypeEnum.springByName.name();
