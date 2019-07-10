@@ -6,6 +6,7 @@ import com.common.collect.container.aops.LogConstant;
 import com.common.collect.container.arrange.ArrangeContext;
 import com.common.collect.container.arrange.ArrangeRetContext;
 import com.common.collect.util.EmptyUtil;
+import com.common.collect.util.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -35,7 +36,7 @@ public class ArrangeTest {
         // 启动 spring 容器
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("context-spring.xml");
         // 加载配置文件
-        ArrangeContext.load(new ClassPathResource("arrange/function-define.yml").getInputStream());
+        ArrangeContext.load(FileUtil.getString(new ClassPathResource("arrange/function-define.yml").getFile()));
         ArrangeContext.downLoadConfig(path);
         // 定义第一个入参
         ProductContext param = new ProductContext();

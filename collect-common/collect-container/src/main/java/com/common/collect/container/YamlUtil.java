@@ -4,6 +4,7 @@ import com.common.collect.api.excps.UnifiedException;
 import lombok.NonNull;
 import org.yaml.snakeyaml.Yaml;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -27,7 +28,11 @@ public class YamlUtil {
             try {
                 inputStream = new FileInputStream(new File((String) yaml));
             } catch (Exception e) {
-                inputStream = HttpUtil.get((String) yaml);
+                try {
+                    inputStream = HttpUtil.get((String) yaml);
+                } catch (Exception ex) {
+                    inputStream = new ByteArrayInputStream(((String) yaml).getBytes());
+                }
             }
         } else if (yaml instanceof InputStream) {
             inputStream = (InputStream) yaml;
