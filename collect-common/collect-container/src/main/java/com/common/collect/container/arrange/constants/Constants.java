@@ -12,5 +12,9 @@ public class Constants {
 
     public static final String thread_local_current_biz_key = "current_biz_key";
 
+    public static final String export_function_define = "function_define.yml";
+    public static final String export_biz_define = "biz_define.yml";
+    public static final String export_biz_function_chain = "biz_function_chain.yml";
+
 
 }

@@ -2,6 +2,7 @@ package com.common.collect.container.arrange;
 
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.JsonUtil;
+import com.common.collect.container.arrange.constants.Constants;
 import com.common.collect.container.arrange.context.BizContext;
 import com.common.collect.container.arrange.context.BizFunctionChain;
 import com.common.collect.container.arrange.context.ConfigContext;
@@ -102,9 +103,9 @@ public class ArrangeContext {
         if (PathUtil.hasPathSpecial(path)) {
             throw UnifiedException.gen("保存路径有特殊字符");
         }
-        FileUtil.createFile(path + "/function_define.yml", false, functionDefine.toByteArray(), true);
-        FileUtil.createFile(path + "/biz_define.yml", false, bizDefine.toByteArray(), true);
-        FileUtil.createFile(path + "/biz_function_chain.yml", false, bizFunctionChain.toByteArray(), true);
+        FileUtil.createFile(path + Constants.export_function_define, false, functionDefine.toByteArray(), true);
+        FileUtil.createFile(path + Constants.export_biz_define, false, bizDefine.toByteArray(), true);
+        FileUtil.createFile(path + Constants.export_biz_function_chain, false, bizFunctionChain.toByteArray(), true);
 
         try {
             functionDefine.close();
