@@ -9,7 +9,10 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by hznijianfeng on 2019/5/20.
@@ -25,13 +28,11 @@ public class DocsClient {
         List<TplContext> tplContexts = new ArrayList<>();
         List<Class<?>> classList = ClassUtil.getClazzFromPackage(globalConfig.getPkgPath());
         for (Class<?> cls : classList) {
-            Object obj;
-            try {
-                obj = cls.newInstance();
-            } catch (Exception ex) {
-                throw UnifiedException.gen("反射调用失败", ex);
-            }
             DocsApi docsApi = cls.getAnnotation(DocsApi.class);
+            if (docsApi == null) {
+                continue;
+            }
+            Object obj = ClassUtil.newInstance(cls);
             for (Method method : getMethods(cls)) {
                 log.info("createDocsApi className:{},methodName:{}", cls.getName(), method.getName());
                 DocsApiMethod docsApiMethod = method.getAnnotation(DocsApiMethod.class);
@@ -43,7 +44,7 @@ public class DocsClient {
                         args[i] = null;
                     }
                     method.setAccessible(true);
-                    docsMethodConfig = (DocsMethodConfig) method.invoke(obj, args);
+                    docsMethodConfig = ClassUtil.invoke(obj, method, args);
                 } catch (Exception ex) {
                     throw UnifiedException.gen("反射调用失败", ex);
                 }

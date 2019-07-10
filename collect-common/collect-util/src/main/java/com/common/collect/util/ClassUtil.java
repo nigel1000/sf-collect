@@ -62,9 +62,9 @@ public class ClassUtil {
         return result;
     }
 
-    public static Object newInstance(String clazz) {
+    public static <T> T  newInstance(String clazz) {
         try {
-            return getClass(clazz).newInstance();
+            return (T)getClass(clazz).newInstance();
         } catch (Exception e) {
             throw UnifiedException.gen(StringUtil.format(" {} 无法初始化", clazz), e);
         }
@@ -94,19 +94,19 @@ public class ClassUtil {
         }
     }
 
-    public static Object invoke(Object target, Method method, Object... args) {
+    public static <T> T invoke(Object target, Method method, Object... args) {
         try {
-            return method.invoke(target, args);
+            return (T)method.invoke(target, args);
         } catch (Exception e) {
             throw UnifiedException.gen(StringUtil.format(" class:{},method:{} 调用方法失败", target.getClass().getName(), method.getName()), e);
         }
     }
 
-    public static Object getFieldValue(Object target, String name) {
+    public static <T> T  getFieldValue(Object target, String name) {
         try {
             Field field = target.getClass().getDeclaredField(name);
             field.setAccessible(true);
-            return field.get(target);
+            return (T)field.get(target);
         } catch (Exception e) {
             throw UnifiedException.gen(StringUtil.format(" class:{},field:{} 获取属性值失败", target.getClass().getName(), name), e);
         }
