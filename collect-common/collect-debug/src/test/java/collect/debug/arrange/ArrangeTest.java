@@ -51,7 +51,6 @@ public class ArrangeTest {
             log.info("最后一个入参：" + LogConstant.getObjString(in));
         }
 
-        ProductContext lastOut = context.getLastRet();
         log.info("最后一个返回：" + LogConstant.getObjString(context.getLastRet()));
         // 返回最后一个返回
         if (EmptyUtil.isNotEmpty(context.getOutputMap())) {
@@ -59,7 +58,7 @@ public class ArrangeTest {
             log.info("最后一个返回：" + LogConstant.getObjString(out));
         }
 
-        context = ArrangeContext.runBiz("biz_fillProductSkuAndSale", JsonUtil.bean2json(lastOut));
+        context = ArrangeContext.runBiz("biz_fillProductSkuAndSale", JsonUtil.bean2json(context.getLastRet()));
         log.info("最后一个入参：" + LogConstant.getObjString(context.getLastArg()));
         log.info("最后一个返回：" + LogConstant.getObjString(context.getLastRet()));
 
