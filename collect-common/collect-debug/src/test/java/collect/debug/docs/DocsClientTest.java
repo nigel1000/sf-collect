@@ -15,9 +15,9 @@ public class DocsClientTest {
     static {
         path = DocsClientTest.class.getResource("/").getPath();
         if (path.contains(":/")) {
-            path = path.substring(1, path.indexOf("target")) + "logs/docs";
+            path = path.substring(1, path.indexOf("target")) + "logs/docs/";
         } else {
-            path = path.substring(0, path.indexOf("target")) + "logs/docs";
+            path = path.substring(0, path.indexOf("target")) + "logs/docs/";
         }
     }
 

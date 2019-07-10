@@ -58,7 +58,7 @@ public class DocsClient {
             Map<String, Object> tplMap = new HashMap<>();
             tplMap.put("tplContext", tplContext);
             log.debug("Create DocsApi: filePath:{},tplMap:{}", tplContext.getSavePath(), tplMap);
-            String fileContent = TemplateUtil.genTemplate("/tpl", "docs.tpl", tplMap);
+            String fileContent = TemplateUtil.getStringByTemplate("/tpl/docs", "docs.tpl", tplMap);
             FileUtil.createFile(tplContext.getSavePath(), false, fileContent.getBytes(), tplContext.isReCreate());
         }
     }

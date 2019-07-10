@@ -18,8 +18,8 @@ public class BizDefineArrangeModel {
     private String name;
     private String inputType;
     private InputTypeEnum inputTypeEnum;
-    private List<String> inputMapping;
-    private List<String> inputExclude;
+    private List<String> inputMappings;
+    private List<String> inputExcludes;
 
     public void validSelf(BizDefineModel bizDefineModel) {
         try {
@@ -35,19 +35,19 @@ public class BizDefineArrangeModel {
         } catch (Exception ex) {
             throw UnifiedException.gen(StringUtil.format("arrange 不合法，{}", this.getType()), ex);
         }
-        if (EmptyUtil.isEmpty(inputMapping)) {
-            inputMapping = new ArrayList<>();
+        if (EmptyUtil.isEmpty(inputMappings)) {
+            inputMappings = new ArrayList<>();
         }
         if (inputTypeEnum.equals(InputTypeEnum.assign)) {
             if (this.getTypeEnum().equals(TypeEnum.biz)) {
-                if (EmptyUtil.isEmpty(this.getInputMapping())) {
+                if (EmptyUtil.isEmpty(this.getInputMappings())) {
                     throw UnifiedException.gen(StringUtil.format("type为biz,bizKey:{},name:{} 的 input 不能为空", bizDefineModel.getBizKey(),
                             this.getName()));
                 }
             }
         }
-        if (EmptyUtil.isEmpty(inputExclude)) {
-            inputExclude = new ArrayList<>();
+        if (EmptyUtil.isEmpty(inputExcludes)) {
+            inputExcludes = new ArrayList<>();
         }
     }
 

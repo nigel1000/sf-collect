@@ -129,8 +129,15 @@ public class FileUtil {
         Path dirPath;
         if (isDir) {
             dirPath = Paths.get(path);
+            if (!dirPath.toFile().isDirectory()) {
+                throw UnifiedException.gen(StringUtil.format("{} 不是目录", path));
+            }
         } else {
-            dirPath = Paths.get(path).getParent();
+            dirPath = Paths.get(path);
+            if (dirPath.toFile().isDirectory()) {
+                throw UnifiedException.gen(StringUtil.format("{} 是目录", path));
+            }
+            dirPath = dirPath.getParent();
         }
         // 创建目录
         File dir = dirPath.toFile();

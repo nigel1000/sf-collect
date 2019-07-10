@@ -51,7 +51,7 @@ public class DB2Domain {
             String fileName = className + ".java";
             String dirPath = domainParam.getPrefixPath();
             String filePath = dirPath + fileName;
-            String fileContent = TemplateUtil.genTemplate("/tpl", "domain.tpl", tplMap);
+            String fileContent = TemplateUtil.getStringByTemplate("/tpl/mybatis", "domain.tpl", tplMap);
             log.info("DB2Domain:filePath:{},args:{},tplMap:{}", filePath, domainParam, tplMap);
             FileUtil.createFile(filePath, false, fileContent.getBytes(), true);
             files.add(new File(filePath));

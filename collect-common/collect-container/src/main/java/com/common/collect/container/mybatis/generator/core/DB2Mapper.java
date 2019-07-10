@@ -56,7 +56,7 @@ public class DB2Mapper {
             String fileName = className + daoSuffixName + ".xml";
             String dirPath = mapperParam.getMapperPrefixPath();
             String filePath = dirPath + fileName;
-            String fileContent = TemplateUtil.genTemplate("/tpl", "mapper.tpl", tplMap);
+            String fileContent = TemplateUtil.getStringByTemplate("/tpl/mybatis", "mapper.tpl", tplMap);
             if (mapperParam.isGenMapper()) {
                 log.info("DB2Mapper mapper:filePath:{},args:{},tplMap:{}", filePath, mapperParam, tplMap);
                 FileUtil.createFile(filePath, false, fileContent.getBytes(), true);
@@ -66,7 +66,7 @@ public class DB2Mapper {
             fileName = className + daoSuffixName + ".java";
             dirPath = mapperParam.getDaoPrefixPath();
             filePath = dirPath + fileName;
-            fileContent = TemplateUtil.genTemplate("/tpl", "dao.tpl", tplMap);
+            fileContent = TemplateUtil.getStringByTemplate("/tpl/mybatis", "dao.tpl", tplMap);
             if (mapperParam.isGenDao()) {
                 log.info("DB2Mapper dao:filePath:{},args:{},tplMap:{}", filePath, mapperParam, tplMap);
                 FileUtil.createFile(filePath, false, fileContent.getBytes(), true);

@@ -40,7 +40,7 @@ functions_define:
     function_method_in_clazz: collect.debug.arrange.demo.ProductContext
     function_method_in_fields:
     #    - productModel
-    function_method_out_from: input
+    function_method_out_from: output
     function_method_out_fields:
   #    - productModel
 
@@ -71,19 +71,21 @@ biz_define:
       # 可以为空 默认为自动 auto|assign
       # auto input_mapping + 上一个产出和当前输入 属性名一样的自动映射 - input_exclude
       input_type: assign
-      input_mapping: [productModel->productModel]
-      input_exclude: [goodsId]
+      input_mappings:
+      - productModel->productModel
+      input_excludes:
+      - goodsId
   # 业务 3
   biz_fillProductSkuAndSale:
     arranges:
     - type: biz
       name: biz_fillProductSku
       input_type: auto
-      input_exclude: [goodsId]
-    #      input_mapping: [productModel->productModel]
+      input_excludes: [goodsId]
+    #      input_mappings: [productModel->productModel]
     - type: biz
       name: biz_fillProductSkuSale
-  #      input_mapping: [productModel->productModel]
+  #      input_mappings: [productModel->productModel]
   # 业务 2
   biz_fillProductSku:
     arranges:

@@ -5,7 +5,6 @@ import com.common.collect.container.JsonUtil;
 import com.common.collect.container.aops.LogConstant;
 import com.common.collect.container.arrange.ArrangeContext;
 import com.common.collect.container.arrange.ArrangeRetContext;
-import com.common.collect.util.log4j.Slf4jUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -20,12 +19,23 @@ import java.io.IOException;
 @Slf4j
 public class ArrangeTest {
 
+    private static String path;
+
+    static {
+        path = ArrangeTest.class.getResource("/").getPath();
+        if (path.contains(":/")) {
+            path = path.substring(1, path.indexOf("target")) + "logs/arrange/";
+        } else {
+            path = path.substring(0, path.indexOf("target")) + "logs/arrange/";
+        }
+    }
+
     public static void main(String[] args) throws IOException {
         // 启动 spring 容器
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("context-spring.xml");
         // 加载配置文件
         ArrangeContext.load(new ClassPathResource("arrange/function-define.yml").getInputStream());
-
+        ArrangeContext.downLoadConfig(path);
         // 定义第一个入参
         ProductContext param = new ProductContext();
         param.setGoodsId(5882654L);

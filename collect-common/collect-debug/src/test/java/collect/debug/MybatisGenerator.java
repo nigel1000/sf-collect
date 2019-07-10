@@ -26,9 +26,9 @@ public class MybatisGenerator {
     static {
         path = MybatisGenerator.class.getResource("/").getPath();
         if (path.contains(":/")) {
-            path = path.substring(1, path.indexOf("target")) + "logs/";
+            path = path.substring(1, path.indexOf("target")) + "logs/mybatis/";
         } else {
-            path = path.substring(0, path.indexOf("target")) + "logs/";
+            path = path.substring(0, path.indexOf("target")) + "logs/mybatis/";
         }
         try {
             properties = PropertiesLoaderUtils.loadAllProperties("db.properties");

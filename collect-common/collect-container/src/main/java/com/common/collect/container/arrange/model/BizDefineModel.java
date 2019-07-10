@@ -1,6 +1,5 @@
 package com.common.collect.container.arrange.model;
 
-import com.alibaba.fastjson.annotation.JSONField;
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.util.EmptyUtil;
 import lombok.Data;

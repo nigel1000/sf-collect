@@ -17,7 +17,11 @@ import java.util.Map;
 
 public class TemplateUtil {
 
-    public static String genTemplate(String classPathPrefixPath, String fileName, Map<String, Object> map) {
+    public static String getStringByTemplate(String classPathPrefixPath, String fileName, Map<String, Object> map) {
+        return new String(getStreamByTemplate(classPathPrefixPath, fileName, map).toByteArray(), StandardCharsets.UTF_8);
+    }
+
+    public static ByteArrayOutputStream getStreamByTemplate(String classPathPrefixPath, String fileName, Map<String, Object> map) {
         try {
             // 获取文档模板
             Configuration configuration = new Configuration(Configuration.VERSION_2_3_22);
@@ -30,7 +34,7 @@ public class TemplateUtil {
             template.process(map, out);
             // 将输出流刷新到outputStream中
             out.flush();
-            return new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+            return outputStream;
         } catch (Exception ex) {
             throw UnifiedException.gen("TemplateUtil 模板生成有问题!", ex);
         }

@@ -2,6 +2,7 @@ package com.common.collect.container.arrange.context;
 
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.JsonUtil;
+import com.common.collect.container.TemplateUtil;
 import com.common.collect.container.arrange.constants.Constants;
 import com.common.collect.container.arrange.model.BizDefineArrangeModel;
 import com.common.collect.container.arrange.model.BizDefineModel;
@@ -14,6 +15,7 @@ import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -35,6 +37,19 @@ public class BizContext {
 
     private static Map<String, BizContext> bizContextMap = new LinkedHashMap<>();
 
+
+    public static ByteArrayOutputStream downloadBizDefine() {
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("bizDefines", bizContextMap);
+        return TemplateUtil.getStreamByTemplate("/tpl/arrange", "biz_define.tpl", map);
+    }
+
+    public static ByteArrayOutputStream downloadBizFunctionChain() {
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("bizFunctionChains", bizContextMap);
+        return TemplateUtil.getStreamByTemplate("/tpl/arrange", "biz_function_chain.tpl", map);
+    }
+
     public static BizContext getBizContextByKey(String key) {
         BizContext bizContext = bizContextMap.get(key);
         if (bizContext == null) {
@@ -50,8 +65,10 @@ public class BizContext {
         allBizContextMap.putAll(bizContextMap);
         // 更新内存中的业务配置
         BizContext.bizContextMap = allBizContextMap;
-        log.info("current biz context map :");
-        log.info("{}", JsonUtil.bean2jsonPretty(allBizContextMap));
+        if (log.isDebugEnabled()) {
+            log.debug("current biz context map :");
+            log.debug("{}", JsonUtil.bean2jsonPretty(allBizContextMap));
+        }
     }
 
     private static Map<String, BizContext> initFunctionChain(Map<String, BizDefineModel> bizDefineModelMap) {
@@ -85,8 +102,8 @@ public class BizContext {
         for (int i = 0; i < size; i++) {
             BizDefineArrangeModel arrangeModel = bizDefineModel.getArranges().get(i);
             if (i == 0 && arrangeModel.getType().equals(BizDefineArrangeModel.TypeEnum.function.name())) {
-                if (EmptyUtil.isNotEmpty(arrangeModel.getInputMapping())) {
-                    throw UnifiedException.gen(StringUtil.format("业务:{},第一个功能链的input:{}必须为空", bizKey, arrangeModel.getInputMapping()));
+                if (EmptyUtil.isNotEmpty(arrangeModel.getInputMappings())) {
+                    throw UnifiedException.gen(StringUtil.format("业务:{},第一个功能链的input:{}必须为空", bizKey, arrangeModel.getInputMappings()));
                 }
             }
             if (arrangeModel.getType().equals(BizDefineArrangeModel.TypeEnum.function.name())) {
@@ -138,13 +155,13 @@ public class BizContext {
     }
 
     private static void parseBizDefineInput(BizDefineArrangeModel arrangeModel, BizFunctionChain functionChain, List<BizFunctionChain> beforeFunctionChains) {
-        List<String> excludes = arrangeModel.getInputExclude();
+        List<String> excludes = arrangeModel.getInputExcludes();
         if (EmptyUtil.isEmpty(beforeFunctionChains)) {
-            if (EmptyUtil.isNotEmpty(arrangeModel.getInputMapping())) {
+            if (EmptyUtil.isNotEmpty(arrangeModel.getInputMappings())) {
                 throw UnifiedException.gen(StringUtil.format("{} 的第一个功能 input_mapping 必须为空", functionChain.bizKeyRoutePath()));
             }
         }
-        for (String input : arrangeModel.getInputMapping()) {
+        for (String input : arrangeModel.getInputMappings()) {
             List<String> inOutput = SplitUtil.split(input, Constants.input_split, (t) -> t);
             if (inOutput.size() != 2) {
                 throw UnifiedException.gen(StringUtil.format("{} 的 input_mapping(lastOut->currentIn):{} 不合法", functionChain.bizKeyRoutePath(), input));
