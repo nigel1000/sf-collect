@@ -6,7 +6,13 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.concurrent.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -70,6 +76,17 @@ public class ThreadPoolUtil {
                     new ArrayBlockingQueue<>(QUEUE_SIZE), new LogThreadFactory(), new ThreadPoolExecutor.AbortPolicy());
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 INSTANCE.executorService.shutdown();
+                try {
+                    long start = System.currentTimeMillis();
+                    log.info("线程池关闭开始,time:{}", start);
+                    long i = 1;
+                    while (!INSTANCE.executorService.awaitTermination(1, TimeUnit.SECONDS)) {
+                        log.info("线程池还有任务在执行 {}", i++);
+                    }
+                    log.info("线程池关闭总消耗 {} ms", System.currentTimeMillis() - start);
+                } catch (Exception ex) {
+                    log.error("线程池关闭过程抛出异常", ex);
+                }
             }));
         }
     }
