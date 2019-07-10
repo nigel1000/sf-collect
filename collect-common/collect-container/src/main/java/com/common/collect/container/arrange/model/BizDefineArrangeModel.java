@@ -35,16 +35,26 @@ public class BizDefineArrangeModel {
         } catch (Exception ex) {
             throw UnifiedException.gen(StringUtil.format("arrange 不合法，{}", this.getType()), ex);
         }
-        if (EmptyUtil.isEmpty(inputMappings)) {
-            inputMappings = new ArrayList<>();
-        }
         if (inputTypeEnum.equals(InputTypeEnum.assign)) {
             if (this.getTypeEnum().equals(TypeEnum.biz)) {
                 if (EmptyUtil.isEmpty(this.getInputMappings())) {
-                    throw UnifiedException.gen(StringUtil.format("type为biz,bizKey:{},name:{} 的 input 不能为空", bizDefineModel.getBizKey(),
+                    throw UnifiedException.gen(StringUtil.format("type为biz,bizKey:{},name:{} 的 inputMappings 不能为空", bizDefineModel.getBizKey(),
                             this.getName()));
                 }
             }
+        }
+        if (inputTypeEnum.equals(InputTypeEnum.pass)) {
+            if (EmptyUtil.isNotEmpty(inputMappings)) {
+                throw UnifiedException.gen(StringUtil.format("inputTypeEnum 为 pass 时, bizKey:{},name:{} 的 inputMappings 必须为空", bizDefineModel.getBizKey(),
+                        this.getName()));
+            }
+            if (EmptyUtil.isNotEmpty(inputExcludes)) {
+                throw UnifiedException.gen(StringUtil.format("inputTypeEnum 为 pass 时, bizKey:{},name:{} 的 inputExcludes 必须为空", bizDefineModel.getBizKey(),
+                        this.getName()));
+            }
+        }
+        if (EmptyUtil.isEmpty(inputMappings)) {
+            inputMappings = new ArrayList<>();
         }
         if (EmptyUtil.isEmpty(inputExcludes)) {
             inputExcludes = new ArrayList<>();
@@ -64,6 +74,7 @@ public class BizDefineArrangeModel {
 
         auto,
         assign,
+        pass,
 
         ;
 

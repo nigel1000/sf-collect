@@ -47,6 +47,7 @@ public class BizFunctionChain {
     // 方法参数 输入
     private FunctionMethodOutFromEnum functionMethodOutFromEnum;
     private Map<String, String> inOutMap = new LinkedHashMap<>();
+    private InputTypeEnum inputTypeEnum;
 
     public static BizFunctionChain gen(FunctionDefineModel functionDefineModel) {
         BizFunctionChain bizFunctionChain = new BizFunctionChain();
@@ -90,4 +91,16 @@ public class BizFunctionChain {
     public String bizKeyRoutePath() {
         return SplitUtil.join(this.getBizKeyRoute(), "#") + "#" + this.getFunctionKey();
     }
+
+    public enum InputTypeEnum {
+
+        none,
+        auto,
+        assign,
+        pass,
+
+        ;
+
+    }
+
 }

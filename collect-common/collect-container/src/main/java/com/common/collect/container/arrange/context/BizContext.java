@@ -138,15 +138,15 @@ public class BizContext {
                 initFunctionChain(innerBizContext, bizDefineModelMap);
                 // 拷贝一份 区分在不同 biz_define 中参数的异同
                 List<BizFunctionChain> functionChains = BizFunctionChain.copy(innerBizContext.getBizFunctionChains());
-                BizFunctionChain functionChain = functionChains.get(0);
-                // 传递biz类型的input配置到此biz对应的功能
-                parseBizDefineInput(arrangeModel, functionChain, bizFunctionChains);
                 for (BizFunctionChain param : functionChains) {
                     List<String> routes = new ArrayList<>();
                     routes.add(bizKey);
                     routes.addAll(param.getBizKeyRoute());
                     param.setBizKeyRoute(routes);
                 }
+                // 传递biz类型的input配置到此biz对应的功能
+                BizFunctionChain functionChain = functionChains.get(0);
+                parseBizDefineInput(arrangeModel, functionChain, bizFunctionChains);
                 bizFunctionChains.addAll(functionChains);
             }
         }
@@ -156,18 +156,24 @@ public class BizContext {
 
     private static void parseBizDefineInput(BizDefineArrangeModel arrangeModel, BizFunctionChain functionChain, List<BizFunctionChain> beforeFunctionChains) {
         List<String> excludes = arrangeModel.getInputExcludes();
+        functionChain.setInputTypeEnum(BizFunctionChain.InputTypeEnum.valueOf(arrangeModel.getInputTypeEnum().name()));
         if (EmptyUtil.isEmpty(beforeFunctionChains)) {
-            if (EmptyUtil.isNotEmpty(arrangeModel.getInputMappings())) {
-                throw UnifiedException.gen(StringUtil.format("{} 的第一个功能 input_mapping 必须为空", functionChain.bizKeyRoutePath()));
+            // 第一个功能的 inputType 为 none
+            functionChain.setInputTypeEnum(BizFunctionChain.InputTypeEnum.none);
+            if (EmptyUtil.isNotEmpty(arrangeModel.getInputMappings()) || EmptyUtil.isNotEmpty(arrangeModel.getInputExcludes())) {
+                throw UnifiedException.gen(StringUtil.format("{} 的第一个功能 input_* 必须为空", functionChain.bizKeyRoutePath()));
             }
         }
-        for (String input : arrangeModel.getInputMappings()) {
-            List<String> inOutput = SplitUtil.split(input, Constants.input_split, (t) -> t);
-            if (inOutput.size() != 2) {
-                throw UnifiedException.gen(StringUtil.format("{} 的 input_mapping(lastOut->currentIn):{} 不合法", functionChain.bizKeyRoutePath(), input));
-            }
-            if (!excludes.contains(inOutput.get(1))) {
-                functionChain.putInOutputMap(inOutput.get(0), inOutput.get(1));
+        if (functionChain.getInputTypeEnum().equals(BizFunctionChain.InputTypeEnum.auto) ||
+                functionChain.getInputTypeEnum().equals(BizFunctionChain.InputTypeEnum.assign)) {
+            for (String input : arrangeModel.getInputMappings()) {
+                List<String> inOutput = SplitUtil.split(input, Constants.input_split, (t) -> t);
+                if (inOutput.size() != 2) {
+                    throw UnifiedException.gen(StringUtil.format("{} 的 input_mapping(lastOut->currentIn):{} 不合法", functionChain.bizKeyRoutePath(), input));
+                }
+                if (!excludes.contains(inOutput.get(1))) {
+                    functionChain.putInOutputMap(inOutput.get(0), inOutput.get(1));
+                }
             }
         }
 
@@ -178,7 +184,7 @@ public class BizContext {
             List<String> inFields = currentFunctionDefineModel.getFunctionMethodInFields();
             List<String> lastOutFields = lastFunctionDefineModel.getFunctionMethodOutFields();
 
-            if (arrangeModel.getInputTypeEnum().equals(BizDefineArrangeModel.InputTypeEnum.auto)) {
+            if (functionChain.getInputTypeEnum().equals(BizFunctionChain.InputTypeEnum.auto)) {
                 // 取交集 默认进行属性对应
                 List<String> retain = new ArrayList<>(inFields);
                 retain.retainAll(lastOutFields);
@@ -188,24 +194,25 @@ public class BizContext {
                 }
             }
 
-            Map<String, String> inOutMap = functionChain.getInOutMap();
-            if (EmptyUtil.isNotEmpty(inOutMap)) {
-                for (String in : inOutMap.values()) {
-                    if (!inFields.contains(in)) {
-                        log.warn("当前功能的输入 input_mapping[1] 属性应该在此范围内:{}", JsonUtil.bean2json(inFields));
-                        throw UnifiedException.gen(StringUtil.format("{} 的 当前功能的输入 input_mapping[1]:{} 属性设置有误", functionChain.bizKeyRoutePath(), in));
+            if (functionChain.getInputTypeEnum().equals(BizFunctionChain.InputTypeEnum.auto) ||
+                    functionChain.getInputTypeEnum().equals(BizFunctionChain.InputTypeEnum.assign)) {
+                Map<String, String> inOutMap = functionChain.getInOutMap();
+                if (EmptyUtil.isNotEmpty(inOutMap)) {
+                    for (String in : inOutMap.values()) {
+                        if (!inFields.contains(in)) {
+                            log.warn("当前功能的输入 input_mapping[1] 属性应该在此范围内:{}", JsonUtil.bean2json(inFields));
+                            throw UnifiedException.gen(StringUtil.format("{} 的 当前功能的输入 input_mapping[1]:{} 属性设置有误", functionChain.bizKeyRoutePath(), in));
+                        }
                     }
-                }
-                for (String out : inOutMap.keySet()) {
-                    if (!lastOutFields.contains(out)) {
-                        log.warn("上一个功能的产出 属性应该在此范围内:{}", JsonUtil.bean2json(lastOutFields));
-                        throw UnifiedException.gen(StringUtil.format("{} 的 上一个功能的产出 input_mapping[0]:{} 属性设置有误", functionChain.bizKeyRoutePath(), out));
+                    for (String out : inOutMap.keySet()) {
+                        if (!lastOutFields.contains(out)) {
+                            log.warn("上一个功能的产出 属性应该在此范围内:{}", JsonUtil.bean2json(lastOutFields));
+                            throw UnifiedException.gen(StringUtil.format("{} 的 上一个功能的产出 input_mapping[0]:{} 属性设置有误", functionChain.bizKeyRoutePath(), out));
+                        }
                     }
                 }
             }
-
         }
-
 
     }
 }

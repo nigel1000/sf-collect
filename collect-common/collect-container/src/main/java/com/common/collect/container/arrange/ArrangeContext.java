@@ -38,21 +38,22 @@ public class ArrangeContext {
         ArrangeRetContext retContext = new ArrangeRetContext();
         retContext.setBizKey(bizContext.getBizKey());
         List<BizFunctionChain> bizFunctionChains = bizContext.getBizFunctionChains();
-        int size = bizFunctionChains.size();
         Object ret = null;
         Object arg = null;
-        for (int i = 0; i < size; i++) {
-            BizFunctionChain bizFunctionChain = bizFunctionChains.get(i);
+        int i = 1;
+        for (BizFunctionChain bizFunctionChain : bizFunctionChains) {
             if (bizFunctionChain.getFunctionMethodTypeEnum().equals(FunctionMethodTypeEnum.inputLessEqualOne)) {
                 Class<?> paramType = null;
                 if (bizFunctionChain.getParamCount() == 1) {
                     paramType = bizFunctionChain.getParamTypes()[0];
                 }
-                if (i == 0) {
+                // 为 null 时表示是第一个功能
+                if (bizFunctionChain.getInputTypeEnum().equals(BizFunctionChain.InputTypeEnum.none)) {
                     if (paramJson != null && paramType != null) {
                         arg = JsonUtil.json2bean(paramJson, paramType);
                     }
-                } else {
+                } else if (bizFunctionChain.getInputTypeEnum().equals(BizFunctionChain.InputTypeEnum.assign) ||
+                        bizFunctionChain.getInputTypeEnum().equals(BizFunctionChain.InputTypeEnum.auto)) {
                     Map<String, Object> paramMap = new HashMap<>();
                     Map<String, String> inOutMap = bizFunctionChain.getInOutMap();
                     for (Map.Entry<String, String> entry : inOutMap.entrySet()) {
@@ -74,6 +75,15 @@ public class ArrangeContext {
                     } else {
                         arg = null;
                     }
+                } else if (bizFunctionChain.getInputTypeEnum().equals(BizFunctionChain.InputTypeEnum.pass)) {
+                    FunctionMethodOutFromEnum outFrom = bizFunctionChain.getFunctionMethodOutFromEnum();
+                    if (outFrom.equals(FunctionMethodOutFromEnum.output)) {
+                        // 上一个返回作为输入
+                        arg = ret;
+                    } else if (outFrom.equals(FunctionMethodOutFromEnum.input)) {
+                        // 上一个输入作为输入
+                        // arg = arg;
+                    }
                 }
                 ret = ClassUtil.invoke(bizFunctionChain.getTarget(), bizFunctionChain.getMethod(), arg);
                 if (bizFunctionChain.getFunctionInKeep()) {
@@ -82,6 +92,7 @@ public class ArrangeContext {
                 if (bizFunctionChain.getFunctionOutKeep()) {
                     retContext.putOutputMap(bizFunctionChain.bizKeyRoutePath() + "-" + i, ret);
                 }
+                i++;
             } else {
                 throw UnifiedException.gen(bizFunctionChain.getTarget().getClass().getName() + "#" + bizFunctionChain.getMethod().getName() + " 入参只能是一个");
             }

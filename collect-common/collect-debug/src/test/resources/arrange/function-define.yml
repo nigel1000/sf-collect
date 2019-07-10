@@ -68,8 +68,10 @@ biz_define:
     # 类型是 biz 的 input 不能为空
     - type: biz
       name: biz_fillProductSkuAndSale
-      # 可以为空 默认为自动 auto|assign
-      # auto input_mapping + 上一个产出和当前输入 属性名一样的自动映射 - input_exclude
+      # 可以为空 默认为自动 auto|assign|pass(透传不进行转化)
+      # auto input_mapping + 上一个产出和当前输入属性名一样的自动映射 - input_exclude
+      # assign input_mapping - input_exclude
+      # pass 直接透传 input_mappings和input_excludes必须为空
       input_type: assign
       input_mappings:
       - productModel->productModel
@@ -80,11 +82,12 @@ biz_define:
     arranges:
     - type: biz
       name: biz_fillProductSku
-      input_type: auto
-      input_excludes: [goodsId]
+    #      input_type: auto
+    #      input_excludes: [goodsId]
     #      input_mappings: [productModel->productModel]
     - type: biz
       name: biz_fillProductSkuSale
+      input_type: pass
   #      input_mappings: [productModel->productModel]
   # 业务 2
   biz_fillProductSku:
