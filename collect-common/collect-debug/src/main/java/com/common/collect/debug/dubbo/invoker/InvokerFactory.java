@@ -47,6 +47,9 @@ public class InvokerFactory {
             if (providerUrls != null && providerUrls.size() > 0) {
                 for (int i = 0; i < providerUrls.size(); i++) {
                     URL providerUrl = providerUrls.get(i);
+                    if (providerUrl.getProtocol().contains("jsonrpc")) {
+                        continue;
+                    }
                     log.info("before providerUrl:{}", providerUrl);
                     if (invokerParam.getIpMap().containsKey(providerUrl.getHost())) {
                         providerUrl = providerUrl.setAddress(invokerParam.getIpMap().get(providerUrl.getHost()));
