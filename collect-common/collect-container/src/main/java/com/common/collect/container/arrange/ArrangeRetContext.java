@@ -48,6 +48,10 @@ public class ArrangeRetContext {
     }
 
     public <T> T getLastRet() {
-        return (T)lastRet;
+        return (T) lastRet;
+    }
+
+    public <T> T getLastArg() {
+        return (T) lastArg;
     }
 }

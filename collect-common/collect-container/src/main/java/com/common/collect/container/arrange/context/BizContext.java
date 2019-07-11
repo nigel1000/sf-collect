@@ -2,7 +2,6 @@ package com.common.collect.container.arrange.context;
 
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.JsonUtil;
-import com.common.collect.container.TemplateUtil;
 import com.common.collect.container.arrange.constants.Constants;
 import com.common.collect.container.arrange.model.BizDefineArrangeModel;
 import com.common.collect.container.arrange.model.BizDefineModel;
@@ -15,7 +14,6 @@ import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -37,17 +35,8 @@ public class BizContext {
 
     private static Map<String, BizContext> bizContextMap = new LinkedHashMap<>();
 
-
-    public static ByteArrayOutputStream downloadBizDefine() {
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put("bizDefines", bizContextMap);
-        return TemplateUtil.getStreamByTemplate("/tpl/arrange", "biz_define.tpl", map);
-    }
-
-    public static ByteArrayOutputStream downloadBizFunctionChain() {
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put("bizFunctionChains", bizContextMap);
-        return TemplateUtil.getStreamByTemplate("/tpl/arrange", "biz_function_chain.tpl", map);
+    public static Map<String, BizContext> getBizContextMap() {
+        return bizContextMap;
     }
 
     public static BizContext getBizContextByKey(String key) {

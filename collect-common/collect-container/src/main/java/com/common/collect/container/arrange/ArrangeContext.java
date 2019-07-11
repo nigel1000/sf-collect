@@ -2,7 +2,6 @@ package com.common.collect.container.arrange;
 
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.JsonUtil;
-import com.common.collect.container.arrange.constants.Constants;
 import com.common.collect.container.arrange.context.BizContext;
 import com.common.collect.container.arrange.context.BizFunctionChain;
 import com.common.collect.container.arrange.context.ConfigContext;
@@ -10,13 +9,9 @@ import com.common.collect.container.arrange.enums.FunctionMethodOutFromEnum;
 import com.common.collect.container.arrange.enums.FunctionMethodTypeEnum;
 import com.common.collect.util.ClassUtil;
 import com.common.collect.util.EmptyUtil;
-import com.common.collect.util.FileUtil;
-import com.common.collect.util.PathUtil;
 import lombok.Data;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -104,28 +99,6 @@ public class ArrangeContext {
 
     public synchronized static void load(Object... obj) {
         ConfigContext.load(obj);
-    }
-
-    public synchronized static void downLoadConfig(@NonNull String path) {
-        ByteArrayOutputStream functionDefine = ConfigContext.downloadFunctionDefine();
-        ByteArrayOutputStream bizDefine = BizContext.downloadBizDefine();
-        ByteArrayOutputStream bizFunctionChain = BizContext.downloadBizFunctionChain();
-        path = PathUtil.tailEndSeparator(path);
-        if (PathUtil.hasPathSpecial(path)) {
-            throw UnifiedException.gen("保存路径有特殊字符");
-        }
-        FileUtil.createFile(path + Constants.export_function_define, false, functionDefine.toByteArray(), true);
-        FileUtil.createFile(path + Constants.export_biz_define, false, bizDefine.toByteArray(), true);
-        FileUtil.createFile(path + Constants.export_biz_function_chain, false, bizFunctionChain.toByteArray(), true);
-
-        try {
-            functionDefine.close();
-            bizDefine.close();
-            bizFunctionChain.close();
-        } catch (Exception e) {
-            throw UnifiedException.gen("关闭流失败", e);
-        }
-
     }
 
 }

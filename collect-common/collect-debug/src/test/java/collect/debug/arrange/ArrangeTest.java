@@ -37,7 +37,6 @@ public class ArrangeTest {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("context-spring.xml");
         // 加载配置文件
         ArrangeContext.load(FileUtil.getString(new ClassPathResource("arrange/function-define.yml").getFile()));
-        ArrangeContext.downLoadConfig(path);
         // 定义第一个入参
         ProductContext param = new ProductContext();
         param.setGoodsId(5882654L);
