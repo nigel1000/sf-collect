@@ -25,8 +25,7 @@ import java.util.Map;
 public class ArrangeContext {
 
 
-    private ArrangeContext() {
-    }
+    private ArrangeContext() {}
 
     public static ArrangeRetContext runBiz(String bizKey, String paramJson) {
         BizContext bizContext = BizContext.getBizContextByKey(bizKey);
@@ -43,12 +42,14 @@ public class ArrangeContext {
                     paramType = bizFunctionChain.getParamTypes()[0];
                 }
                 // 为 null 时表示是第一个功能
-                if (bizFunctionChain.getInputTypeEnum().equals(BizFunctionChain.InputTypeEnum.none)) {
-                    if (paramJson != null && paramType != null) {
+                if (paramType == null) {
+                    arg = null;
+                } else if (bizFunctionChain.getInputTypeEnum().equals(BizFunctionChain.InputTypeEnum.none)) {
+                    if (paramJson != null) {
                         arg = JsonUtil.json2bean(paramJson, paramType);
                     }
-                } else if (bizFunctionChain.getInputTypeEnum().equals(BizFunctionChain.InputTypeEnum.assign) ||
-                        bizFunctionChain.getInputTypeEnum().equals(BizFunctionChain.InputTypeEnum.auto)) {
+                } else if (bizFunctionChain.getInputTypeEnum().equals(BizFunctionChain.InputTypeEnum.assign)
+                        || bizFunctionChain.getInputTypeEnum().equals(BizFunctionChain.InputTypeEnum.auto)) {
                     Map<String, Object> paramMap = new HashMap<>();
                     Map<String, String> inOutMap = bizFunctionChain.getInOutMap();
                     for (Map.Entry<String, String> entry : inOutMap.entrySet()) {
@@ -65,10 +66,8 @@ public class ArrangeContext {
                             }
                         }
                     }
-                    if (EmptyUtil.isNotEmpty(paramMap) && paramType != null) {
+                    if (EmptyUtil.isNotEmpty(paramMap)) {
                         arg = JsonUtil.json2bean(JsonUtil.bean2json(paramMap), paramType);
-                    } else {
-                        arg = null;
                     }
                 } else if (bizFunctionChain.getInputTypeEnum().equals(BizFunctionChain.InputTypeEnum.pass)) {
                     FunctionMethodOutFromEnum outFrom = bizFunctionChain.getFunctionMethodOutFromEnum();
@@ -89,7 +88,8 @@ public class ArrangeContext {
                 }
                 i++;
             } else {
-                throw UnifiedException.gen(bizFunctionChain.getTarget().getClass().getName() + "#" + bizFunctionChain.getMethod().getName() + " 入参只能是一个");
+                throw UnifiedException.gen(bizFunctionChain.getTarget().getClass().getName() + "#"
+                        + bizFunctionChain.getMethod().getName() + " 入参只能是一个");
             }
         }
         retContext.setLastRet(ret);
