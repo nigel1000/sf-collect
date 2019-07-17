@@ -90,11 +90,22 @@ public class UnifiedException extends RuntimeException {
     }
 
     public UnifiedException addContext(String key, Object value) {
-
         if (context == null) {
             context = new HashMap<>();
         }
         context.put(key, value);
+        return this;
+    }
+
+
+    public UnifiedException addContext(Map<String, Object> add) {
+        if (add == null) {
+            return this;
+        }
+        if (context == null) {
+            context = new HashMap<>();
+        }
+        context.putAll(add);
         return this;
     }
 

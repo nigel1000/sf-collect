@@ -3,6 +3,8 @@ package com.common.collect.api;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 @Data
 public class Response<T> implements Serializable {
@@ -15,6 +17,27 @@ public class Response<T> implements Serializable {
 
     private T result;
     private Object error;
+
+    private Map<String, Object> context;
+
+    public Response<T> addContext(String key, Object value) {
+        if (context == null) {
+            context = new HashMap<>();
+        }
+        context.put(key, value);
+        return this;
+    }
+
+    public Response<T> addContext(Map<String, Object> add) {
+        if (add == null) {
+            return this;
+        }
+        if (context == null) {
+            context = new HashMap<>();
+        }
+        context.putAll(add);
+        return this;
+    }
 
     private Response(int code, T data, Object desc) {
         this.code = code;

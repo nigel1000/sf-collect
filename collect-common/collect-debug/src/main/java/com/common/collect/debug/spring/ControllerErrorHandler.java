@@ -5,6 +5,7 @@ import com.alibaba.dubbo.rpc.RpcException;
 import com.common.collect.api.Response;
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.aops.LogConstant;
+import com.common.collect.container.trace.TraceIdUtil;
 import com.common.collect.util.EmptyUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
@@ -49,7 +50,9 @@ public class ControllerErrorHandler {
             return Response.fail(PARAM_ERROR_MESSAGE);
         }
         FieldError fieldError = fieldErrors.get(0);
-        return Response.fail(fieldError.getDefaultMessage());
+        Response response = Response.fail(fieldError.getDefaultMessage());
+        response.addContext("traceId", TraceIdUtil.traceId());
+        return response;
     }
 
     /**
@@ -64,7 +67,9 @@ public class ControllerErrorHandler {
             return Response.fail(PARAM_ERROR_MESSAGE);
         }
         ConstraintViolation<?> next = constraintViolations.iterator().next();
-        return Response.fail(next.getMessage());
+        Response response = Response.fail(next.getMessage());
+        response.addContext("traceId", TraceIdUtil.traceId());
+        return response;
     }
 
     /**
@@ -74,7 +79,9 @@ public class ControllerErrorHandler {
     @ResponseStatus(HttpStatus.OK)
     public Response processControllerError(NativeWebRequest request, MissingServletRequestParameterException ex) {
         printLogInfo(request, ex);
-        return Response.fail(ex.getMessage());
+        Response response = Response.fail(ex.getMessage());
+        response.addContext("traceId", TraceIdUtil.traceId());
+        return response;
     }
 
     /**
@@ -89,7 +96,9 @@ public class ControllerErrorHandler {
             return Response.fail(PARAM_ERROR_MESSAGE);
         }
         FieldError fieldError = errors.getFieldErrors().get(0);
-        return Response.fail(fieldError.getDefaultMessage());
+        Response response = Response.fail(fieldError.getDefaultMessage());
+        response.addContext("traceId", TraceIdUtil.traceId());
+        return response;
     }
 
     /**
@@ -99,7 +108,9 @@ public class ControllerErrorHandler {
     @ResponseStatus(HttpStatus.OK)
     public Response processControllerError(NativeWebRequest request, HttpMessageNotReadableException ex) {
         printLogInfo(request, ex);
-        return Response.fail(PARAM_ERROR_MESSAGE);
+        Response response = Response.fail(PARAM_ERROR_MESSAGE);
+        response.addContext("traceId", TraceIdUtil.traceId());
+        return response;
     }
 
     /**
@@ -109,7 +120,9 @@ public class ControllerErrorHandler {
     @ResponseStatus(HttpStatus.OK)
     public Response processControllerError(NativeWebRequest request, RpcException ex) {
         printLogInfo(request, ex);
-        return Response.fail(RPC_EXCEPTION);
+        Response response = Response.fail(RPC_EXCEPTION);
+        response.addContext("traceId", TraceIdUtil.traceId());
+        return response;
     }
 
     /**
@@ -122,7 +135,10 @@ public class ControllerErrorHandler {
         if (ex.getCause() != null) {
             printLogInfo(request, ex);
         }
-        return Response.build(ex.getErrorCode(), ex.getContext(), message);
+        Response response = Response.fail(ex.getErrorCode(), message);
+        response.addContext("traceId", TraceIdUtil.traceId());
+        response.addContext(ex.getContext());
+        return response;
     }
 
     /**
@@ -132,7 +148,9 @@ public class ControllerErrorHandler {
     @ResponseStatus(HttpStatus.OK)
     public Response processControllerError(NativeWebRequest request, SQLException ex) {
         printLogInfo(request, ex);
-        return Response.fail(DB_EXCEPTION);
+        Response response = Response.fail(DB_EXCEPTION);
+        response.addContext("traceId", TraceIdUtil.traceId());
+        return response;
     }
 
     /**
@@ -142,7 +160,9 @@ public class ControllerErrorHandler {
     @ResponseStatus(HttpStatus.OK)
     public Response processControllerError(NativeWebRequest request, RuntimeException ex) {
         printLogInfo(request, ex);
-        return Response.fail(INTERNAL_EXCEPTION);
+        Response response = Response.fail(INTERNAL_EXCEPTION);
+        response.addContext("traceId", TraceIdUtil.traceId());
+        return response;
     }
 
     /**
@@ -151,5 +171,4 @@ public class ControllerErrorHandler {
     private void printLogInfo(NativeWebRequest request, Throwable ex) {
         log.info("request parameters:{}", LogConstant.getObjString(request.getParameterMap()), ex);
     }
-
 }

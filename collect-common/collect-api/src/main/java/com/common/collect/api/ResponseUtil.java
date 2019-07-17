@@ -14,16 +14,23 @@ public class ResponseUtil {
     }
 
     public static <T> T parse(Response<T> response) {
+        UnifiedException exception;
         if (response == null) {
-            throw UnifiedException.gen(CommonError.RPC_INVOKE_ERROR.getErrorMessage());
+            exception = UnifiedException.gen(CommonError.RPC_INVOKE_ERROR.getErrorMessage());
+            exception.addContext("error_type", "返回为 null");
+            throw exception;
         }
         if (response.isSuccess()) {
             return response.getResult();
         }
         if (response.getError() != null) {
-            throw UnifiedException.gen(String.valueOf(response.getError()));
+            exception = UnifiedException.gen(String.valueOf(response.getError()));
+            exception.addContext(response.getContext());
+            throw exception;
         }
-        throw UnifiedException.gen(CommonError.RPC_INVOKE_ERROR.getErrorMessage());
+        exception = UnifiedException.gen(CommonError.RPC_INVOKE_ERROR.getErrorMessage());
+        exception.addContext(response.getContext());
+        throw exception;
     }
 
 }

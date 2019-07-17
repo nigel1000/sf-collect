@@ -26,7 +26,7 @@ public class TraceIdUtil {
         MDC.remove(TraceConstants.TRACE_ID_KEY);
     }
 
-    public static String getTraceId() {
+    public static String traceId() {
         return MDC.get(TraceConstants.TRACE_ID_KEY);
     }
 

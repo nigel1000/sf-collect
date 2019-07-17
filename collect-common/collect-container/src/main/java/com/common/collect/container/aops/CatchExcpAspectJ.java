@@ -4,6 +4,7 @@ import com.common.collect.api.Response;
 import com.common.collect.api.enums.CommonError;
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.AspectUtil;
+import com.common.collect.container.trace.TraceIdUtil;
 import com.common.collect.util.ClassUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -57,7 +58,7 @@ public class CatchExcpAspectJ {
                 log.error(LogConstant.EXCP_LOG_PREFIX + " excpModule:{}, excpMessage:{}, excpContext:{}", module,
                         className, methodName, ex.getModule(), ex.getErrorMessage(), ex.getContext(), ex);
             }
-            return returnResult(ex.getErrorCode(), ex.getErrorMessage(), returnType);
+            return returnResult(ex, returnType);
         } catch (DataAccessException | SQLException ex) {
             log.info(LogConstant.START_LOG_PREFIX + " args:{}", module, point.getTarget().getClass().getName(),
                     point.getSignature().getName(), LogConstant.getObjString(point.getArgs()));
@@ -91,10 +92,23 @@ public class CatchExcpAspectJ {
     private Object returnResult(int errorCode, String errorMessage, Class returnType) {
 
         if (Response.class == returnType) {
-            return Response.fail(errorCode, errorMessage);
+            Response response = Response.fail(errorCode, errorMessage);
+            response.addContext("traceId", TraceIdUtil.traceId());
+            return response;
         }
+
         return ClassUtil.returnBaseDataType(returnType);
     }
 
+    private Object returnResult(UnifiedException ex, Class returnType) {
+        if (Response.class == returnType) {
+            Response response = Response.fail(ex.getErrorCode(), ex.getErrorMessage());
+            response.addContext("traceId", TraceIdUtil.traceId());
+            response.addContext(ex.getContext());
+            return response;
+        }
+
+        return ClassUtil.returnBaseDataType(returnType);
+    }
 
 }
