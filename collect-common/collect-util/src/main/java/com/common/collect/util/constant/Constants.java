@@ -12,9 +12,10 @@ public class Constants {
     public static final String CHINESE_REG_EX = "[\\u4e00-\\u9fa5]";
 
     /**
-     * 特殊字符
+     * 16 进制字符
      */
-    public static final String SPECIAL_MARK = "`~!@#$%^&*()+=|{}':;',.<>?~！@#￥%……&*（）——+|{}【】；：。？\\[\\]/\\\\";
+    public static final char[] HEX_LOOKUP_STRING = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c',
+            'd', 'e', 'f'};
 
     /**
      * 时间

@@ -15,13 +15,22 @@ public class ValidUtil {
     }
 
     // 手机号码的正则表达式
-    public static boolean isPhoneNo(String str) {
+    public static boolean isPhone(String str) {
         return match(str, "[1]{1}[3|4|5|7|8|9]{1}[0-9]{9}");
+    }
+
+    public static boolean isTel(String str) {
+        return match(str, "^([\\d]{3}-)?([\\d]{3,4}-)?[\\d]{7,8}(-[\\d]{1,4})?$");
     }
 
     // 校验邮箱格式
     public static boolean isEmail(String email) {
         return match(email, "^([\\w-\\.]+)@[\\w-.]+(\\.?[a-zA-Z]{2,4}$)");
+    }
+
+    // 校验邮箱格式
+    public static boolean isUrl(String email) {
+        return match(email, "^(http|https)://.*");
     }
 
     // 0.1
