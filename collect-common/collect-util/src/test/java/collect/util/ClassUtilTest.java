@@ -22,7 +22,7 @@ public class ClassUtilTest {
 
     private static class CallableTest
             extends HashMap<Double, BigDecimal>
-            implements Callable<Object>, Supplier<Integer>, Function<Double, Float> {
+            implements Runnable, Callable<Object>, Supplier<Integer>, Function<Double, Float> {
         @Override
         public Object call() {
             return null;
@@ -36,6 +36,11 @@ public class ClassUtilTest {
         @Override
         public Integer get() {
             return null;
+        }
+
+        @Override
+        public void run() {
+
         }
     }
 

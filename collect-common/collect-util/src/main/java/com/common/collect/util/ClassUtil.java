@@ -160,7 +160,9 @@ public class ClassUtil {
         Type[] genTypes = clazz.getGenericInterfaces();
         List<Class> classes = new ArrayList<>();
         for (Type genType : genTypes) {
-            classes.add(getGenericType(clazz, genType, index));
+            if (genType instanceof ParameterizedType) {
+                classes.add(getGenericType(clazz, genType, index));
+            }
         }
         return classes;
     }
