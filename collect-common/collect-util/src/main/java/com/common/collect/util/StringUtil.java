@@ -2,6 +2,7 @@ package com.common.collect.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
 
 /**
  * Created by hznijianfeng on 2019/3/26.
@@ -34,7 +35,7 @@ public class StringUtil {
         }
         String ret = str;
         for (Object arg : args) {
-            ret = ret.replaceFirst("\\{}", String.valueOf(arg));
+            ret = ret.replaceFirst("\\{}", Matcher.quoteReplacement(String.valueOf(arg)));
         }
         return ret;
     }

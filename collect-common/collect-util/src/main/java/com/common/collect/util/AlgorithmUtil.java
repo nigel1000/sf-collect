@@ -15,7 +15,14 @@ import javax.crypto.spec.SecretKeySpec;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.security.*;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
@@ -32,7 +39,8 @@ public class AlgorithmUtil {
         SHA1("SHA-1"),
         SHA256("SHA-256"),
         SHA384("SHA-384"),
-        SHA512("SHA-512"),;
+        SHA512("SHA-512"),
+        ;
 
         @Getter
         private String name;
@@ -220,23 +228,31 @@ public class AlgorithmUtil {
         }
     }
 
-    public static String uRLDecoder(String str) {
-        if (EmptyUtil.isEmpty(str)) {
+    public static String uRLDecoderUtf8(String content) {
+        return uRLDecoder(content, StandardCharsets.UTF_8.name());
+    }
+
+    public static String uRLDecoder(String content, @NonNull String encode) {
+        if (EmptyUtil.isEmpty(content)) {
             return "";
         }
         try {
-            return URLDecoder.decode(str, StandardCharsets.UTF_8.name());
+            return URLDecoder.decode(content, encode);
         } catch (Exception e) {
             throw UnifiedException.gen(StringUtil.format("url 加密失败"), e);
         }
     }
 
-    public static String uRLEncoder(String str) {
-        if (EmptyUtil.isEmpty(str)) {
+    public static String uRLEncoderUtf8(String content) {
+        return uRLEncoder(content, StandardCharsets.UTF_8.name());
+    }
+
+    public static String uRLEncoder(String content, @NonNull String encode) {
+        if (EmptyUtil.isEmpty(content)) {
             return "";
         }
         try {
-            return URLEncoder.encode(str, StandardCharsets.UTF_8.name());
+            return URLEncoder.encode(content, encode);
         } catch (Exception e) {
             throw UnifiedException.gen(StringUtil.format("url 解密失败"), e);
         }

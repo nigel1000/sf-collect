@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -20,6 +22,74 @@ import java.util.jar.JarFile;
  * Created by nijianfeng on 2019/5/19.
  */
 public class ClassUtil {
+    // 基础能力
+    public static <T> T newInstance(String clazz) {
+        try {
+            return (T) getClass(clazz).newInstance();
+        } catch (Exception e) {
+            throw UnifiedException.gen(StringUtil.format(" {} 无法初始化", clazz), e);
+        }
+    }
+
+    public static <T> T newInstance(Class<?> clazz) {
+        try {
+            return (T) clazz.newInstance();
+        } catch (Exception e) {
+            throw UnifiedException.gen(StringUtil.format(" {} 无法初始化", clazz.getName()), e);
+        }
+    }
+
+    public static Method getMethod(Class<?> clazz, String methodName, Class<?>... args) {
+        try {
+            return clazz.getDeclaredMethod(methodName, args);
+        } catch (Exception e) {
+            throw UnifiedException.gen(StringUtil.format("class:{},method:{},找不到", clazz.getName(), methodName), e);
+        }
+    }
+
+    public static Class<?> getClass(String clazz) {
+        try {
+            return Class.forName(clazz);
+        } catch (Exception e) {
+            throw UnifiedException.gen(StringUtil.format(" {} 无法找到类定义", clazz), e);
+        }
+    }
+
+    public static <T> T invoke(Object target, Method method, Object... args) {
+        try {
+            return (T) method.invoke(target, args);
+        } catch (Exception e) {
+            throw UnifiedException.gen(StringUtil.format(" class:{},method:{} 调用方法失败", target.getClass().getName(), method.getName()), e);
+        }
+    }
+
+    public static <T> T getFieldValue(Object target, String name) {
+        try {
+            Field field = getField(target.getClass(), name);
+            return (T) field.get(target);
+        } catch (Exception e) {
+            throw UnifiedException.gen(StringUtil.format(" class:{},field:{} 获取属性值失败", target.getClass().getName(), name), e);
+        }
+    }
+
+    public static void setFieldValue(Object target, String name, Object value) {
+        try {
+            Field field = getField(target.getClass(), name);
+            field.set(target, value);
+        } catch (Exception e) {
+            throw UnifiedException.gen(StringUtil.format(" class:{},field:{} 设置属性值失败", target.getClass().getName(), name), e);
+        }
+    }
+
+    public static Field getField(Class<?> clazz, String name) {
+        try {
+            Field field = clazz.getDeclaredField(name);
+            field.setAccessible(true);
+            return field;
+        } catch (Exception e) {
+            throw UnifiedException.gen(StringUtil.format(" class:{},field:{} 获取属性值失败", clazz.getName(), name), e);
+        }
+    }
 
     public static Object returnBaseDataType(Class<?> returnType) {
         if (returnType != null && returnType.isPrimitive()) {
@@ -51,6 +121,7 @@ public class ClassUtil {
         return null;
     }
 
+    // 泛型 继承
     public static List<Class> getSuperclasses(Class clazz) {
         List<Class> result = new ArrayList<>();
         result.add(clazz);
@@ -59,68 +130,41 @@ public class ClassUtil {
             return result;
         }
         result.addAll(getSuperclasses(clazz.getSuperclass()));
-        return result;
+        return CollectionUtil.removeDuplicate(result);
     }
 
-    public static <T> T  newInstance(String clazz) {
-        try {
-            return (T)getClass(clazz).newInstance();
-        } catch (Exception e) {
-            throw UnifiedException.gen(StringUtil.format(" {} 无法初始化", clazz), e);
+    // 获取父类泛型类型
+    public static Class getGenericType(Class clazz, Type genType, int index) {
+        if (!(genType instanceof ParameterizedType)) {
+            throw UnifiedException.gen(StringUtil.format(" class:{},index:{} 的父类没有泛型", clazz.getName(), index));
+        } else {
+            Type[] params = ((ParameterizedType) genType).getActualTypeArguments();
+            if (index < params.length && index >= 0) {
+                if (!(params[index] instanceof Class)) {
+                    throw UnifiedException.gen(StringUtil.format(" class:{},index:{} 的父类没有设置具体的类型", clazz.getName(), index));
+                } else {
+                    return (Class) params[index];
+                }
+            } else {
+                throw UnifiedException.gen(StringUtil.format(" class:{},index:{} 的父类与 index 不匹配", clazz.getName(), index));
+            }
         }
     }
 
-    public static <T> T newInstance(Class<?> clazz) {
-        try {
-            return (T) clazz.newInstance();
-        } catch (Exception e) {
-            throw UnifiedException.gen(StringUtil.format(" {} 无法初始化", clazz.getName()), e);
-        }
+    public static Class getSuperClassGenericType(Class clazz, int index) {
+        Type genType = clazz.getGenericSuperclass();
+        return getGenericType(clazz, genType, index);
     }
 
-    public static Method getDeclaredMethod(Class<?> clazz, String methodName, Class<?>... args) {
-        try {
-            return clazz.getDeclaredMethod(methodName, args);
-        } catch (Exception e) {
-            throw UnifiedException.gen(StringUtil.format("class:{},method:{},找不到", clazz.getName(), methodName), e);
+    public static List<Class> getSuperInterfaceGenericType(Class clazz, int index) {
+        Type[] genTypes = clazz.getGenericInterfaces();
+        List<Class> classes = new ArrayList<>();
+        for (Type genType : genTypes) {
+            classes.add(getGenericType(clazz, genType, index));
         }
+        return classes;
     }
 
-    public static Class<?> getClass(String clazz) {
-        try {
-            return Class.forName(clazz);
-        } catch (Exception e) {
-            throw UnifiedException.gen(StringUtil.format(" {} 无法找到类定义", clazz), e);
-        }
-    }
-
-    public static <T> T invoke(Object target, Method method, Object... args) {
-        try {
-            return (T)method.invoke(target, args);
-        } catch (Exception e) {
-            throw UnifiedException.gen(StringUtil.format(" class:{},method:{} 调用方法失败", target.getClass().getName(), method.getName()), e);
-        }
-    }
-
-    public static <T> T  getFieldValue(Object target, String name) {
-        try {
-            Field field = target.getClass().getDeclaredField(name);
-            field.setAccessible(true);
-            return (T)field.get(target);
-        } catch (Exception e) {
-            throw UnifiedException.gen(StringUtil.format(" class:{},field:{} 获取属性值失败", target.getClass().getName(), name), e);
-        }
-    }
-
-    public static Field getField(Class<?> clazz, String name) {
-        try {
-            Field field = clazz.getDeclaredField(name);
-            field.setAccessible(true);
-            return field;
-        } catch (Exception e) {
-            throw UnifiedException.gen(StringUtil.format(" class:{},field:{} 获取属性值失败", clazz.getName(), name), e);
-        }
-    }
 
     /**
      * 获得包下面的所有的class

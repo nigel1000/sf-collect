@@ -50,8 +50,8 @@ public class AlgorithmUtilTest {
         System.out.println("##########url###########");
         String url = "name=sdff{王小帅}\"";
         System.out.println(StringUtil.format("url 加密数据:{}", url));
-        System.out.println(StringUtil.format("url 加密结果:{}", AlgorithmUtil.uRLEncoder(url)));
-        System.out.println(StringUtil.format("url 解密数据:{}", AlgorithmUtil.uRLDecoder(url)));
+        System.out.println(StringUtil.format("url 加密结果:{}", AlgorithmUtil.uRLEncoderUtf8(url)));
+        System.out.println(StringUtil.format("url 解密数据:{}", AlgorithmUtil.uRLDecoderUtf8(url)));
 
         // rsa
         System.out.println("##########rsa###########");
