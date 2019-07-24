@@ -16,17 +16,19 @@ public interface IElasticMapper<T> {
 
     Boolean index(Object id, T t);
 
-    Boolean index(Object id, Object parentId, T t);
-
-    Boolean update(Object id, String field, Object object);
+    Boolean index(Object id, Object routing, T t);
 
     Boolean update(Object id, T update);
+
+    Boolean update(Object id, Object routing, T update);
 
     Boolean delete(Object id);
 
     Boolean delete(Object id, Object routing);
 
     T get(Object id);
+
+    T get(Object id, Object routing);
 
     PageResult<T> query(QueryBuilder query, PageParam pageParam, List<SortBuilder> sortBuilders);
 
@@ -36,5 +38,6 @@ public interface IElasticMapper<T> {
 
     PageResult<T> query(QueryBuilder query, String[] fetchSource, String[] routing, PageParam pageParam, List<SortBuilder> sortBuilders,
                         Function<SearchResponse, List<T>> resultMapping);
+
 
 }

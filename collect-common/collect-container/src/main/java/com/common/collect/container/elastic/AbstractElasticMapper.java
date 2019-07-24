@@ -11,7 +11,6 @@ import com.common.collect.api.page.PageResult;
 import com.common.collect.util.ConvertUtil;
 import com.common.collect.util.EmptyUtil;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -38,7 +37,6 @@ import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -54,24 +52,18 @@ public abstract class AbstractElasticMapper<T> implements IElasticMapper<T>, IEl
 
     @Override
     public Boolean index(Object docId, @NonNull T obj) {
-        IndexRequest indexRequest = new IndexRequest(getIndex(), getType());
-        indexRequest.source(toJSONString(obj), XContentType.JSON);
-        if (docId != null) {
-            indexRequest.id(String.valueOf(docId));
-        }
-        return index(indexRequest);
+        return index(docId, null, obj);
     }
 
     // 父子操作 api
     // https://www.elastic.co/guide/en/elasticsearch/reference/6.5/parent-join.html
     @Override
     public Boolean index(Object docId, Object routing, @NonNull T obj) {
-        if (routing == null) {
-            return index(docId, obj);
-        }
         IndexRequest indexRequest = new IndexRequest(getIndex(), getType());
         indexRequest.source(toJSONString(obj), XContentType.JSON);
-        indexRequest.routing(String.valueOf(routing));
+        if (routing != null) {
+            indexRequest.routing(String.valueOf(routing));
+        }
         if (docId != null) {
             indexRequest.id(String.valueOf(docId));
         }
@@ -84,61 +76,52 @@ public abstract class AbstractElasticMapper<T> implements IElasticMapper<T>, IEl
             IndexResponse indexResponse = getElasticClient().index(indexRequest, RequestOptions.DEFAULT);
             return indexResponse.getResult().equals(DocWriteResponse.Result.CREATED);
         } catch (Exception e) {
-            throw UnifiedException.gen("es 插入文档失败:" + toJSONString(indexRequest.sourceAsMap()), e);
-        }
-    }
-
-    @Override
-    public Boolean update(@NonNull Object docId, @NonNull String field, @NonNull Object object) {
-        UpdateRequest updateRequest = new UpdateRequest(getIndex(), getType(), String.valueOf(docId));
-        Map<String, Object> doc = Maps.newHashMap();
-        doc.put(field, object);
-        updateRequest.doc(toJSONString(doc), XContentType.JSON);
-        updateRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.NONE);
-        try {
-            UpdateResponse updateResponse = getElasticClient().update(updateRequest, RequestOptions.DEFAULT);
-            return updateResponse.getResult().equals(DocWriteResponse.Result.UPDATED);
-        } catch (Exception e) {
-            log.warn("docId:[{}],field:[{}],object:[{}]", docId, field, object);
-            throw UnifiedException.gen("es 更新文档失败:" + toJSONString(doc), e);
+            throw UnifiedException.gen("es 插入文档失败", e);
         }
     }
 
     @Override
     public Boolean update(@NonNull Object docId, @NonNull T update) {
+        return update(docId, null, update);
+    }
+
+    @Override
+    public Boolean update(@NonNull Object docId, Object routing, @NonNull T update) {
+
         UpdateRequest updateRequest = new UpdateRequest(getIndex(), getType(), String.valueOf(docId));
         updateRequest.doc(toJSONString(update), XContentType.JSON);
         updateRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.NONE);
+        if (routing != null) {
+            updateRequest.routing(routing.toString());
+        }
+        return update(updateRequest);
+    }
 
+    private Boolean update(UpdateRequest updateRequest) {
         try {
             UpdateResponse updateResponse = getElasticClient().update(updateRequest, RequestOptions.DEFAULT);
             return updateResponse.getResult().equals(DocWriteResponse.Result.UPDATED);
         } catch (Exception e) {
-            log.warn("docId:[{}],update:[{}]", docId, update);
-            throw UnifiedException.gen("es 更新文档失败:" + toJSONString(update), e);
+            throw UnifiedException.gen("es 更新文档失败", e);
         }
     }
 
     @Override
     public Boolean delete(@NonNull Object docId) {
-        DeleteRequest deleteRequest = new DeleteRequest(getIndex(), getType(), String.valueOf(docId));
-        deleteRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.NONE);
-        try {
-            DeleteResponse deleteResponse = getElasticClient().delete(deleteRequest, RequestOptions.DEFAULT);
-            return deleteResponse.getResult().equals(DocWriteResponse.Result.DELETED);
-        } catch (Exception e) {
-            throw UnifiedException.gen("es 删除文档失败", e);
-        }
+        return delete(docId, null);
     }
 
     @Override
     public Boolean delete(@NonNull Object docId, Object routing) {
-        if(routing == null){
-            return delete(docId);
-        }
         DeleteRequest deleteRequest = new DeleteRequest(getIndex(), getType(), String.valueOf(docId));
         deleteRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.NONE);
-        deleteRequest.routing(routing.toString());
+        if (routing != null) {
+            deleteRequest.routing(routing.toString());
+        }
+        return delete(deleteRequest);
+    }
+
+    private Boolean delete(DeleteRequest deleteRequest) {
         try {
             DeleteResponse deleteResponse = getElasticClient().delete(deleteRequest, RequestOptions.DEFAULT);
             return deleteResponse.getResult().equals(DocWriteResponse.Result.DELETED);
@@ -149,12 +132,24 @@ public abstract class AbstractElasticMapper<T> implements IElasticMapper<T>, IEl
 
     @Override
     public T get(Object docId) {
+        return get(docId, null);
+    }
+
+    @Override
+    public T get(Object docId, Object routing) {
         GetRequest getRequest = new GetRequest(getIndex(), getType(), String.valueOf(docId));
+        if (routing != null) {
+            getRequest.routing(routing.toString());
+        }
+        return get(getRequest);
+    }
+
+    private T get(GetRequest getRequest) {
         try {
             GetResponse getResponse = getElasticClient().get(getRequest, RequestOptions.DEFAULT);
             return parse(toJSONString(getResponse.getSourceAsMap()), getIndexClass());
         } catch (Exception e) {
-            throw UnifiedException.gen("es 获取文档失败，文档:id" + String.valueOf(docId), e);
+            throw UnifiedException.gen("es 获取文档失败", e);
         }
     }
 
