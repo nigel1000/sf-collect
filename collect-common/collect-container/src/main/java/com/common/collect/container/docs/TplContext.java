@@ -109,7 +109,7 @@ public class TplContext {
         }
     }
 
-    private static boolean priorityConfig(boolean global, boolean cls, boolean method) {
+    public static boolean priorityConfig(boolean global, boolean cls, boolean method) {
         return global && cls && method;
     }
 
