@@ -24,12 +24,17 @@ public interface IElasticMapper<T> {
 
     Boolean delete(Object id);
 
+    Boolean delete(Object id, Object routing);
+
     T get(Object id);
 
     PageResult<T> query(QueryBuilder query, PageParam pageParam, List<SortBuilder> sortBuilders);
 
     PageResult<T> query(QueryBuilder query, String[] fetchSource, PageParam pageParam, List<SortBuilder> sortBuilders);
 
-    PageResult<T> query(QueryBuilder query, String[] fetchSource, PageParam pageParam, List<SortBuilder> sortBuilders,
+    PageResult<T> query(QueryBuilder query, String[] fetchSource, String[] routing, PageParam pageParam, List<SortBuilder> sortBuilders);
+
+    PageResult<T> query(QueryBuilder query, String[] fetchSource, String[] routing, PageParam pageParam, List<SortBuilder> sortBuilders,
                         Function<SearchResponse, List<T>> resultMapping);
+
 }

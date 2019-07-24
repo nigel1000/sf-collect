@@ -14,8 +14,4 @@ public interface IElasticConfig {
         return null;
     }
 
-    default String getRouting() {
-        return null;
-    }
-
 }

@@ -65,12 +65,13 @@ public abstract class AbstractElasticMapper<T> implements IElasticMapper<T>, IEl
     // 父子操作 api
     // https://www.elastic.co/guide/en/elasticsearch/reference/6.5/parent-join.html
     @Override
-    public Boolean index(Object docId, Object parentId, @NonNull T obj) {
-        if (parentId == null) {
+    public Boolean index(Object docId, Object routing, @NonNull T obj) {
+        if (routing == null) {
             return index(docId, obj);
         }
         IndexRequest indexRequest = new IndexRequest(getIndex(), getType());
         indexRequest.source(toJSONString(obj), XContentType.JSON);
+        indexRequest.routing(String.valueOf(routing));
         if (docId != null) {
             indexRequest.id(String.valueOf(docId));
         }
@@ -80,9 +81,6 @@ public abstract class AbstractElasticMapper<T> implements IElasticMapper<T>, IEl
     private Boolean index(IndexRequest indexRequest) {
         try {
             indexRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.NONE);
-            if (getRouting() != null) {
-                indexRequest.routing(getRouting());
-            }
             IndexResponse indexResponse = getElasticClient().index(indexRequest, RequestOptions.DEFAULT);
             return indexResponse.getResult().equals(DocWriteResponse.Result.CREATED);
         } catch (Exception e) {
@@ -97,9 +95,6 @@ public abstract class AbstractElasticMapper<T> implements IElasticMapper<T>, IEl
         doc.put(field, object);
         updateRequest.doc(toJSONString(doc), XContentType.JSON);
         updateRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.NONE);
-        if (getRouting() != null) {
-            updateRequest.routing(getRouting());
-        }
         try {
             UpdateResponse updateResponse = getElasticClient().update(updateRequest, RequestOptions.DEFAULT);
             return updateResponse.getResult().equals(DocWriteResponse.Result.UPDATED);
@@ -114,9 +109,7 @@ public abstract class AbstractElasticMapper<T> implements IElasticMapper<T>, IEl
         UpdateRequest updateRequest = new UpdateRequest(getIndex(), getType(), String.valueOf(docId));
         updateRequest.doc(toJSONString(update), XContentType.JSON);
         updateRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.NONE);
-        if (getRouting() != null) {
-            updateRequest.routing(getRouting());
-        }
+
         try {
             UpdateResponse updateResponse = getElasticClient().update(updateRequest, RequestOptions.DEFAULT);
             return updateResponse.getResult().equals(DocWriteResponse.Result.UPDATED);
@@ -129,10 +122,23 @@ public abstract class AbstractElasticMapper<T> implements IElasticMapper<T>, IEl
     @Override
     public Boolean delete(@NonNull Object docId) {
         DeleteRequest deleteRequest = new DeleteRequest(getIndex(), getType(), String.valueOf(docId));
-        if (getRouting() != null) {
-            deleteRequest.routing(getRouting());
-        }
         deleteRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.NONE);
+        try {
+            DeleteResponse deleteResponse = getElasticClient().delete(deleteRequest, RequestOptions.DEFAULT);
+            return deleteResponse.getResult().equals(DocWriteResponse.Result.DELETED);
+        } catch (Exception e) {
+            throw UnifiedException.gen("es 删除文档失败", e);
+        }
+    }
+
+    @Override
+    public Boolean delete(@NonNull Object docId, Object routing) {
+        if(routing == null){
+            return delete(docId);
+        }
+        DeleteRequest deleteRequest = new DeleteRequest(getIndex(), getType(), String.valueOf(docId));
+        deleteRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.NONE);
+        deleteRequest.routing(routing.toString());
         try {
             DeleteResponse deleteResponse = getElasticClient().delete(deleteRequest, RequestOptions.DEFAULT);
             return deleteResponse.getResult().equals(DocWriteResponse.Result.DELETED);
@@ -161,11 +167,17 @@ public abstract class AbstractElasticMapper<T> implements IElasticMapper<T>, IEl
     @Override
     public PageResult<T> query(@NonNull QueryBuilder queryBuilders, String[] fetchSource, PageParam pageParam,
                                List<SortBuilder> sortBuilders) {
-        return query(queryBuilders, fetchSource, pageParam, sortBuilders, defaultResultMapping);
+        return query(queryBuilders, fetchSource, null, pageParam, sortBuilders, defaultResultMapping);
     }
 
     @Override
-    public PageResult<T> query(QueryBuilder queryBuilders, String[] fetchSource, PageParam pageParam, List<SortBuilder> sortBuilders,
+    public PageResult<T> query(@NonNull QueryBuilder queryBuilders, String[] fetchSource, String[] routing, PageParam pageParam,
+                               List<SortBuilder> sortBuilders) {
+        return query(queryBuilders, fetchSource, routing, pageParam, sortBuilders, defaultResultMapping);
+    }
+
+    @Override
+    public PageResult<T> query(QueryBuilder queryBuilders, String[] fetchSource, String[] routing, PageParam pageParam, List<SortBuilder> sortBuilders,
                                Function<SearchResponse, List<T>> resultMapping) {
 
         if (resultMapping == null) {
@@ -190,9 +202,10 @@ public abstract class AbstractElasticMapper<T> implements IElasticMapper<T>, IEl
         searchRequest.indices(getIndex());
         searchRequest.types(getType());
         searchRequest.source(sourceBuilder);
-        if (getRouting() != null) {
-            searchRequest.routing(getRouting());
+        if (routing != null) {
+            searchRequest.routing(routing);
         }
+
         log.debug("es 查询 json :\r\n{}\r\n", sourceBuilder.toString());
         try {
             SearchResponse searchResponse = getElasticClient().search(searchRequest, RequestOptions.DEFAULT);
@@ -202,6 +215,7 @@ public abstract class AbstractElasticMapper<T> implements IElasticMapper<T>, IEl
             throw UnifiedException.gen("es 查询失败", e);
         }
     }
+
 
     protected String toJSONString(Object object) {
         SerializeFilter[] serializeFilters = null;
