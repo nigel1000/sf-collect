@@ -128,28 +128,38 @@ public final class IdUtil implements Serializable {
             private static long workId;
 
             static {
-                // 配置比较麻烦 按服务器mac的属性做md5定workId值
-                try {
-                    // 获取本地网卡
-                    byte[] mac = NetworkInterface.getByInetAddress(InetAddress.getLocalHost()).getHardwareAddress();
-                    // 下面代码是把mac地址拼装成String
-                    StringBuilder sb = new StringBuilder();
-                    for (int i = 0; i < mac.length; i++) {
-                        if (i != 0) {
-                            sb.append("-");
+                String config = System.getProperty("snow.flake.work.id");
+                if (EmptyUtil.isEmpty(config)) {
+                    // 配置比较麻烦 按服务器mac的属性做md5定workId值
+                    try {
+                        // 获取本地网卡
+                        byte[] mac = NetworkInterface.getByInetAddress(InetAddress.getLocalHost()).getHardwareAddress();
+                        // 下面代码是把mac地址拼装成String
+                        StringBuilder sb = new StringBuilder();
+                        for (int i = 0; i < mac.length; i++) {
+                            if (i != 0) {
+                                sb.append("-");
+                            }
+                            // mac[i] & 0xFF 是为了把byte转化为正整数
+                            String s = Integer.toHexString(mac[i] & 0xFF);
+                            sb.append(s.length() == 1 ? 0 + s : s);
                         }
-                        // mac[i] & 0xFF 是为了把byte转化为正整数
-                        String s = Integer.toHexString(mac[i] & 0xFF);
-                        sb.append(s.length() == 1 ? 0 + s : s);
+                        String macAddress = sb.toString();
+                        // hash倒数10-5位
+                        int hash = macAddress.hashCode();
+                        log.info("初始化SnowFlake的 mac address:{}，hashCode:{}", macAddress, hash);
+                        workId = hash & maxWorkerId;
+                    } catch (Exception ex) {
+                        throw UnifiedException.gen("初始化 workId 失败!!", ex);
                     }
-                    String macAddress = sb.toString();
-                    // hash倒数10-5位
-                    int hash = macAddress.hashCode();
-                    log.info("初始化SnowFlake的 mac address:{}，hashCode:{}", macAddress, hash);
-                    workId = hash & maxWorkerId;
-                } catch (Exception ex) {
-                    throw UnifiedException.gen("初始化 workId 失败!!", ex);
+                } else {
+                    try {
+                        workId = Long.valueOf(config);
+                    } catch (Exception ex) {
+                        throw UnifiedException.gen(StringUtil.format("snow.flake.work.id:{}不是数字", config), ex);
+                    }
                 }
+
                 log.info("初始化SnowFlake的 workId:{}", workId);
             }
 
