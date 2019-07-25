@@ -1,5 +1,6 @@
 package com.common.collect.debug.dubbo.invoker;
 
+import com.alibaba.dubbo.common.Constants;
 import com.alibaba.dubbo.common.URL;
 import com.alibaba.dubbo.common.extension.ExtensionLoader;
 import com.alibaba.dubbo.common.utils.UrlUtils;
@@ -25,6 +26,7 @@ public class InvokerFactory {
     public static <T> T getInstance(InvokerParam invokerParam) {
         String zkAddress = invokerParam.getZkAddress();
         URL registryUrl = URL.valueOf(zkAddress);
+        registryUrl = registryUrl.addParameter(Constants.APPLICATION_KEY,invokerParam.getApplication());
         String registryUrlStr = registryUrl.toFullString();
         log.info("registryUrl:[{}]", registryUrlStr);
         Registry registry = ThreadLocalUtil.pull(registryUrlStr);
