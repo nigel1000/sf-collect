@@ -70,7 +70,7 @@ public abstract class AbstractElasticMapper<T> implements IElasticMapper<T>, IEl
         return index(indexRequest);
     }
 
-    private Boolean index(IndexRequest indexRequest) {
+    protected Boolean index(IndexRequest indexRequest) {
         try {
             indexRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.NONE);
             IndexResponse indexResponse = getElasticClient().index(indexRequest, RequestOptions.DEFAULT);
@@ -97,7 +97,7 @@ public abstract class AbstractElasticMapper<T> implements IElasticMapper<T>, IEl
         return update(updateRequest);
     }
 
-    private Boolean update(UpdateRequest updateRequest) {
+    protected Boolean update(UpdateRequest updateRequest) {
         try {
             UpdateResponse updateResponse = getElasticClient().update(updateRequest, RequestOptions.DEFAULT);
             return updateResponse.getResult().equals(DocWriteResponse.Result.UPDATED);
@@ -121,7 +121,7 @@ public abstract class AbstractElasticMapper<T> implements IElasticMapper<T>, IEl
         return delete(deleteRequest);
     }
 
-    private Boolean delete(DeleteRequest deleteRequest) {
+    protected Boolean delete(DeleteRequest deleteRequest) {
         try {
             DeleteResponse deleteResponse = getElasticClient().delete(deleteRequest, RequestOptions.DEFAULT);
             return deleteResponse.getResult().equals(DocWriteResponse.Result.DELETED);
@@ -144,7 +144,7 @@ public abstract class AbstractElasticMapper<T> implements IElasticMapper<T>, IEl
         return get(getRequest);
     }
 
-    private T get(GetRequest getRequest) {
+    protected T get(GetRequest getRequest) {
         try {
             GetResponse getResponse = getElasticClient().get(getRequest, RequestOptions.DEFAULT);
             return parse(toJSONString(getResponse.getSourceAsMap()), getIndexClass());
