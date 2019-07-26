@@ -21,13 +21,13 @@ public class DateUtil {
     }
 
     // 字符串与date的转换
-    // data   2018-11-12 11:20:21
+    // date   2018-11-12 11:20:21
     // format yyyy-MM-dd HH:mm:ss
-    public static Date parseDate(@NonNull String data, @NonNull String format) {
+    public static Date parseDate(@NonNull String date, @NonNull String format) {
         try {
-            return toDate(LocalDateTime.parse(data, DateTimeFormatter.ofPattern(format)));
+            return toDate(LocalDateTime.parse(date, DateTimeFormatter.ofPattern(format)));
         } catch (Exception ex) {
-            return toDate(LocalDate.parse(data, DateTimeFormatter.ofPattern(format)));
+            return toDate(LocalDate.parse(date, DateTimeFormatter.ofPattern(format)));
         }
     }
 

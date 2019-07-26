@@ -1,5 +1,7 @@
 package com.common.collect.util;
 
+import com.common.collect.api.excps.UnifiedException;
+
 import java.util.function.Supplier;
 
 /**
@@ -25,6 +27,29 @@ public class NullUtil {
             return def;
         }
         return obj;
+    }
+
+    public static <T> T validThrow(Supplier<T> supplier, String message) {
+        try {
+            return supplier.get();
+        } catch (Exception e) {
+            throw UnifiedException.gen(message,e);
+        }
+    }
+
+    // 校验是否为空 为空抛出异常
+    public static <T> T validThrow(T obj, String message) {
+        if (obj == null) {
+            throw UnifiedException.gen(message);
+        }
+        return obj;
+    }
+
+    // 校验是否表达式是否为true 为false抛出异常
+    public static void validThrow(Boolean b, String message) {
+        if (!b) {
+            throw UnifiedException.gen(message);
+        }
     }
 
 }

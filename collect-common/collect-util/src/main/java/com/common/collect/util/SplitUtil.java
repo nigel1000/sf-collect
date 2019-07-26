@@ -13,6 +13,8 @@ import java.util.function.Function;
 
 public class SplitUtil {
 
+    public static final String COMMA_SPECIAL = ",";
+
     // split
     public static String[] split2Array(String key, @NonNull String special) {
         if (key == null || "".equals(key.trim())) {
@@ -36,16 +38,16 @@ public class SplitUtil {
     }
 
     public static List<Long> split2LongByComma(String key) {
-        return split(key, ",", Long::valueOf);
+        return split(key, COMMA_SPECIAL, Long::valueOf);
     }
 
     public static List<String> split2StringByComma(String key) {
-        return split(key, ",", s -> s);
+        return split(key, COMMA_SPECIAL, s -> s);
     }
 
     // join
     public static <T> String joinByComma(List<T> list) {
-        return join(list, ",");
+        return join(list, COMMA_SPECIAL);
     }
 
     public static <T> String join(List<T> keys, @NonNull String special) {
