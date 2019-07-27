@@ -7,6 +7,9 @@ import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.aops.LogConstant;
 import com.common.collect.container.trace.TraceIdUtil;
 import com.common.collect.util.EmptyUtil;
+import com.common.collect.util.ThreadLocalUtil;
+import lombok.Data;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -26,8 +29,12 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+/**
+ * Created by nijianfeng on 2018/8/14.
+ */
 @ControllerAdvice
 @ResponseBody
 @Slf4j
@@ -38,21 +45,56 @@ public class ControllerErrorHandler {
     private static final String DB_EXCEPTION = "数据库异常";
     private static final String INTERNAL_EXCEPTION = "发生未知错误，请联系技术人员排查!";
 
+    @Data
+    private static class RtnParam {
+
+        private Integer errorCode;
+
+        private String errorMsg;
+
+        private Map<String, Object> context;
+
+        public RtnParam(String errorMsg) {
+            this.errorMsg = errorMsg;
+        }
+
+        public RtnParam(int errorCode, String errorMsg, Map<String, Object> context) {
+            this.errorCode = errorCode;
+            this.errorMsg = errorMsg;
+            this.context = context;
+        }
+    }
+
+    private Object getResponse(@NonNull RtnParam rtnParam) {
+        Class<?> rtnType = ThreadLocalUtil.pullClear(AjaxInterceptor.ajax_rtn_type);
+
+        Response defResponse = Response.fail(rtnParam.getErrorMsg());
+        if (rtnParam.getErrorCode() != null) {
+            defResponse = Response.fail(rtnParam.getErrorCode(), rtnParam.getErrorMsg());
+        }
+        defResponse.addContext("traceId", TraceIdUtil.traceId());
+        defResponse.addContext(rtnParam.getContext());
+
+        if (Response.class.equals(rtnType)) {
+            return defResponse;
+        } else {
+            return defResponse;
+        }
+    }
+
     /**
      * Valid标签 校验失败
      */
     @ExceptionHandler(BindException.class)
     @ResponseStatus(HttpStatus.OK)
-    public Response processControllerError(NativeWebRequest request, BindException ex) {
+    public Object processControllerError(NativeWebRequest request, BindException ex) {
         printLogInfo(request, ex);
         List<FieldError> fieldErrors = ex.getFieldErrors();
         if (EmptyUtil.isEmpty(fieldErrors)) {
-            return Response.fail(PARAM_ERROR_MESSAGE);
+            return getResponse(new RtnParam(PARAM_ERROR_MESSAGE));
         }
         FieldError fieldError = fieldErrors.get(0);
-        Response response = Response.fail(fieldError.getDefaultMessage());
-        response.addContext("traceId", TraceIdUtil.traceId());
-        return response;
+        return getResponse(new RtnParam(fieldError.getDefaultMessage()));
     }
 
     /**
@@ -60,16 +102,14 @@ public class ControllerErrorHandler {
      */
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.OK)
-    public Response processControllerError(NativeWebRequest request, ConstraintViolationException ex) {
+    public Object processControllerError(NativeWebRequest request, ConstraintViolationException ex) {
         printLogInfo(request, ex);
         Set<ConstraintViolation<?>> constraintViolations = ex.getConstraintViolations();
         if (EmptyUtil.isEmpty(constraintViolations)) {
-            return Response.fail(PARAM_ERROR_MESSAGE);
+            return getResponse(new RtnParam(PARAM_ERROR_MESSAGE));
         }
         ConstraintViolation<?> next = constraintViolations.iterator().next();
-        Response response = Response.fail(next.getMessage());
-        response.addContext("traceId", TraceIdUtil.traceId());
-        return response;
+        return getResponse(new RtnParam(next.getMessage()));
     }
 
     /**
@@ -77,11 +117,9 @@ public class ControllerErrorHandler {
      */
     @ExceptionHandler(MissingServletRequestParameterException.class)
     @ResponseStatus(HttpStatus.OK)
-    public Response processControllerError(NativeWebRequest request, MissingServletRequestParameterException ex) {
+    public Object processControllerError(NativeWebRequest request, MissingServletRequestParameterException ex) {
         printLogInfo(request, ex);
-        Response response = Response.fail(ex.getMessage());
-        response.addContext("traceId", TraceIdUtil.traceId());
-        return response;
+        return getResponse(new RtnParam(ex.getMessage()));
     }
 
     /**
@@ -89,16 +127,14 @@ public class ControllerErrorHandler {
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.OK)
-    public Response processJsr303ValidatorError(NativeWebRequest request, MethodArgumentNotValidException ex) {
+    public Object processJsr303ValidatorError(NativeWebRequest request, MethodArgumentNotValidException ex) {
         printLogInfo(request, ex);
         BindingResult errors = ex.getBindingResult();
         if (EmptyUtil.isEmpty(errors.getFieldErrors())) {
-            return Response.fail(PARAM_ERROR_MESSAGE);
+            return getResponse(new RtnParam(PARAM_ERROR_MESSAGE));
         }
         FieldError fieldError = errors.getFieldErrors().get(0);
-        Response response = Response.fail(fieldError.getDefaultMessage());
-        response.addContext("traceId", TraceIdUtil.traceId());
-        return response;
+        return getResponse(new RtnParam(fieldError.getDefaultMessage()));
     }
 
     /**
@@ -106,11 +142,9 @@ public class ControllerErrorHandler {
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.OK)
-    public Response processControllerError(NativeWebRequest request, HttpMessageNotReadableException ex) {
+    public Object processControllerError(NativeWebRequest request, HttpMessageNotReadableException ex) {
         printLogInfo(request, ex);
-        Response response = Response.fail(PARAM_ERROR_MESSAGE);
-        response.addContext("traceId", TraceIdUtil.traceId());
-        return response;
+        return getResponse(new RtnParam(PARAM_ERROR_MESSAGE));
     }
 
     /**
@@ -118,11 +152,9 @@ public class ControllerErrorHandler {
      */
     @ExceptionHandler({RpcException.class, TimeoutException.class})
     @ResponseStatus(HttpStatus.OK)
-    public Response processControllerError(NativeWebRequest request, RpcException ex) {
+    public Object processControllerError(NativeWebRequest request, RpcException ex) {
         printLogInfo(request, ex);
-        Response response = Response.fail(RPC_EXCEPTION);
-        response.addContext("traceId", TraceIdUtil.traceId());
-        return response;
+        return getResponse(new RtnParam(RPC_EXCEPTION));
     }
 
     /**
@@ -130,15 +162,12 @@ public class ControllerErrorHandler {
      */
     @ExceptionHandler(UnifiedException.class)
     @ResponseStatus(HttpStatus.OK)
-    public Response processControllerError(NativeWebRequest request, UnifiedException ex) {
+    public Object processControllerError(NativeWebRequest request, UnifiedException ex) {
         String message = ex.getErrorMessage();
         if (ex.getCause() != null) {
             printLogInfo(request, ex);
         }
-        Response response = Response.fail(ex.getErrorCode(), message);
-        response.addContext("traceId", TraceIdUtil.traceId());
-        response.addContext(ex.getContext());
-        return response;
+        return getResponse(new RtnParam(ex.getErrorCode(), message, ex.getContext()));
     }
 
     /**
@@ -146,11 +175,9 @@ public class ControllerErrorHandler {
      */
     @ExceptionHandler({SQLException.class, DataAccessException.class})
     @ResponseStatus(HttpStatus.OK)
-    public Response processControllerError(NativeWebRequest request, SQLException ex) {
+    public Object processControllerError(NativeWebRequest request, SQLException ex) {
         printLogInfo(request, ex);
-        Response response = Response.fail(DB_EXCEPTION);
-        response.addContext("traceId", TraceIdUtil.traceId());
-        return response;
+        return getResponse(new RtnParam(DB_EXCEPTION));
     }
 
     /**
@@ -158,11 +185,9 @@ public class ControllerErrorHandler {
      */
     @ExceptionHandler({RuntimeException.class, Exception.class, Error.class, Throwable.class})
     @ResponseStatus(HttpStatus.OK)
-    public Response processControllerError(NativeWebRequest request, RuntimeException ex) {
+    public Object processControllerError(NativeWebRequest request, RuntimeException ex) {
         printLogInfo(request, ex);
-        Response response = Response.fail(INTERNAL_EXCEPTION);
-        response.addContext("traceId", TraceIdUtil.traceId());
-        return response;
+        return getResponse(new RtnParam(INTERNAL_EXCEPTION));
     }
 
     /**
