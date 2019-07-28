@@ -54,7 +54,7 @@ public class InvokerFactory {
                         continue;
                     }
                     if (EmptyUtil.isNotEmpty(invokerParam.getTargetIp())) {
-                        if (!providerUrl.toFullString().contains(invokerParam.getTargetIp())) {
+                        if (!providerUrl.getIp().contains(invokerParam.getTargetIp())) {
                             continue;
                         }
                     }
