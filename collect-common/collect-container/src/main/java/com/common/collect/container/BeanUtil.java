@@ -73,7 +73,7 @@ public class BeanUtil {
     }
 
     public static <T> T genBean(Object source, T target) {
-        BeanUtils.copyProperties(source, target);
+        BeanUtils.copyProperties(source, target, getNullPropertyNames(source));
         return target;
     }
 
