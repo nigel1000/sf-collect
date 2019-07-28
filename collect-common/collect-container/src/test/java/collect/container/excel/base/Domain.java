@@ -7,6 +7,7 @@ import java.util.List;
 
 @Data
 public class Domain {
+
     @ExcelImport(colIndex = "0")
     private String s1;
     @ExcelImport(colIndex = "1")
@@ -23,4 +24,5 @@ public class Domain {
     private String s7;
     @ExcelImport(colIndex = "2:4")
     private List<String> s24;
+
 }
