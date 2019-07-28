@@ -9,6 +9,7 @@ import com.alibaba.dubbo.config.ReferenceConfig;
 import com.alibaba.dubbo.registry.Registry;
 import com.alibaba.dubbo.registry.RegistryFactory;
 import com.common.collect.api.excps.UnifiedException;
+import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.ThreadLocalUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,7 +27,7 @@ public class InvokerFactory {
     public static <T> T getInstance(InvokerParam invokerParam) {
         String zkAddress = invokerParam.getZkAddress();
         URL registryUrl = URL.valueOf(zkAddress);
-        registryUrl = registryUrl.addParameter(Constants.APPLICATION_KEY,invokerParam.getApplication());
+        registryUrl = registryUrl.addParameter(Constants.APPLICATION_KEY, invokerParam.getApplication());
         String registryUrlStr = registryUrl.toFullString();
         log.info("registryUrl:[{}]", registryUrlStr);
         Registry registry = ThreadLocalUtil.pull(registryUrlStr);
@@ -51,6 +52,11 @@ public class InvokerFactory {
                     URL providerUrl = providerUrls.get(i);
                     if (providerUrl.getProtocol().contains("jsonrpc")) {
                         continue;
+                    }
+                    if (EmptyUtil.isNotEmpty(invokerParam.getTargetIp())) {
+                        if (!providerUrl.toFullString().contains(invokerParam.getTargetIp())) {
+                            continue;
+                        }
                     }
                     log.info("before providerUrl:{}", providerUrl);
                     if (invokerParam.getIpMap().containsKey(providerUrl.getHost())) {

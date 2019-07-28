@@ -1,13 +1,11 @@
 package com.common.collect.debug.dubbo.invoker;
 
 import com.alibaba.dubbo.common.URL;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.Data;
 import lombok.NonNull;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,6 +19,8 @@ public class InvokerParam {
 
     private Class mockClass;
     private String mockClassName;
+
+    private String targetIp;
 
     private Map<String, String> ipMap = new HashMap<>();
 
