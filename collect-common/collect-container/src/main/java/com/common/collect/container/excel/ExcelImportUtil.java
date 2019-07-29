@@ -121,7 +121,7 @@ public class ExcelImportUtil extends ExcelSession {
             for (Integer colIndex : colIndexes) {
                 Object value = null;
                 String currentValue;
-                if (colMaxNum < colIndex) {
+                if (colMaxNum <= colIndex) {
                     currentValue = null;
                 } else {
                     currentValue = rowMap.get(colIndex);
