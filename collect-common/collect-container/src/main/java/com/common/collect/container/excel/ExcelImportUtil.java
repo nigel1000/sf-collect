@@ -110,6 +110,7 @@ public class ExcelImportUtil extends ExcelSession {
         ExcelImportException excelParseException = new ExcelImportException(failCount);
         String sheetName = getSheet().getSheetName();
         List<String> rowMap = getRowValueList(rowIndex);
+        int colMaxNum = rowMap.size();
         for (String fieldName : excelContext.getFieldNameList()) {
             if (!excelContext.isImport(fieldName)) {
                 continue;
@@ -119,11 +120,17 @@ public class ExcelImportUtil extends ExcelSession {
             List<Object> values = Lists.newArrayList();
             for (Integer colIndex : colIndexes) {
                 Object value = null;
-                String currentValue = rowMap.get(colIndex);
+                String currentValue;
+                if (colMaxNum < colIndex) {
+                    currentValue = null;
+                } else {
+                    currentValue = rowMap.get(colIndex);
+                }
                 if (EmptyUtil.isNotBlank(currentValue)) {
                     boolean isConvertSuccess = true;
                     // 后面加的可以覆盖默认 转换 以最后一个为准
-                    for (IConvertImportHandler convertHandler : excelContext.getExcelConvertImportHandlerMap().get(fieldName)) {
+                    for (IConvertImportHandler convertHandler : excelContext.getExcelConvertImportHandlerMap()
+                            .get(fieldName)) {
                         try {
                             Object convert = convertHandler.convert(currentValue, fieldName, excelContext);
                             if (convert != null) {
