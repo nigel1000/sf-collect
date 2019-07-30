@@ -10,6 +10,7 @@ import org.springframework.beans.BeanWrapperImpl;
 
 import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -76,6 +77,17 @@ public class BeanUtil {
             return;
         }
         BeanUtils.copyProperties(source, target, getPropertyNames(target, NeedPropertyType.NOT_NULL));
+    }
+
+    public static void genBeanIgnoreSourceNullAndTargetNotNullProperty(Object source, Object target) {
+        if (source == null || target == null) {
+            return;
+        }
+        Set<String> property = new HashSet<>();
+        Collections.addAll(property, getPropertyNames(source, NeedPropertyType.NULL));
+        Collections.addAll(property, getPropertyNames(target, NeedPropertyType.NOT_NULL));
+        String[] result = new String[property.size()];
+        BeanUtils.copyProperties(source, target, property.toArray(result));
     }
 
     public static <T> T emptyBean(Class<T> target) {
