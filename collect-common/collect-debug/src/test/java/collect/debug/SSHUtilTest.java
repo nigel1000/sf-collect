@@ -20,8 +20,11 @@ public class SSHUtilTest {
     private static String classPath = SSHUtilTest.class.getResource("/").getPath();
 
     static {
-        String machine = "stable_master";
-        String app = "collect_system_web";
+
+        String app = "app";
+        String machineIp = app + ".env.ip";
+        String port = app + ".debug_port";
+
         Properties properties = new Properties();
         try {
             classPath = classPath + "app_machine.properties";
@@ -29,14 +32,15 @@ public class SSHUtilTest {
         } catch (IOException e) {
             throw UnifiedException.gen("属性文件获取失败", e);
         }
-        remote_host = properties.getProperty(machine + ".ip");
-        debug_port = Integer.valueOf(properties.getProperty(machine + "." + app + "." + "debug_port"));
+        remote_host = properties.getProperty(machineIp);
+        debug_port = Integer.valueOf(properties.getProperty(port));
 
         log.info("classPath:{}", classPath);
-        log.info("machine:{}", machine);
+        log.info("machineIp:{}", machineIp);
         log.info("app:{}", app);
         log.info("remote_host:{}", remote_host);
         log.info("debug_port:{}", debug_port);
+
     }
 
     public static void main(String[] args) throws Exception {
