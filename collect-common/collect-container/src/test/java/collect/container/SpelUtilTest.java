@@ -1,6 +1,6 @@
 package collect.container;
 
-import com.common.collect.container.SPELUtil;
+import com.common.collect.container.SpelUtil;
 import com.common.collect.util.ClassUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -17,28 +17,28 @@ import java.util.Map;
  */
 
 @Slf4j
-public class SPELUtilTest {
+public class SpelUtilTest {
 
     public static void main(String[] args) {
-        log.info("{}", SPELUtil.getMethodParamName(
+        log.info("{}", SpelUtil.getMethodParamName(
                 ClassUtil.getMethod(ClassUtil.class, "getMethod", Class.class, String.class, Class[].class)));
 
         Map<String, Object> variables = new HashMap<>();
         variables.put("test", "test");
-        EvaluationContext evaluationContext = SPELUtil.standardEvaluationContext(variables);
+        EvaluationContext evaluationContext = SpelUtil.standardEvaluationContext(variables);
 
-        log.info("{}", SPELUtil.spelExpressionParser(String.class, evaluationContext, "Hello World"));
-        log.info("{}", SPELUtil.spelExpressionParser(Double.class, evaluationContext, "6.0221415E+23"));
-        log.info("{}", SPELUtil.spelExpressionParser(BigDecimal.class, evaluationContext, "6.0221415E+23"));
-        log.info("{}", SPELUtil.spelExpressionParser(Integer.class, evaluationContext, "0x7FFFFFFF"));
-        log.info("{}", SPELUtil.spelExpressionParser(Boolean.class, evaluationContext, "true"));
-        log.info("{}", SPELUtil.spelExpressionParser(Object.class, evaluationContext, "null"));
+        log.info("{}", SpelUtil.spelExpressionParser(String.class, evaluationContext, "Hello World"));
+        log.info("{}", SpelUtil.spelExpressionParser(Double.class, evaluationContext, "6.0221415E+23"));
+        log.info("{}", SpelUtil.spelExpressionParser(BigDecimal.class, evaluationContext, "6.0221415E+23"));
+        log.info("{}", SpelUtil.spelExpressionParser(Integer.class, evaluationContext, "0x7FFFFFFF"));
+        log.info("{}", SpelUtil.spelExpressionParser(Boolean.class, evaluationContext, "true"));
+        log.info("{}", SpelUtil.spelExpressionParser(Object.class, evaluationContext, "null"));
 
         variables.put("true", Boolean.FALSE);
-        log.info("{}", SPELUtil.spelExpressionParser(Boolean.class, variables, "#{#true}"));
-        log.info("{}", SPELUtil.spelExpressionParser(String.class, variables, "#{#test}"));
+        log.info("{}", SpelUtil.spelExpressionParser(Boolean.class, variables, "#{#true}"));
+        log.info("{}", SpelUtil.spelExpressionParser(String.class, variables, "#{#test}"));
         variables.put("person", new Person("ni", "jianfeng"));
-        log.info("{}", SPELUtil.spelExpressionParser(String.class, variables,
+        log.info("{}", SpelUtil.spelExpressionParser(String.class, variables,
                 "姓:#{#person.firstName},名:#{#person.lastName},list:#{#person.list[1]}"));
 
     }

@@ -16,7 +16,7 @@ import java.util.Map;
 /**
  * Created by nijianfeng on 2019/8/3.
  */
-public class SPELUtil {
+public class SpelUtil {
 
     public static EvaluationContext standardEvaluationContext(@NonNull Map<String, Object> variables) {
         StandardEvaluationContext context = new StandardEvaluationContext();
