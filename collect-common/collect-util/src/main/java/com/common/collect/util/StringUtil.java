@@ -2,7 +2,6 @@ package com.common.collect.util;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
 
 /**
  * Created by hznijianfeng on 2019/3/26.
@@ -26,7 +25,7 @@ public class StringUtil {
         if (regex == null || newString == null || oldString == null) {
             return oldString;
         }
-        return oldString.replaceAll(regex, newString);
+        return oldString.replaceAll(escapeRegex(regex), escapeRegex(newString));
     }
 
     public static String format(String str, Object... args) {
@@ -35,9 +34,22 @@ public class StringUtil {
         }
         String ret = str;
         for (Object arg : args) {
-            ret = ret.replaceFirst("\\{}", Matcher.quoteReplacement(String.valueOf(arg)));
+            ret = ret.replaceFirst("\\{}", escapeRegex(String.valueOf(arg)));
         }
         return ret;
+    }
+
+    // 转义正则特殊字符
+    public static String escapeRegex(String keyword) {
+        if (EmptyUtil.isNotBlank(keyword)) {
+            String[] fbsArr = {"\\", "$", "(", ")", "*", "+", ".", "[", "]", "?", "^", "{", "}", "|"};
+            for (String key : fbsArr) {
+                if (keyword.contains(key)) {
+                    keyword = keyword.replace(key, "\\" + key);
+                }
+            }
+        }
+        return keyword;
     }
 
 }

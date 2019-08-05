@@ -21,12 +21,12 @@ public class SplitUtil {
             return new String[]{};
         }
         // 去空 去空格
-        String[] keys = key.split(special);
+        String[] keys = key.split(StringUtil.escapeRegex(special));
         int index = 0;
         for (int i = 0; i < keys.length; i++) {
             String temp = keys[i];
-            if (temp != null && !"".equals(temp.trim())) {
-                keys[index] = temp.trim();
+            if (EmptyUtil.isNotBlank(temp)) {
+                keys[index] = temp;
                 index++;
             }
         }

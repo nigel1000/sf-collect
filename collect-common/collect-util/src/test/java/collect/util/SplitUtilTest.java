@@ -18,6 +18,7 @@ public class SplitUtilTest {
         log.info("{}", Arrays.toString(SplitUtil.split2Array("11::22::33:", ":")));
         log.info("{}", Arrays.toString(SplitUtil.split2Array("", ":")));
         log.info("{}", Arrays.toString(SplitUtil.split2Array(null, ":")));
+        log.info("{}", Arrays.toString(SplitUtil.split2Array("$$@#$%^&*()!!@#$%^&*()``@#$%^&*()", "@#$%^&*()")));
 
         log.info("{}", SplitUtil.split("aa:bb:cc", ":", a -> a + "sf"));
         log.info("{}", SplitUtil.split("11.01,22,33", ",", BigDecimal::new));
