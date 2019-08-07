@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 public class ExcelClient {
 
     public static <T> List<T> urlImport(@NonNull String excelUrl, Class<T> clazz) {
-        ExcelImportUtil excelParse = new ExcelImportUtil(HttpUtil.get(excelUrl));
+        ExcelImportUtil excelParse = new ExcelImportUtil(HttpUtil.getInputStream(excelUrl));
         // 收集所有的错误
         excelParse.setImportLimit(1000);
         excelParse.setFastFail(false);
@@ -71,7 +71,7 @@ public class ExcelClient {
     public static File fileUrlExport(@NonNull String excelUrl, Consumer<ExcelExportUtil> execute) {
         // 导出excel
         ExcelExportUtil excelExportUtil =
-                new ExcelExportUtil(ExcelExportUtil.ExcelType.BIG_XLSX, HttpUtil.get(excelUrl));
+                new ExcelExportUtil(ExcelExportUtil.ExcelType.BIG_XLSX, HttpUtil.getInputStream(excelUrl));
         execute.accept(excelExportUtil);
         File file = excelExportUtil.saveTemp(IdUtil.uuidHex());
         log.info("导出文件地址:\n{}", file.getAbsolutePath());

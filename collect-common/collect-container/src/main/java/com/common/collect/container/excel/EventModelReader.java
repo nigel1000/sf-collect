@@ -75,7 +75,7 @@ public class EventModelReader {
     }
 
     private void excelFile(@NonNull String url) {
-        this.excelFile = FileUtil.saveTempFile(HttpUtil.get(url), IdUtil.timeDiy("excel"), ".xlsx");
+        this.excelFile = FileUtil.saveTempFile(HttpUtil.getInputStream(url), IdUtil.timeDiy("excel"), ".xlsx");
     }
 
     private void excelFile(@NonNull File file) {

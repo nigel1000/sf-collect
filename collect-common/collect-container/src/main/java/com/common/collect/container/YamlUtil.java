@@ -29,7 +29,7 @@ public class YamlUtil {
                 inputStream = new FileInputStream(new File((String) yaml));
             } catch (Exception e) {
                 try {
-                    inputStream = HttpUtil.get((String) yaml);
+                    inputStream = HttpUtil.getInputStream((String) yaml);
                 } catch (Exception ex) {
                     inputStream = new ByteArrayInputStream(((String) yaml).getBytes());
                 }
