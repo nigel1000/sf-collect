@@ -1,6 +1,6 @@
 package collect.debug.test;
 
-import com.common.collect.container.AopTargetUtil;
+import com.common.collect.container.AopUtil;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
@@ -64,14 +64,14 @@ public class MockitoListener extends DependencyInjectionTestExecutionListener {
                     // 代理类不能被 mock spy 因为 $Proxy is final
                     Object fb = factory.getBean(field.getName());
                     // 对被代理类进行 mock spy
-                    Object targetSource = AopTargetUtil.getTarget(fb);
+                    Object targetSource = AopUtil.getTarget(fb);
                     Object spyObject = Mockito.spy(targetSource);
                     if (!fb.equals(targetSource)) {
                         // 是代理类， mock spy 替换掉被代理类
                         if (AopUtils.isJdkDynamicProxy(fb)) {
-                            AopTargetUtil.setJdkDynamicProxyTargetObject(fb, spyObject);
+                            AopUtil.setJdkDynamicProxyTargetObject(fb, spyObject);
                         } else { // cglib
-                            AopTargetUtil.setCglibProxyTargetObject(fb, spyObject);
+                            AopUtil.setCglibProxyTargetObject(fb, spyObject);
                         }
                     } else {
                         mockObjectMap.put(field.getName(), spyObject);
@@ -88,7 +88,7 @@ public class MockitoListener extends DependencyInjectionTestExecutionListener {
             Object fo = field.get(bean);
             if (AopUtils.isAopProxy(fo)) {
                 Class targetClass = AopUtils.getTargetClass(fo);
-                Object targetSource = AopTargetUtil.getTarget(fo);
+                Object targetSource = AopUtil.getTarget(fo);
                 Field[] targetFields = targetClass.getDeclaredFields();
                 for (Field targetField : targetFields) {
                     targetField.setAccessible(true);

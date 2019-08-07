@@ -1,7 +1,7 @@
 package collect.debug.aop;
 
 import com.common.collect.api.excps.UnifiedException;
-import com.common.collect.container.AspectUtil;
+import com.common.collect.container.AopUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -25,7 +25,7 @@ public class AopOrderAspect3 {
 
     @Around("order()")
     public Object around(final ProceedingJoinPoint point) throws Throwable {
-        IAopOrderAspect3 iAopOrderAspect3 = AspectUtil.getAnnotation(point, IAopOrderAspect3.class);
+        IAopOrderAspect3 iAopOrderAspect3 = AopUtil.getAnnotation(point, IAopOrderAspect3.class);
         String clazzName = this.getClass().getName();
         log.info("{} before action", clazzName);
         if (iAopOrderAspect3.rollback()) {

@@ -12,7 +12,6 @@ import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
@@ -22,21 +21,25 @@ import java.util.jar.JarFile;
  * Created by nijianfeng on 2019/5/19.
  */
 public class ClassUtil {
-    // 基础能力
-    public static <T> T newInstance(String clazz) {
+
+    public static Class<?> getClass(String clazz) {
         try {
-            return (T) getClass(clazz).newInstance();
+            return Class.forName(clazz);
         } catch (Exception e) {
-            throw UnifiedException.gen(StringUtil.format(" {} 无法初始化", clazz), e);
+            throw UnifiedException.gen(StringUtil.format(" {} 无法找到类定义", clazz), e);
         }
     }
 
     public static <T> T newInstance(Class<?> clazz) {
         try {
-            return (T) clazz.newInstance();
+            return (T)clazz.newInstance();
         } catch (Exception e) {
             throw UnifiedException.gen(StringUtil.format(" {} 无法初始化", clazz.getName()), e);
         }
+    }
+
+    public static <T> T newInstance(String clazz) {
+        return (T) newInstance(getClass(clazz));
     }
 
     public static Method getMethod(Class<?> clazz, String methodName, Class<?>... args) {
@@ -44,14 +47,6 @@ public class ClassUtil {
             return clazz.getDeclaredMethod(methodName, args);
         } catch (Exception e) {
             throw UnifiedException.gen(StringUtil.format("class:{},method:{},找不到", clazz.getName(), methodName), e);
-        }
-    }
-
-    public static Class<?> getClass(String clazz) {
-        try {
-            return Class.forName(clazz);
-        } catch (Exception e) {
-            throw UnifiedException.gen(StringUtil.format(" {} 无法找到类定义", clazz), e);
         }
     }
 
@@ -63,10 +58,19 @@ public class ClassUtil {
         }
     }
 
+    public static Field getField(Class<?> clazz, String name) {
+        try {
+            Field field = clazz.getDeclaredField(name);
+            field.setAccessible(true);
+            return field;
+        } catch (Exception e) {
+            throw UnifiedException.gen(StringUtil.format(" class:{},field:{} 获取属性值失败", clazz.getName(), name), e);
+        }
+    }
+
     public static <T> T getFieldValue(Object target, String name) {
         try {
-            Field field = getField(target.getClass(), name);
-            return (T) field.get(target);
+            return (T) getField(target.getClass(), name).get(target);
         } catch (Exception e) {
             throw UnifiedException.gen(StringUtil.format(" class:{},field:{} 获取属性值失败", target.getClass().getName(), name), e);
         }
@@ -78,16 +82,6 @@ public class ClassUtil {
             field.set(target, value);
         } catch (Exception e) {
             throw UnifiedException.gen(StringUtil.format(" class:{},field:{} 设置属性值失败", target.getClass().getName(), name), e);
-        }
-    }
-
-    public static Field getField(Class<?> clazz, String name) {
-        try {
-            Field field = clazz.getDeclaredField(name);
-            field.setAccessible(true);
-            return field;
-        } catch (Exception e) {
-            throw UnifiedException.gen(StringUtil.format(" class:{},field:{} 获取属性值失败", clazz.getName(), name), e);
         }
     }
 
@@ -121,19 +115,7 @@ public class ClassUtil {
         return null;
     }
 
-    // 泛型 继承
-    public static List<Class> getSuperclasses(Class clazz) {
-        List<Class> result = new ArrayList<>();
-        result.add(clazz);
-        result.addAll(Arrays.asList(clazz.getInterfaces()));
-        if (clazz.equals(Object.class)) {
-            return result;
-        }
-        result.addAll(getSuperclasses(clazz.getSuperclass()));
-        return CollectionUtil.removeDuplicate(result);
-    }
-
-    // 获取父类泛型类型
+    // 获取泛型类型
     public static Class getGenericType(Class clazz, Type genType, int index) {
         if (!(genType instanceof ParameterizedType)) {
             throw UnifiedException.gen(StringUtil.format(" class:{},index:{} 的父类没有泛型", clazz.getName(), index));

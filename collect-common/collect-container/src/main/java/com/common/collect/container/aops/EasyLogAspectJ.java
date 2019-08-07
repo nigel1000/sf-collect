@@ -1,10 +1,14 @@
 package com.common.collect.container.aops;
 
-import com.common.collect.container.AspectUtil;
+import com.common.collect.container.AopUtil;
 import com.google.common.base.Throwables;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.*;
+import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.AfterThrowing;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -29,7 +33,7 @@ public class EasyLogAspectJ {
     @Before("clazz() || method()")
     public void before(final JoinPoint point) {
 
-        EasyLog easyLog = AspectUtil.getAnnotation(point, EasyLog.class);
+        EasyLog easyLog = AopUtil.getAnnotation(point, EasyLog.class);
         String module = easyLog.module();
         log.debug(LogConstant.START_LOG_PREFIX + " args:{}", module, point.getTarget().getClass().getName(),
                 point.getSignature().getName(), LogConstant.getObjString(point.getArgs()));
@@ -38,7 +42,7 @@ public class EasyLogAspectJ {
     @AfterReturning(returning = "rtObj", value = "clazz() || method()")
     public void afterReturning(final JoinPoint point, final Object rtObj) {
 
-        EasyLog easyLog = AspectUtil.getAnnotation(point, EasyLog.class);
+        EasyLog easyLog = AopUtil.getAnnotation(point, EasyLog.class);
         String module = easyLog.module();
         log.debug(LogConstant.FINISH_LOG_PREFIX + " return:{}", module, point.getTarget().getClass().getName(),
                 point.getSignature().getName(), LogConstant.getObjString(rtObj));
@@ -48,7 +52,7 @@ public class EasyLogAspectJ {
     @AfterThrowing(throwing = "ex", value = "clazz() || method()")
     public void afterThrowing(final JoinPoint point, final Throwable ex) {
 
-        EasyLog easyLog = AspectUtil.getAnnotation(point, EasyLog.class);
+        EasyLog easyLog = AopUtil.getAnnotation(point, EasyLog.class);
         String module = easyLog.module();
         log.debug(LogConstant.FINISH_LOG_PREFIX + " exception:{}", module, point.getTarget().getClass().getName(),
                 point.getSignature().getName(), Throwables.getStackTraceAsString(ex));

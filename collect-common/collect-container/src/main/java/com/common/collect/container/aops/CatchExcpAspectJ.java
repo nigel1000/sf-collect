@@ -3,7 +3,7 @@ package com.common.collect.container.aops;
 import com.common.collect.api.Response;
 import com.common.collect.api.enums.CommonError;
 import com.common.collect.api.excps.UnifiedException;
-import com.common.collect.container.AspectUtil;
+import com.common.collect.container.AopUtil;
 import com.common.collect.container.trace.TraceIdUtil;
 import com.common.collect.util.ClassUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +39,7 @@ public class CatchExcpAspectJ {
     @Around("clazz() || method()")
     public Object around(final ProceedingJoinPoint point) {
 
-        CatchExcp catchExcp = AspectUtil.getAnnotation(point, CatchExcp.class);
+        CatchExcp catchExcp = AopUtil.getAnnotation(point, CatchExcp.class);
         String module = catchExcp.module();
         return errorHandler(point, module);
     }
