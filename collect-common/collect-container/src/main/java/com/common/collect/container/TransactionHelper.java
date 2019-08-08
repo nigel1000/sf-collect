@@ -29,6 +29,8 @@ public class TransactionHelper {
         return biz.get();
     }
 
+    // 若在事务内则事务提交后异步执行
+    // 若不在事务内则直接异步执行
     public void afterCommit(@NonNull String taskName, Runnable biz) {
         afterCommit(taskName, biz, false);
     }
