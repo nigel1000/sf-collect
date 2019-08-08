@@ -1,5 +1,6 @@
 package collect.debug;
 
+import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.TransactionHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
@@ -17,27 +18,44 @@ public class TransactionHelperTest {
         TransactionHelper transactionHelper = (TransactionHelper) applicationContext.getBean("transactionHelper");
 
         transactionHelper.aroundBiz(() -> {
-            log.info("outer transaction start");
+            log.info("commit transaction start");
             transactionHelper.afterCommit("taskName1", () -> {
                 log.info("taskName1 start");
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
                 log.info("taskName1 end");
             });
             transactionHelper.afterCommit("taskName2", () -> {
                 log.info("taskName2 start");
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
                 log.info("taskName2 end");
             });
-            log.info("outer transaction end");
+            log.info("commit transaction end");
         });
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            transactionHelper.aroundBiz(() -> {
+                log.info("rollback transaction start");
+                transactionHelper.afterCommit("taskName3", () -> {
+                    log.info("taskName3 start");
+                    log.info("taskName3 end");
+                });
+                transactionHelper.afterCommit("taskName4", () -> {
+                    log.info("taskName4 start");
+                    log.info("taskName4 end");
+                });
+                log.info("rollback transaction end");
+                throw UnifiedException.gen("回滚");
+            });
+        } catch (UnifiedException ex) {
+            if (!ex.getErrorMessage().equals("回滚")) {
+                throw ex;
+            }
+        }
+
 
         Thread.sleep(3000);
         System.exit(-1);

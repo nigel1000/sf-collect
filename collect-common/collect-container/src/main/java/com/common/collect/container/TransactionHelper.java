@@ -1,5 +1,6 @@
 package com.common.collect.container;
 
+import com.common.collect.api.excps.UnifiedException;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -7,8 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Supplier;
 
 /**
@@ -31,66 +30,29 @@ public class TransactionHelper {
     }
 
     public void afterCommit(@NonNull String taskName, Runnable biz) {
-        AfterTransactionCommitExecutor.SingletonInstance.INSTANCE.executeAfterCommit(taskName, biz);
-    }
-
-    @Slf4j
-    private static class AfterTransactionCommitExecutor extends TransactionSynchronizationAdapter {
-        private AfterTransactionCommitExecutor() {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            throw UnifiedException.gen("当前没有开启事务");
         }
 
-        private static class SingletonInstance {
-            private static final AfterTransactionCommitExecutor INSTANCE = new AfterTransactionCommitExecutor();
-        }
+        String transactionName = TransactionSynchronizationManager.getCurrentTransactionName();
 
-        private final ThreadLocal<List<Runnable>> runnableTasks = new ThreadLocal<>();
-        private final ThreadLocal<List<String>> taskNames = new ThreadLocal<>();
-
-        private void executeAfterCommit(String taskName, Runnable biz) {
-            if (biz == null) {
-                return;
-            }
-            if (!TransactionSynchronizationManager.isSynchronizationActive()) {
-                log.info("transaction synchronization is not active. executing right now runnable! taskName:{}",
-                        taskName);
+        TransactionSynchronizationAdapter adapter = new TransactionSynchronizationAdapter() {
+            @Override
+            public void afterCommit() {
+                log.info("事务提交，任务执行:{},transactionName:{}", taskName, transactionName);
+                // 异步任务自己负责异常的处理
                 ThreadPoolUtil.exec(biz);
-                return;
             }
-            List<Runnable> runnableList = runnableTasks.get();
-            List<String> taskNameList = taskNames.get();
-            if (runnableList == null) {
-                runnableList = new ArrayList<>();
-                taskNameList = new ArrayList<>();
-                runnableTasks.set(runnableList);
-                taskNames.set(taskNameList);
-                TransactionSynchronizationManager.registerSynchronization(this);
-            }
-            runnableList.add(biz);
-            taskNameList.add(taskName);
-        }
 
-        @Override
-        public void afterCommit() {
-            List<Runnable> runnableList = runnableTasks.get();
-            List<String> taskNameList = taskNames.get();
-            log.info("transaction successfully committed, executing taskNames:{}", taskNameList);
-            for (int i = 0; i < runnableList.size(); i++) {
-                Runnable biz = runnableList.get(i);
-                log.info("executing taskName:{}", taskNameList.get(i));
-                try {
-                    ThreadPoolUtil.exec(biz);
-                } catch (Exception ex) {
-                    log.error("failed to execute taskName:{}, Exception :", taskNameList.get(i), ex);
+            @Override
+            public void afterCompletion(int status) {
+                if (status == STATUS_ROLLED_BACK) {
+                    log.info("事务回滚,任务未执行:{},transactionName:{}", taskName, transactionName);
                 }
             }
-        }
-
-        //  在 afterCommit 之后执行，哪怕 afterCommit 抛出异常也会执行
-        @Override
-        public void afterCompletion(int status) {
-            log.info("transaction completed with status {}", status == STATUS_COMMITTED ? "COMMITTED" : "ROLLED_BACK");
-            runnableTasks.remove();
-            taskNames.remove();
-        }
+        };
+        log.info("事务提交,任务注册:{},transactionName:{}", taskName, transactionName);
+        TransactionSynchronizationManager.registerSynchronization(adapter);
     }
+
 }
