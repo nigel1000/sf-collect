@@ -56,6 +56,20 @@ public class TransactionHelperTest {
             }
         }
 
+        try {
+            transactionHelper.afterCommit("taskName5", () -> {
+                log.info("taskName5 start");
+                log.info("taskName5 end");
+            }, true);
+        } catch (UnifiedException ex) {
+            log.error("taskName5 exception", ex);
+        }
+
+        transactionHelper.afterCommit("taskName5", () -> {
+            log.info("taskName5 start");
+            log.info("taskName5 end");
+        }, false);
+
 
         Thread.sleep(3000);
         System.exit(-1);

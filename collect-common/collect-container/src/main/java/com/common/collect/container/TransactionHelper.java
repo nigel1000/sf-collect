@@ -30,8 +30,18 @@ public class TransactionHelper {
     }
 
     public void afterCommit(@NonNull String taskName, Runnable biz) {
+        afterCommit(taskName, biz, false);
+    }
+
+    public void afterCommit(@NonNull String taskName, Runnable biz, boolean isThrow) {
         if (!TransactionSynchronizationManager.isSynchronizationActive()) {
-            throw UnifiedException.gen("当前没有开启事务");
+            if (isThrow) {
+                throw UnifiedException.gen("当前没有开启事务");
+            } else {
+                log.info("事务未开启，任务执行:{}", taskName);
+                ThreadPoolUtil.exec(biz);
+                return;
+            }
         }
 
         String transactionName = TransactionSynchronizationManager.getCurrentTransactionName();
