@@ -42,6 +42,20 @@ public class RedisClientUtil {
     }
 
     /**
+     * 根据传入key值 获取对象
+     */
+    public <V> V get(IJedisOperator redisClient, @NonNull String key, Supplier<V> supplier, int second) {
+        V ret = get(redisClient, key);
+        if (ret == null) {
+            ret = supplier.get();
+            if (put(redisClient, key, ret, second)) {
+                fromBiz("get", key);
+            }
+        }
+        return ret;
+    }
+
+    /**
      * 批量获取
      */
     public static <V> List<V> batchGet(IJedisOperator redisClient, List<String> keys) {
