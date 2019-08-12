@@ -23,13 +23,16 @@ import java.util.List;
 @Slf4j
 public class RedisController {
 
-    private final static JedisOperator jedisOperator;
+    public static RedisClientUtil redisClientUtil;
 
     static {
         RedisClientFactory redisClientFactory = new RedisClientFactory();
-        jedisOperator = (JedisOperator) redisClientFactory.newSingleClient();
+        JedisOperator jedisOperator = (JedisOperator) redisClientFactory.newSingleClient();
         jedisOperator.getRedisConfig().setSerializeEnum(SerializeEnum.HESSIAN);
         jedisOperator.init();
+
+        redisClientUtil = new RedisClientUtil();
+        redisClientUtil.setRedisClient(jedisOperator);
     }
 
     private String redis_key = "c26b094cc27346379266147682c41fc0";
@@ -76,14 +79,14 @@ public class RedisController {
         }
 
         if ("del".equals(type)) {
-            RedisClientUtil.del(jedisOperator, key);
+            redisClientUtil.del(key);
         } else if ("get".equals(type)) {
-            return Response.ok(RedisClientUtil.get(jedisOperator, key));
+            return Response.ok(redisClientUtil.get(key));
         } else if ("set".equals(type)) {
             if (expire == null) {
-                RedisClientUtil.put(jedisOperator, key, obj);
+                redisClientUtil.put(key, obj);
             } else {
-                RedisClientUtil.put(jedisOperator, key, obj, expire);
+                redisClientUtil.put(key, obj, expire);
             }
         } else {
             return Response.ok("操作类型不存在");
