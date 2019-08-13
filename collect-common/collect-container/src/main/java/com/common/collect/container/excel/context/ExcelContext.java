@@ -152,9 +152,6 @@ public class ExcelContext {
             if (isImport(fieldName)) {
                 ExcelImport excelImport = excelImportMap.get(fieldName);
                 String colIndex = excelImport.colIndex();
-                if (!colIndexSortByField && EmptyUtil.isBlank(colIndex)) {
-                    throw UnifiedException.gen(ExcelConstants.MODULE, "colIndex不能为空");
-                }
                 excelImportColIndexMap.put(fieldName, colIndex);
                 Class<? extends IColIndexParser> colIndexParserCls = excelImport.colIndexParser();
                 excelImportColIndexParserClsMap.put(fieldName, colIndexParserCls);
@@ -166,8 +163,12 @@ public class ExcelContext {
                 List<Integer> colIndexNums = new ArrayList<>();
                 if (colIndexSortByField) {
                     colIndexNums.add(fieldImportIndex++);
-                } else {
+                }
+                if (EmptyUtil.isNotBlank(colIndex)) {
                     colIndexNums = CollectionUtil.removeDuplicate(colIndexParser.parseColIndex(colIndex));
+                }
+                if (EmptyUtil.isEmpty(colIndexNums)) {
+                    throw UnifiedException.gen(ExcelConstants.MODULE, "colIndex不能为空");
                 }
                 excelImportColIndexNumMap.put(fieldName, colIndexNums);
                 boolean isMultiCol = colIndexNums.size() > 1;
@@ -185,13 +186,14 @@ public class ExcelContext {
 
             if (isExport(fieldName)) {
                 ExcelExport excelExport = excelExportMap.get(fieldName);
-                int colIndex;
+                Integer colIndex = null;
                 if (colIndexSortByField) {
                     colIndex = fieldExportIndex++;
-                } else {
+                }
+                if (excelExport.colIndex() != -1) {
                     colIndex = excelExport.colIndex();
                 }
-                if (colIndex < 0) {
+                if (colIndex == null || colIndex < 0) {
                     throw UnifiedException.gen(ExcelConstants.MODULE, "导出 colIndex 不能小于0");
                 }
                 excelExportColIndexMap.put(fieldName, colIndex);

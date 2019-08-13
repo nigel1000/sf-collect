@@ -16,7 +16,7 @@ import java.lang.annotation.Target;
 public @interface ExcelExport {
 
     // excel的colIndex
-    int colIndex() default 0;
+    int colIndex() default -1;
 
     // excel的title
     String title() default "";

@@ -61,10 +61,11 @@ public class DefaultEventModelParseHandler implements IEventModelParseHandler {
         private String s6;
         @ExcelImport
         private String s7;
-
+        @ExcelImport(colIndex = "2:4")
+        private List<String> s24;
         @ExcelImport
         private String s1;
-        @ExcelImport
+        @ExcelImport(colIndex = "1")
         private String s2;
         @ExcelImport
         private String s3;
