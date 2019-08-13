@@ -3,7 +3,6 @@ package com.common.collect.container.excel.annotations;
 import com.common.collect.container.excel.define.IBeanFactory;
 import com.common.collect.container.excel.define.ICellConfig;
 import com.common.collect.container.excel.define.bean.SingletonBeanFactory;
-import com.common.collect.container.excel.define.cell.NullCellConfig;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -21,7 +20,7 @@ public @interface ExcelEntity {
 
     boolean colIndexSortByField() default false;
 
-    Class<? extends ICellConfig> cellConfig() default NullCellConfig.class;
+    Class<? extends ICellConfig> cellConfig() default ICellConfig.class;
 
     Class<? extends IBeanFactory> beanFactory() default SingletonBeanFactory.class;
 

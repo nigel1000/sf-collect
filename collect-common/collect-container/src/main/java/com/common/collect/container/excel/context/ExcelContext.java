@@ -273,11 +273,7 @@ public class ExcelContext {
             return;
         }
         beanFactoryCls = excelEntity.beanFactory();
-        try {
-            beanFactory = beanFactoryCls.newInstance();
-        } catch (Exception ex) {
-            throw UnifiedException.gen(ExcelConstants.MODULE, "工厂类初始化失败", ex);
-        }
+        beanFactory = ClassUtil.newInstance(beanFactoryCls);
         cellConfigCls = excelEntity.cellConfig();
         cellConfig = beanFactory.getBean(cellConfigCls);
         colIndexSortByField = excelEntity.colIndexSortByField();
