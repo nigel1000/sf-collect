@@ -19,6 +19,8 @@ import java.lang.annotation.Target;
 // 类上的配置会覆盖属性上的配置
 public @interface ExcelEntity {
 
+    boolean colIndexSortByField() default false;
+
     Class<? extends ICellConfig> cellConfig() default DefaultCellConfig.class;
 
     Class<? extends IBeanFactory> beanFactory() default SingletonBeanFactory.class;

@@ -45,6 +45,7 @@ public class ExcelContext {
     private Class<?> clazz;
     // ExcelEntity
     private ExcelEntity excelEntity;
+    private boolean colIndexSortByField;
     private Class<? extends ICellConfig> cellConfigCls;
     private ICellConfig cellConfig;
     private Class<? extends IBeanFactory> beanFactoryCls;
@@ -143,17 +144,18 @@ public class ExcelContext {
 
     private void parseField() {
         // 处理 导入参数
+        int fieldImportIndex = 0;
+        int fieldExportIndex = 0;
         for (Map.Entry<String, Field> entry : fieldMap.entrySet()) {
             String fieldName = entry.getKey();
             Field field = entry.getValue();
             if (isImport(fieldName)) {
                 ExcelImport excelImport = excelImportMap.get(fieldName);
                 String colIndex = excelImport.colIndex();
-                if (EmptyUtil.isBlank(colIndex)) {
+                if (!colIndexSortByField && EmptyUtil.isBlank(colIndex)) {
                     throw UnifiedException.gen(ExcelConstants.MODULE, "colIndex不能为空");
-                } else {
-                    excelImportColIndexMap.put(fieldName, excelImport.colIndex());
                 }
+                excelImportColIndexMap.put(fieldName, colIndex);
                 Class<? extends IColIndexParser> colIndexParserCls = excelImport.colIndexParser();
                 excelImportColIndexParserClsMap.put(fieldName, colIndexParserCls);
                 IColIndexParser colIndexParser = beanFactory.getBean(colIndexParserCls);
@@ -161,7 +163,12 @@ public class ExcelContext {
                     throw UnifiedException.gen(ExcelConstants.MODULE, "列下标解析器不能为空");
                 }
                 excelImportColIndexParserMap.put(fieldName, colIndexParser);
-                List<Integer> colIndexNums = CollectionUtil.removeDuplicate(colIndexParser.parseColIndex(colIndex));
+                List<Integer> colIndexNums = new ArrayList<>();
+                if (colIndexSortByField) {
+                    colIndexNums.add(fieldImportIndex++);
+                } else {
+                    colIndexNums = CollectionUtil.removeDuplicate(colIndexParser.parseColIndex(colIndex));
+                }
                 excelImportColIndexNumMap.put(fieldName, colIndexNums);
                 boolean isMultiCol = colIndexNums.size() > 1;
                 if (isMultiCol && !fieldClsMap.get(fieldName).equals(List.class)) {
@@ -178,7 +185,12 @@ public class ExcelContext {
 
             if (isExport(fieldName)) {
                 ExcelExport excelExport = excelExportMap.get(fieldName);
-                int colIndex = excelExport.colIndex();
+                int colIndex;
+                if (colIndexSortByField) {
+                    colIndex = fieldExportIndex++;
+                } else {
+                    colIndex = excelExport.colIndex();
+                }
                 if (colIndex < 0) {
                     throw UnifiedException.gen(ExcelConstants.MODULE, "导出 colIndex 不能小于0");
                 }
@@ -255,6 +267,7 @@ public class ExcelContext {
         if (excelEntity == null) {
             beanFactoryCls = SingletonBeanFactory.class;
             beanFactory = new SingletonBeanFactory();
+            colIndexSortByField = false;
             return;
         }
         beanFactoryCls = excelEntity.beanFactory();
@@ -265,6 +278,7 @@ public class ExcelContext {
         }
         cellConfigCls = excelEntity.cellConfig();
         cellConfig = beanFactory.getBean(cellConfigCls);
+        colIndexSortByField = excelEntity.colIndexSortByField();
     }
 
     public <C> C newInstance() {

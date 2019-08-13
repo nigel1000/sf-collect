@@ -44,8 +44,8 @@ public class ExcelSessionTest {
         }
 //        Slf4jUtil.setLogLevel("debug");
 
-//        log.info("eventModelReader ##########");
-//        eventModelReader();
+        log.info("eventModelReader ##########");
+        eventModelReader();
 
 //        log.info("sessionExcel ##########");
 //        sessionExcel();
@@ -59,9 +59,11 @@ public class ExcelSessionTest {
 //        log.info("exportNew ##########");
 //        exportNew();
 //
-        log.info("exportTpl ##########");
-        exportTpl();
+//        log.info("exportTpl ##########");
+//        exportTpl();
 
+
+        log.info(" done ");
     }
 
     public static void eventModelReader() throws Exception {

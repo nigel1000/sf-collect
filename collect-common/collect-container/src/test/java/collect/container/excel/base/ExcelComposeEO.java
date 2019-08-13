@@ -43,7 +43,7 @@ public class ExcelComposeEO implements Serializable {
     @ExcelExport(colIndex = 3, title = "数字3")
     private BigDecimal bigDecimalValue;
 
-    @ExcelImport(colIndex = "4:5,3,0:1", duplicateRemove = true, dataType = String.class)
+    @ExcelImport(colIndex = "4:5,3,0:1", dataType = String.class)
     @ExcelCheck(max = 100, required = true)
     private List<String> stringListValue;
 

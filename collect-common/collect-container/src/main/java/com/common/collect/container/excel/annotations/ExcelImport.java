@@ -28,9 +28,6 @@ public @interface ExcelImport {
     // 多列时生效即属性类型是List
     Class dataType() default String.class;
 
-    // 多列时生效即属性类型是List 去重
-    boolean duplicateRemove() default false;
-
     // excel的title 无实际使用意义 类似于备注使字段可以自解释
     String title() default "";
 
