@@ -52,7 +52,7 @@ public class DefaultEventModelParseHandler implements IEventModelParseHandler {
     }
 
     @Data
-    @ExcelEntity(colIndexSortByField = true)
+    @ExcelEntity(colIndexStrategy = ExcelEntity.ColIndexStrategyEnum.by_field_place_default)
     public static class DomainSortByField {
 
         @ExcelImport
@@ -61,7 +61,7 @@ public class DefaultEventModelParseHandler implements IEventModelParseHandler {
         private String s6;
         @ExcelImport
         private String s7;
-        @ExcelImport(colIndex = "2:4")
+        @ExcelImport(colIndex = "2:4", dataType = String.class)
         private List<String> s24;
         @ExcelImport
         private String s1;

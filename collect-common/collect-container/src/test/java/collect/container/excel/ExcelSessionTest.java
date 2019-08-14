@@ -7,6 +7,7 @@ import com.common.collect.container.excel.ExcelExportUtil;
 import com.common.collect.container.excel.ExcelImportUtil;
 import com.common.collect.container.excel.ExcelSession;
 import com.common.collect.container.excel.client.ExcelClient;
+import com.common.collect.container.excel.excps.ExcelImportException;
 import com.common.collect.util.IdUtil;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
@@ -47,20 +48,20 @@ public class ExcelSessionTest {
         log.info("eventModelReader ##########");
         eventModelReader();
 
-//        log.info("sessionExcel ##########");
-//        sessionExcel();
-//
-//        log.info("importCorrect ##########");
-//        importCorrect();
-//
-//        log.info("importError ##########");
-//        importError();
+        log.info("sessionExcel ##########");
+        sessionExcel();
 
-//        log.info("exportNew ##########");
-//        exportNew();
-//
-//        log.info("exportTpl ##########");
-//        exportTpl();
+        log.info("importCorrect ##########");
+        importCorrect();
+
+        log.info("importError ##########");
+        importError();
+
+        log.info("exportNew ##########");
+        exportNew();
+
+        log.info("exportTpl ##########");
+        exportTpl();
 
 
         log.info(" done ");
@@ -106,8 +107,8 @@ public class ExcelSessionTest {
             List<ExcelComposeEO> errors =
                     ExcelClient.fileImport(new File(path + "/ExcelImportError.xlsx"), ExcelComposeEO.class);
             print(errors);
-        } catch (Exception ex) {
-            log.error("导出错误信息", ex);
+        } catch (ExcelImportException ex) {
+            log.error("导出错误信息:{}", ex.toString());
         }
     }
 

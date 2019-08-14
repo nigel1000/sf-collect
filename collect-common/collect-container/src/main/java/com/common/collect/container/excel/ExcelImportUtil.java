@@ -192,7 +192,7 @@ public class ExcelImportUtil extends ExcelSession {
     }
 
     // 设置错误行的 cellStyle
-    public void setErrorCellStyle(ExcelImportException excption, CellStyle cellStyle) {
+    public void setErrorCellStyle(ExcelImportException exception, CellStyle cellStyle) {
         if (cellStyle == null) {
             short color = IndexedColors.RED.getIndex();
             cellStyle = this.createDefaultCellStyle();
@@ -203,7 +203,7 @@ public class ExcelImportUtil extends ExcelSession {
             cellStyle.setRightBorderColor(color);
             cellStyle.setLeftBorderColor(color);
         }
-        List<ExcelSheetInfo> infos = excption.getInfoList();
+        List<ExcelSheetInfo> infos = exception.getInfoList();
         for (ExcelSheetInfo info : infos) {
             setCellStyle(info.getRowNum(), info.getColNum(), cellStyle);
         }

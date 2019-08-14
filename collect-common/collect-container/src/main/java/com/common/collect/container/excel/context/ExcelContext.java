@@ -45,7 +45,7 @@ public class ExcelContext {
     private Class<?> clazz;
     // ExcelEntity
     private ExcelEntity excelEntity;
-    private boolean colIndexSortByField;
+    private ExcelEntity.ColIndexStrategyEnum colIndexStrategy;
     private Class<? extends ICellConfig> cellConfigCls;
     private ICellConfig cellConfig;
     private Class<? extends IBeanFactory> beanFactoryCls;
@@ -161,20 +161,26 @@ public class ExcelContext {
                 }
                 excelImportColIndexParserMap.put(fieldName, colIndexParser);
                 List<Integer> colIndexNums = new ArrayList<>();
-                if (colIndexSortByField) {
-                    colIndexNums.add(fieldImportIndex++);
-                }
-                if (EmptyUtil.isNotBlank(colIndex)) {
-                    colIndexNums = CollectionUtil.removeDuplicate(colIndexParser.parseColIndex(colIndex));
+                switch (colIndexStrategy) {
+                    case by_field_config:
+                        colIndexNums = CollectionUtil.removeDuplicate(colIndexParser.parseColIndex(colIndex));
+                        break;
+                    case by_field_place:
+                        colIndexNums.add(fieldImportIndex++);
+                        break;
+                    case by_field_place_default:
+                        colIndexNums.add(fieldImportIndex++);
+                        if (EmptyUtil.isNotBlank(colIndex)) {
+                            colIndexNums = CollectionUtil.removeDuplicate(colIndexParser.parseColIndex(colIndex));
+                        }
+                        break;
                 }
                 if (EmptyUtil.isEmpty(colIndexNums)) {
-                    throw UnifiedException.gen(ExcelConstants.MODULE, "colIndex不能为空");
+                    throw UnifiedException.gen(ExcelConstants.MODULE, "colIndex 不能为空");
                 }
                 excelImportColIndexNumMap.put(fieldName, colIndexNums);
-                boolean isMultiCol = colIndexNums.size() > 1;
-                if (isMultiCol && !fieldClsMap.get(fieldName).equals(List.class)) {
-                    throw UnifiedException.gen(ExcelConstants.MODULE, "多列时类型必须是 List");
-                }
+                // 是 list 就是多列
+                boolean isMultiCol = fieldClsMap.get(fieldName).equals(List.class);
                 excelImportIsMultiColMap.put(fieldName, isMultiCol);
                 if (isMultiCol) {
                     excelImportMultiColListTypeMap.put(fieldName, excelImport.dataType());
@@ -186,14 +192,23 @@ public class ExcelContext {
 
             if (isExport(fieldName)) {
                 ExcelExport excelExport = excelExportMap.get(fieldName);
-                Integer colIndex = null;
-                if (colIndexSortByField) {
-                    colIndex = fieldExportIndex++;
+                int colIndex = ExcelConstants.EXCEL_EXPORT_COL_INDEX_DEFAULT;
+                switch (colIndexStrategy) {
+                    case by_field_config:
+                        colIndex = excelExport.colIndex();
+                        break;
+                    case by_field_place:
+                        colIndex = fieldExportIndex++;
+                        break;
+                    case by_field_place_default:
+                        colIndex = fieldExportIndex++;
+                        if (excelExport.colIndex() != ExcelConstants.EXCEL_EXPORT_COL_INDEX_DEFAULT) {
+                            colIndex = excelExport.colIndex();
+                        }
+                        break;
                 }
-                if (excelExport.colIndex() != -1) {
-                    colIndex = excelExport.colIndex();
-                }
-                if (colIndex == null || colIndex < 0) {
+
+                if (colIndex < 0) {
                     throw UnifiedException.gen(ExcelConstants.MODULE, "导出 colIndex 不能小于0");
                 }
                 excelExportColIndexMap.put(fieldName, colIndex);
@@ -269,14 +284,14 @@ public class ExcelContext {
         if (excelEntity == null) {
             beanFactoryCls = SingletonBeanFactory.class;
             beanFactory = new SingletonBeanFactory();
-            colIndexSortByField = false;
+            colIndexStrategy = ExcelEntity.ColIndexStrategyEnum.by_field_config;
             return;
         }
         beanFactoryCls = excelEntity.beanFactory();
         beanFactory = ClassUtil.newInstance(beanFactoryCls);
         cellConfigCls = excelEntity.cellConfig();
         cellConfig = beanFactory.getBean(cellConfigCls);
-        colIndexSortByField = excelEntity.colIndexSortByField();
+        colIndexStrategy = excelEntity.colIndexStrategy();
     }
 
     public <C> C newInstance() {

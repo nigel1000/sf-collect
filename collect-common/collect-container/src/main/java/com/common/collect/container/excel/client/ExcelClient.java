@@ -12,6 +12,7 @@ import org.springframework.core.io.Resource;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -38,8 +39,8 @@ public class ExcelClient {
             excelParse.setFastFail(false);
             excelParse.setFailCount(20);
             return excelParse.excelParse(1, clazz);
-        } catch (Exception ex) {
-            throw UnifiedException.gen("excel 文件解析失败", ex);
+        } catch (FileNotFoundException ex) {
+            throw UnifiedException.gen("文件未找到", ex);
         }
     }
 

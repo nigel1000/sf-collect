@@ -11,6 +11,8 @@ public class ExcelConstants {
 
     public final static String MODULE = "excel 组件";
 
+    public final static int EXCEL_EXPORT_COL_INDEX_DEFAULT = -1;
+
     public final static String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
     public final static String NUMBER_FORMAT = " #,##0.00 ";
 

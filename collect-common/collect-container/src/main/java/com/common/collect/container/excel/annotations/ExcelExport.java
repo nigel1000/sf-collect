@@ -1,5 +1,6 @@
 package com.common.collect.container.excel.annotations;
 
+import com.common.collect.container.excel.base.ExcelConstants;
 import com.common.collect.container.excel.define.ICellConfig;
 
 import java.lang.annotation.ElementType;
@@ -16,7 +17,7 @@ import java.lang.annotation.Target;
 public @interface ExcelExport {
 
     // excel的colIndex
-    int colIndex() default -1;
+    int colIndex() default ExcelConstants.EXCEL_EXPORT_COL_INDEX_DEFAULT;
 
     // excel的title
     String title() default "";
