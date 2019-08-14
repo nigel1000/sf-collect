@@ -23,6 +23,7 @@ import com.common.collect.util.ClassUtil;
 import com.common.collect.util.CollectionUtil;
 import com.common.collect.util.ConvertUtil;
 import com.common.collect.util.EmptyUtil;
+import com.common.collect.util.StringUtil;
 import com.google.common.collect.Lists;
 import lombok.Getter;
 
@@ -157,7 +158,8 @@ public class ExcelContext {
                 excelImportColIndexParserClsMap.put(fieldName, colIndexParserCls);
                 IColIndexParser colIndexParser = beanFactory.getBean(colIndexParserCls);
                 if (colIndexParser == null) {
-                    throw UnifiedException.gen(ExcelConstants.MODULE, "列下标解析器不能为空");
+                    throw UnifiedException.gen(ExcelConstants.MODULE,
+                            StringUtil.format("class:{} fieldName:{} 列下标解析器不能为空", clazz.getName(), fieldName));
                 }
                 excelImportColIndexParserMap.put(fieldName, colIndexParser);
                 List<Integer> colIndexNums = new ArrayList<>();
@@ -176,15 +178,24 @@ public class ExcelContext {
                         break;
                 }
                 if (EmptyUtil.isEmpty(colIndexNums)) {
-                    throw UnifiedException.gen(ExcelConstants.MODULE, "colIndex 不能为空");
+                    throw UnifiedException.gen(ExcelConstants.MODULE,
+                            StringUtil.format("class:{} fieldName:{} colIndex 不能为空", clazz.getName(), fieldName));
                 }
                 excelImportColIndexNumMap.put(fieldName, colIndexNums);
                 // 是 list 就是多列
-                boolean isMultiCol = fieldClsMap.get(fieldName).equals(List.class);
+                boolean isMultiCol = excelImport.isMultiCol();
                 excelImportIsMultiColMap.put(fieldName, isMultiCol);
                 if (isMultiCol) {
+                    if (!fieldClsMap.get(fieldName).equals(List.class)) {
+                        throw UnifiedException.gen(ExcelConstants.MODULE,
+                                StringUtil.format("class:{} fieldName:{} 多列 返回类型必须是 List", clazz.getName(), fieldName));
+                    }
                     excelImportMultiColListTypeMap.put(fieldName, excelImport.dataType());
                 } else {
+                    if (colIndexNums.size() > 1) {
+                        throw UnifiedException.gen(ExcelConstants.MODULE,
+                                StringUtil.format("class:{} fieldName:{} 单列 当前指定的 colIndex 为多列", clazz.getName(), fieldName));
+                    }
                     excelImportMultiColListTypeMap.put(fieldName, fieldClsMap.get(fieldName));
                 }
                 excelImportTitleMap.put(fieldName, excelImport.title());
@@ -209,7 +220,8 @@ public class ExcelContext {
                 }
 
                 if (colIndex < 0) {
-                    throw UnifiedException.gen(ExcelConstants.MODULE, "导出 colIndex 不能小于0");
+                    throw UnifiedException.gen(ExcelConstants.MODULE,
+                            StringUtil.format("class:{} fieldName:{} 导出 colIndex 不能小于0", clazz.getName(), fieldName));
                 }
                 excelExportColIndexMap.put(fieldName, colIndex);
                 excelExportTitleMap.put(fieldName, excelExport.title());

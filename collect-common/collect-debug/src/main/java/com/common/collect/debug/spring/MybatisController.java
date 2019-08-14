@@ -63,8 +63,8 @@ public class MybatisController {
         }
 
         List<File> files = Lists.newArrayList();
-
         GlobalParam globalParam = new GlobalParam();
+        globalParam.setDbSchema(url.substring(url.lastIndexOf("/") + 1, url.indexOf("?")));
         if (EmptyUtil.isNotEmpty(schema)) {
             globalParam.setDbSchema(schema);
         }

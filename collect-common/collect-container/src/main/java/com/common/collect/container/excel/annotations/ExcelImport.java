@@ -25,6 +25,8 @@ public @interface ExcelImport {
     // 解析 colIndex 为 List<Integer>
     Class<? extends IColIndexParser> colIndexParser() default SplitColIndexParser.class;
 
+    boolean isMultiCol() default false;
+
     // 多列时生效即属性类型是List
     Class dataType() default String.class;
 

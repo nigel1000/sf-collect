@@ -47,22 +47,21 @@ public class ExcelSessionTest {
 
         log.info("eventModelReader ##########");
         eventModelReader();
-
-        log.info("sessionExcel ##########");
-        sessionExcel();
-
-        log.info("importCorrect ##########");
-        importCorrect();
-
-        log.info("importError ##########");
-        importError();
-
-        log.info("exportNew ##########");
-        exportNew();
-
-        log.info("exportTpl ##########");
-        exportTpl();
-
+//
+//        log.info("sessionExcel ##########");
+//        sessionExcel();
+//
+//        log.info("importCorrect ##########");
+//        importCorrect();
+//
+//        log.info("importError ##########");
+//        importError();
+//
+//        log.info("exportNew ##########");
+//        exportNew();
+//
+//        log.info("exportTpl ##########");
+//        exportTpl();
 
         log.info(" done ");
     }

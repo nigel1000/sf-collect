@@ -46,7 +46,7 @@ public class DefaultEventModelParseHandler implements IEventModelParseHandler {
         private String s6;
         @ExcelImport(colIndex = "6")
         private String s7;
-        @ExcelImport(colIndex = "2:4")
+        @ExcelImport(colIndex = "2:4", isMultiCol = true, dataType = String.class)
         private List<String> s24;
 
     }
@@ -61,7 +61,7 @@ public class DefaultEventModelParseHandler implements IEventModelParseHandler {
         private String s6;
         @ExcelImport
         private String s7;
-        @ExcelImport(colIndex = "2:4", dataType = String.class)
+        @ExcelImport(colIndex = "2:4", isMultiCol = true, dataType = String.class)
         private List<String> s24;
         @ExcelImport
         private String s1;
