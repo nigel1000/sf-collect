@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -28,10 +29,18 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class HttpUtil {
 
-    private final static OkHttpClient.Builder HTTP_CLIENT_BUILDER = new OkHttpClient.Builder();
-    private final static OkHttpClient HTTP_CLIENT =
-            HTTP_CLIENT_BUILDER.connectionPool(new ConnectionPool()).connectTimeout(3, TimeUnit.SECONDS)
-                    .writeTimeout(3, TimeUnit.SECONDS).readTimeout(10, TimeUnit.SECONDS).build();
+    private final static Map<String, OkHttpClient> okHttpClientMap = new ConcurrentHashMap<>();
+
+    public static OkHttpClient obtainOkHttpClient(@NonNull String okHttpClientName) {
+
+        return okHttpClientMap.computeIfAbsent(okHttpClientName, (key) -> {
+            OkHttpClient.Builder httpClientBuilder = new OkHttpClient.Builder();
+            OkHttpClient httpClient =
+                    httpClientBuilder.connectionPool(new ConnectionPool()).connectTimeout(3, TimeUnit.SECONDS)
+                            .writeTimeout(3, TimeUnit.SECONDS).readTimeout(10, TimeUnit.SECONDS).build();
+            return httpClient;
+        });
+    }
 
     @Data
     public static class HttpParam implements Serializable {
@@ -58,9 +67,7 @@ public class HttpUtil {
         }
 
         private enum RequestEnum {
-            Get,
-            PostFormBody,
-            PostRequestBody
+            Get, PostFormBody, PostRequestBody
         }
 
         public HttpParam(String url) {
@@ -91,6 +98,11 @@ public class HttpUtil {
 
     @SuppressWarnings("unchecked")
     public static <T> T request(@NonNull HttpParam httpParam, Class<T> ret) {
+        return request(httpParam, ret, "default");
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T request(@NonNull HttpParam httpParam, Class<T> ret, @NonNull String okHttpClientName) {
         httpParam.validSelf();
 
         String url = httpParam.getUrl();
@@ -112,7 +124,8 @@ public class HttpUtil {
         }
 
         if (HttpParam.RequestEnum.PostRequestBody.equals(httpParam.getRequestType())) {
-            RequestBody requestBody = RequestBody.create(MediaType.parse(httpParam.getContentType()), httpParam.getContent());
+            RequestBody requestBody =
+                    RequestBody.create(MediaType.parse(httpParam.getContentType()), httpParam.getContent());
             reqBuilder.post(requestBody);
         }
 
@@ -122,10 +135,10 @@ public class HttpUtil {
         okhttp3.Response response;
         try {
             if (httpParam.getCallback() == null) {
-                response = HTTP_CLIENT.newCall(request).execute();
+                response = obtainOkHttpClient(okHttpClientName).newCall(request).execute();
             } else {
                 // 异步执行
-                HTTP_CLIENT.newCall(request).enqueue(httpParam.getCallback());
+                obtainOkHttpClient(okHttpClientName).newCall(request).enqueue(httpParam.getCallback());
                 return null;
             }
         } catch (IOException e) {
