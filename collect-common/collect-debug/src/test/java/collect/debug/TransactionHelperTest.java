@@ -60,7 +60,7 @@ public class TransactionHelperTest {
             transactionHelper.afterCommit("taskName5", () -> {
                 log.info("taskName5 start");
                 log.info("taskName5 end");
-            }, true);
+            }, true, false);
         } catch (UnifiedException ex) {
             log.error("taskName5 exception", ex);
         }
@@ -68,7 +68,7 @@ public class TransactionHelperTest {
         transactionHelper.afterCommit("taskName5", () -> {
             log.info("taskName5 start");
             log.info("taskName5 end");
-        }, false);
+        }, false, true);
 
 
         Thread.sleep(3000);
