@@ -6,10 +6,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
@@ -59,7 +59,7 @@ public class ThreadPoolUtil {
         }
     }
 
-    private final static Map<String, ExecutorService> executorServiceMap = new HashMap<>();
+    private final static Map<String, ExecutorService> executorServiceMap = new ConcurrentHashMap<>();
 
     public static ExecutorService obtainExecutorService(@NonNull String poolName) {
 

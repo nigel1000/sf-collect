@@ -32,16 +32,20 @@ public class TransactionHelper {
     // 若在事务内则事务提交后异步执行
     // 若不在事务内则直接异步执行
     public void afterCommit(@NonNull String taskName, Runnable biz) {
-        afterCommit(taskName, biz, false);
+        afterCommit(taskName, biz, false, false);
     }
 
-    public void afterCommit(@NonNull String taskName, Runnable biz, boolean isThrow) {
+    public void afterCommit(@NonNull String taskName, Runnable biz, boolean isThrowWhenNoTransaction, boolean isUseDefaultPool) {
         if (!TransactionSynchronizationManager.isSynchronizationActive()) {
-            if (isThrow) {
+            if (isThrowWhenNoTransaction) {
                 throw UnifiedException.gen("当前没有开启事务");
             } else {
                 log.info("事务未开启，任务执行:{}", taskName);
-                ThreadPoolUtil.exec(biz);
+                if (isUseDefaultPool) {
+                    ThreadPoolUtil.exec(biz);
+                } else {
+                    ThreadPoolUtil.exec(taskName, biz);
+                }
                 return;
             }
         }
@@ -53,7 +57,11 @@ public class TransactionHelper {
             public void afterCommit() {
                 log.info("事务提交，任务执行:{},transactionName:{}", taskName, transactionName);
                 // 异步任务自己负责异常的处理
-                ThreadPoolUtil.exec(biz);
+                if (isUseDefaultPool) {
+                    ThreadPoolUtil.exec(biz);
+                } else {
+                    ThreadPoolUtil.exec(taskName, biz);
+                }
             }
 
             @Override
