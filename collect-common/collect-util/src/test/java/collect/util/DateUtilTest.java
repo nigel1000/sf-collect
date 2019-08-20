@@ -24,10 +24,12 @@ public class DateUtilTest {
         log.info("getDayOfYear:{}", DateUtil.getDayOfYear(DateUtil.now()));
         log.info("getDayOfWeek:{}", DateUtil.getDayOfWeek(DateUtil.now()));
 
+        log.info("plusDays:{}", DateUtil.plusHours(DateUtil.now(), 12));
         log.info("plusDays:{}", DateUtil.plusDays(DateUtil.now(), 32));
         log.info("plusMonths:{}", DateUtil.plusMonths(DateUtil.now(), 13));
         log.info("plusYears:{}", DateUtil.plusYears(DateUtil.now(), 3));
 
+        log.info("minusDays:{}", DateUtil.minusHours(DateUtil.now(), 12));
         log.info("minusDays:{}", DateUtil.minusDays(DateUtil.now(), 32));
         log.info("minusMonths:{}", DateUtil.minusMonths(DateUtil.now(), 13));
         log.info("minusYears:{}", DateUtil.minusYears(DateUtil.now(), 3));

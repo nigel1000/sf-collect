@@ -3,7 +3,11 @@ package com.common.collect.util;
 import com.common.collect.api.excps.UnifiedException;
 import lombok.NonNull;
 
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
@@ -21,7 +25,7 @@ public class DateUtil {
     }
 
     // 字符串与date的转换
-    // date   2018-11-12 11:20:21
+    // date 2018-11-12 11:20:21
     // format yyyy-MM-dd HH:mm:ss
     public static Date parseDate(@NonNull String date, @NonNull String format) {
         try {
@@ -31,10 +35,10 @@ public class DateUtil {
         }
     }
 
-    //yyyy-MM-dd
-    //yyyy-MM-dd HH:mm:ss
-    //yyyy-MM-dd HH:mm:ss.SSS
-    //yyyy年MM月dd日
+    // yyyy-MM-dd
+    // yyyy-MM-dd HH:mm:ss
+    // yyyy-MM-dd HH:mm:ss.SSS
+    // yyyy年MM月dd日
     public static String format(@NonNull Date date, @NonNull String format) {
         LocalDateTime localDateTime = toLocalDateTime(date);
         return DateTimeFormatter.ofPattern(format).format(localDateTime);
@@ -95,6 +99,11 @@ public class DateUtil {
     }
 
     // 增减时间
+    public static Date plusHours(@NonNull Date date, long hours) {
+        LocalDateTime localDateTime = toLocalDateTime(date);
+        return toDate(localDateTime.plusHours(hours));
+    }
+
     public static Date plusDays(@NonNull Date date, long days) {
         LocalDateTime localDateTime = toLocalDateTime(date);
         return toDate(localDateTime.plusDays(days));
@@ -108,6 +117,11 @@ public class DateUtil {
     public static Date plusYears(@NonNull Date date, long years) {
         LocalDateTime localDateTime = toLocalDateTime(date);
         return toDate(localDateTime.plusYears(years));
+    }
+
+    public static Date minusHours(@NonNull Date date, long hours) {
+        LocalDateTime localDateTime = toLocalDateTime(date);
+        return toDate(localDateTime.minusHours(hours));
     }
 
     public static Date minusDays(@NonNull Date date, long days) {

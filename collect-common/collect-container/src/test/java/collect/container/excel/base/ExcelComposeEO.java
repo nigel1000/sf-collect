@@ -1,6 +1,10 @@
 package collect.container.excel.base;
 
-import com.common.collect.container.excel.annotations.*;
+import com.common.collect.container.excel.annotations.ExcelCheck;
+import com.common.collect.container.excel.annotations.ExcelConvert;
+import com.common.collect.container.excel.annotations.ExcelEntity;
+import com.common.collect.container.excel.annotations.ExcelExport;
+import com.common.collect.container.excel.annotations.ExcelImport;
 import com.common.collect.container.excel.define.cell.DefaultCellConfig;
 import com.common.collect.container.excel.extension.OptionCheckImportHandler;
 import com.common.collect.container.excel.extension.OptionConvertExportHandler;
@@ -43,7 +47,7 @@ public class ExcelComposeEO implements Serializable {
     @ExcelExport(colIndex = 3, title = "数字3")
     private BigDecimal bigDecimalValue;
 
-    @ExcelImport(colIndex = "4:5,3,0:1", dataType = String.class)
+    @ExcelImport(colIndex = "4:5,3,0:1", isMultiCol = true, dataType = String.class)
     @ExcelCheck(max = 100, required = true)
     private List<String> stringListValue;
 
