@@ -32,30 +32,33 @@ public class EasyLogAspectJ {
 
     @Before("clazz() || method()")
     public void before(final JoinPoint point) {
-
-        EasyLog easyLog = AopUtil.getAnnotation(point, EasyLog.class);
-        String module = easyLog.module();
-        log.debug(LogConstant.START_LOG_PREFIX + " args:{}", module, point.getTarget().getClass().getName(),
-                point.getSignature().getName(), LogConstant.getObjString(point.getArgs()));
+        if (log.isDebugEnabled()) {
+            EasyLog easyLog = AopUtil.getAnnotation(point, EasyLog.class);
+            String module = easyLog.module();
+            log.debug(LogConstant.START_LOG_PREFIX + " args:{}", module, point.getTarget().getClass().getName(),
+                    point.getSignature().getName(), LogConstant.getObjString(point.getArgs()));
+        }
     }
 
     @AfterReturning(returning = "rtObj", value = "clazz() || method()")
     public void afterReturning(final JoinPoint point, final Object rtObj) {
-
-        EasyLog easyLog = AopUtil.getAnnotation(point, EasyLog.class);
-        String module = easyLog.module();
-        log.debug(LogConstant.FINISH_LOG_PREFIX + " return:{}", module, point.getTarget().getClass().getName(),
-                point.getSignature().getName(), LogConstant.getObjString(rtObj));
+        if (log.isDebugEnabled()) {
+            EasyLog easyLog = AopUtil.getAnnotation(point, EasyLog.class);
+            String module = easyLog.module();
+            log.debug(LogConstant.FINISH_LOG_PREFIX + " return:{}", module, point.getTarget().getClass().getName(),
+                    point.getSignature().getName(), LogConstant.getObjString(rtObj));
+        }
     }
 
 
     @AfterThrowing(throwing = "ex", value = "clazz() || method()")
     public void afterThrowing(final JoinPoint point, final Throwable ex) {
-
-        EasyLog easyLog = AopUtil.getAnnotation(point, EasyLog.class);
-        String module = easyLog.module();
-        log.debug(LogConstant.FINISH_LOG_PREFIX + " exception:{}", module, point.getTarget().getClass().getName(),
-                point.getSignature().getName(), Throwables.getStackTraceAsString(ex));
+        if (log.isDebugEnabled()) {
+            EasyLog easyLog = AopUtil.getAnnotation(point, EasyLog.class);
+            String module = easyLog.module();
+            log.debug(LogConstant.FINISH_LOG_PREFIX + " exception:{}", module, point.getTarget().getClass().getName(),
+                    point.getSignature().getName(), Throwables.getStackTraceAsString(ex));
+        }
     }
 
 }
