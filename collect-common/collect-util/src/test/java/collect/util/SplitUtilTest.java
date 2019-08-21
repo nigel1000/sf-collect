@@ -1,5 +1,6 @@
 package collect.util;
 
+import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.util.SplitUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,6 +34,18 @@ public class SplitUtilTest {
             log.info("{}", (t));
             return true;
         }, true);
+
+        try {
+            SplitUtil.retry(3, () -> {
+                log.info("retry");
+                if (true) {
+                    throw UnifiedException.gen("retry");
+                }
+                return true;
+            });
+        } catch (UnifiedException ex) {
+            log.error("", ex);
+        }
 
     }
 

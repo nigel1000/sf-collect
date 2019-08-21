@@ -1,11 +1,13 @@
 package com.common.collect.util;
 
+import com.common.collect.api.excps.UnifiedException;
 import lombok.NonNull;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Created by hznijianfeng on 2018/8/14.
@@ -97,5 +99,23 @@ public class SplitUtil {
         }
     }
 
+    public static <T> T retry(int time, Supplier<T> supplier) {
+        if (time < 1) {
+            throw UnifiedException.gen("次数不能少于 1 次");
+        }
+
+        T t;
+        while (true) {
+            try {
+                t = supplier.get();
+                break;
+            } catch (Exception ex) {
+                if (--time < 1) {
+                    throw ex;
+                }
+            }
+        }
+        return t;
+    }
 
 }
