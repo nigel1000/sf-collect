@@ -5,12 +5,13 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageInputStream;
 import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorConvertOp;
 import java.io.File;
 import java.io.IOException;
-import java.net.HttpURLConnection;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,13 +23,9 @@ import java.util.List;
 @Slf4j
 public class ImageUtil {
 
-    public static String getImageFileSize(File file) {
-        return getImageFileSize(file.getAbsolutePath(), SourceFrom.FILE);
-    }
-
     // 获取上传图片的宽高
     // 格式：_width_height
-    public static String getImageFileSize(@NonNull String source, @NonNull SourceFrom sourceFrom) {
+    public static String getImageFileSize(@NonNull Object source, @NonNull SourceFrom sourceFrom) {
         String size = "";
         try {
             BufferedImage buff = getBufferedImage(source, sourceFrom);
@@ -42,41 +39,46 @@ public class ImageUtil {
     }
 
     public enum SourceFrom {
-        FILE, URL,
-
-        ;
+        FILE,
+        URL,
+        INPUT_STREAM,
+        IMAGE_INPUT_STREAM
     }
 
     // 文件地址 或者 url
-    public static BufferedImage getBufferedImage(@NonNull String source, @NonNull SourceFrom sourceFrom) {
+    public static BufferedImage getBufferedImage(@NonNull Object source, @NonNull SourceFrom sourceFrom) {
         switch (sourceFrom) {
             case FILE:
+                File file;
                 try {
-                    return ImageIO.read(new File(source));
+                    if (source instanceof File) {
+                        file = (File) source;
+                    } else if (source instanceof String) {
+                        file = new File((String) source);
+                    } else {
+                        throw UnifiedException.gen(StringUtil.format("FILE 输入不合法"));
+                    }
+                    return ImageIO.read(file);
                 } catch (Exception e) {
-                    throw UnifiedException.gen(StringUtil.format("path:{},读取失败", source), e);
+                    throw UnifiedException.gen(StringUtil.format("path:{},读取失败", source.toString(), e));
                 }
             case URL:
-                HttpURLConnection conn = null;
-                BufferedImage image;
                 try {
-                    URL url = new URL(source);
-                    conn = (HttpURLConnection) url.openConnection();
-                    conn.setConnectTimeout(3000);
-                    conn.setReadTimeout(5000);
-                    if (conn.getResponseCode() == 200) {
-                        image = ImageIO.read(conn.getInputStream());
-                        return image;
-                    } else {
-                        throw UnifiedException
-                                .gen(StringUtil.format("url:{},code:{},读取失败", source, conn.getResponseCode()));
-                    }
+                    return ImageIO.read(new URL((String) source));
                 } catch (IOException e) {
                     throw UnifiedException.gen(StringUtil.format("url:{},读取失败", source), e);
-                } finally {
-                    if (conn != null) {
-                        conn.disconnect();
-                    }
+                }
+            case INPUT_STREAM:
+                try {
+                    return ImageIO.read((InputStream) source);
+                } catch (IOException e) {
+                    throw UnifiedException.gen(StringUtil.format("InputStream 流读取失败"), e);
+                }
+            case IMAGE_INPUT_STREAM:
+                try {
+                    return ImageIO.read((ImageInputStream) source);
+                } catch (IOException e) {
+                    throw UnifiedException.gen(StringUtil.format("ImageInputStream 流读取失败"), e);
                 }
             default:
                 throw UnifiedException.gen(StringUtil.format("不被支持的读取方式"));
@@ -98,15 +100,12 @@ public class ImageUtil {
     }
 
     // 合并多张图片 isHorizontal 是否水平合并
-    public static BufferedImage mergeImage(@NonNull SourceFrom sourceFrom, boolean isHorizontal,
-                                           @NonNull List<String> imgSources) {
-        if (EmptyUtil.isEmpty(imgSources)) {
+    public static BufferedImage mergeImage(List<BufferedImage> sources, boolean isHorizontal) {
+        if (EmptyUtil.isEmpty(sources)) {
             throw UnifiedException.gen(StringUtil.format("没有合图的图片"));
         }
-        List<BufferedImage> bufferedImages = new ArrayList<>();
-        for (String img : imgSources) {
-            bufferedImages.add(getBufferedImage(img, sourceFrom));
-        }
+        // 保证 sources 不变
+        List<BufferedImage> bufferedImages = new ArrayList<>(sources);
         // 生成新图片 第一张图
         BufferedImage destImage = bufferedImages.get(0);
         bufferedImages.remove(0);
@@ -140,8 +139,7 @@ public class ImageUtil {
                     destImage.setRGB(0, destImgHeight, nextImgWidth, nextImgHeight, imageArrayTwo, 0, nextImgWidth); // 设置下半部分的RGB
                 }
             } catch (Exception ex) {
-                throw UnifiedException
-                        .gen(StringUtil.format("宽度高度不匹配, source:{}&{}", imgSources.get(i), imgSources.get(i + 1)), ex);
+                throw UnifiedException.gen(StringUtil.format("宽度高度不匹配, sources index:{} {}", i, i + 1), ex);
             }
         }
 
@@ -149,7 +147,9 @@ public class ImageUtil {
     }
 
     // 切割图片 以白色横条为准切割图片
-    public static List<BufferedImage> segmentImage(BufferedImage sourceImg, @NonNull int lowestHeight) {
+    // ignoreBlankHeight 高度在此之下的白色不视为切割点
+    // lowestHeight 上一个切割点和下一个切割点需保持的最小的距离
+    public static List<BufferedImage> segmentImage(BufferedImage sourceImg, @NonNull int lowestHeight, @NonNull int ignoreBlankHeight) {
         // 转灰白
         BufferedImage grayImg = gray(sourceImg);
         int grayImgWidth = grayImg.getWidth();
@@ -176,26 +176,51 @@ public class ImageUtil {
             height++;
         }
         // 去除相隔小于 lowestHeight 的空白行
-        List<Integer> cutRowNum = new ArrayList<>();
+        List<List<Integer>> series = new ArrayList<>();
+        List<Integer> serial = new ArrayList<>();
         for (int i = 0; i < allBlankRows.size(); i++) {
+            int currRow = allBlankRows.get(i);
             if (i == 0) {
-                cutRowNum.add(allBlankRows.get(i));
+                serial = new ArrayList<>();
+                serial.add(currRow);
             } else {
-                if (allBlankRows.get(i) - cutRowNum.get(cutRowNum.size() - 1) >= lowestHeight) {
-                    cutRowNum.add(allBlankRows.get(i));
+                int preRow = allBlankRows.get(i - 1);
+                if (currRow - preRow == 1) {
+                    serial.add(currRow);
+                } else {
+                    series.add(new ArrayList<>(serial));
+                    serial = new ArrayList<>();
+                    serial.add(currRow);
                 }
             }
         }
+        series.add(new ArrayList<>(serial));
+
+        List<Integer> cutRowIndex = new ArrayList<>();
+        for (List<Integer> rowIndex : series) {
+            if (EmptyUtil.isEmpty(rowIndex) || rowIndex.size() < ignoreBlankHeight) {
+                continue;
+            }
+            int lastCutRow = cutRowIndex.size() == 0 ? 0 : cutRowIndex.get(cutRowIndex.size() - 1);
+            int currCutRow = (rowIndex.get(0) + rowIndex.get(rowIndex.size() - 1)) / 2;
+            if (currCutRow - lastCutRow >= lowestHeight) {
+                cutRowIndex.add(currCutRow);
+            }
+        }
+        // 加入最后一行
+        if (!cutRowIndex.contains(grayImgHeight)) {
+            cutRowIndex.add(grayImgHeight);
+        }
 
         List<BufferedImage> bufferedImages = new ArrayList<>();
-        int lastRow = 0;
-        for (Integer row : cutRowNum) {
-            int rows = row - lastRow;
-            int[] destImageArray = sourceImg.getRGB(0, lastRow, grayImgWidth, rows, null, 0, grayImgWidth);
-            BufferedImage destImage = new BufferedImage(grayImgWidth, rows, BufferedImage.TYPE_INT_RGB);
-            destImage.setRGB(0, 0, grayImgWidth, rows, destImageArray, 0, grayImgWidth);
+        int preRow = 0;
+        for (Integer rowIndex : cutRowIndex) {
+            int rowNum = rowIndex - preRow;
+            int[] destImageArray = sourceImg.getRGB(0, preRow, grayImgWidth, rowNum, null, 0, grayImgWidth);
+            BufferedImage destImage = new BufferedImage(grayImgWidth, rowNum, BufferedImage.TYPE_INT_RGB);
+            destImage.setRGB(0, 0, grayImgWidth, rowNum, destImageArray, 0, grayImgWidth);
             bufferedImages.add(destImage);
-            lastRow = row;
+            preRow = rowIndex;
         }
 
         return bufferedImages;

@@ -1,10 +1,13 @@
-package collect.util;
+package collect.debug;
 
+import com.common.collect.container.HttpUtil;
+import com.common.collect.util.FunctionUtil;
 import com.common.collect.util.ImageUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -33,13 +36,18 @@ public class ImageUtilTest {
                 "http://haitao.nos.netease.com/a10186f33ad34b718ab428d1a9efdb35_750_258.jpg");
 
         // 合图
-        BufferedImage bufferedImage = ImageUtil.mergeImage(ImageUtil.SourceFrom.URL, false, urls);
+        BufferedImage bufferedImage = ImageUtil.mergeImage(
+                FunctionUtil.valueList(urls, (t) ->
+                        ImageUtil.getBufferedImage(HttpUtil.request(new HttpUtil.HttpParam(t), InputStream.class, "image"),
+                                ImageUtil.SourceFrom.INPUT_STREAM)), false);
         File file = ImageUtil.generateFile(bufferedImage, ".jpg");
         log.info("mergeImage path:{}", file.getAbsolutePath());
 
         // 切图
-        List<BufferedImage> bufferedImages = ImageUtil.segmentImage(ImageUtil.getBufferedImage("http://haitao.nos.netease.com/f8c0286f5fb5415fadc325e9bbcbd6ca1543839629293jp8a95v010493.jpg",
-                ImageUtil.SourceFrom.URL), 250);
+        String url = "http://haitao.nos.netease.com/f8c0286f5fb5415fadc325e9bbcbd6ca1543839629293jp8a95v010493.jpg";
+        // 网易考拉温馨提示 276 左右
+        List<BufferedImage> bufferedImages = ImageUtil.segmentImage(
+                ImageUtil.getBufferedImage(url, ImageUtil.SourceFrom.URL), 250, 5);
         List<File> files = new ArrayList<>();
         for (BufferedImage image : bufferedImages) {
             files.add(ImageUtil.generateFile(image, ".jpg"));
@@ -50,9 +58,13 @@ public class ImageUtilTest {
             log.info("segmentImage path:{}", files.get(i).getAbsolutePath());
         }
         // 切图后合图
-        bufferedImage = ImageUtil.mergeImage(ImageUtil.SourceFrom.FILE, false, segmentUrls);
+        bufferedImage = ImageUtil.mergeImage(FunctionUtil.valueList(segmentUrls, (t) -> ImageUtil.getBufferedImage(t, ImageUtil.SourceFrom.FILE)), false);
         file = ImageUtil.generateFile(bufferedImage, ".jpg");
         log.info("mergeImage 切图后合图 path:{}", file.getAbsolutePath());
+
+        log.info("mergeImage 切图后合图:{},原图:{}",
+                ImageUtil.getImageFileSize(file, ImageUtil.SourceFrom.FILE),
+                ImageUtil.getImageFileSize(url, ImageUtil.SourceFrom.URL));
 
         // 黑白
         bufferedImage = ImageUtil.gray(ImageUtil.getBufferedImage(file.getAbsolutePath(), ImageUtil.SourceFrom.FILE));
