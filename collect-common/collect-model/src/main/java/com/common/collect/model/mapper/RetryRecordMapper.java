@@ -1,4 +1,4 @@
-package com.common.collect.model.retry.mapper;
+package com.common.collect.model.mapper;
 
 import com.common.collect.model.retry.IMetaConfig;
 import com.common.collect.model.retry.RetryRecord;

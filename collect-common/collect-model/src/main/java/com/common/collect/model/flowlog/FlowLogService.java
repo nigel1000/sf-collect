@@ -1,7 +1,7 @@
 package com.common.collect.model.flowlog;
 
 import com.common.collect.api.excps.UnifiedException;
-import com.common.collect.model.flowlog.mapper.FlowLogMapper;
+import com.common.collect.model.mapper.FlowLogMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

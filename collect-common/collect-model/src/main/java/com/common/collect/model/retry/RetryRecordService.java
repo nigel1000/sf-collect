@@ -1,7 +1,7 @@
 package com.common.collect.model.retry;
 
 import com.common.collect.api.excps.UnifiedException;
-import com.common.collect.model.retry.mapper.RetryRecordMapper;
+import com.common.collect.model.mapper.RetryRecordMapper;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

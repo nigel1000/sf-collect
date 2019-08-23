@@ -1,4 +1,4 @@
-package com.common.collect.model.flowlog.mapper;
+package com.common.collect.model.mapper;
 
 import com.common.collect.container.mybatis.BaseMapper;
 import com.common.collect.model.flowlog.FlowLog;

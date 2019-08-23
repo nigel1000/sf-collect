@@ -70,7 +70,7 @@
     <bean id="mapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
         <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
         <property name="basePackage"
-                  value="collect.debug.mybatis.dao,com.common.collect.model.flowlog.mapper,com.common.collect.model.retry.mapper"/>
+                  value="collect.debug.mybatis.dao,com.common.collect.model.mapper"/>
     </bean>
 
 

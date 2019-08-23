@@ -16,12 +16,10 @@
         <dependency>
             <groupId>com.common.collect</groupId>
             <artifactId>collect-api</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.common.collect</groupId>
             <artifactId>collect-util</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <!-- 日志依赖 -->
         <!-- slf4j -->

@@ -5,7 +5,7 @@ import com.common.collect.container.mybatis.MybatisContext;
 import com.common.collect.model.flowlog.FlowLog;
 import com.common.collect.model.flowlog.FlowLogService;
 import com.common.collect.model.flowlog.IMetaConfig;
-import com.common.collect.model.flowlog.mapper.FlowLogMapper;
+import com.common.collect.model.mapper.FlowLogMapper;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
