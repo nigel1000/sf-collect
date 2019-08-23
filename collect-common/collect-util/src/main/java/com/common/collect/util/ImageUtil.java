@@ -230,8 +230,8 @@ public class ImageUtil {
     public static BufferedImage gray(@NonNull BufferedImage src) {
         ColorSpace cs = ColorSpace.getInstance(ColorSpace.CS_GRAY);
         ColorConvertOp op = new ColorConvertOp(cs, null);
-        src = op.filter(src, null);
-        return src;
+        // 不会修改 src 的数据，返回新的 dest
+        return op.filter(src, null);
     }
 
 }
