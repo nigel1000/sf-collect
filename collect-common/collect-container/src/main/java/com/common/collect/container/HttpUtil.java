@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 /**
  * Created by hznijianfeng on 2019/3/6.
@@ -30,6 +31,10 @@ import java.util.concurrent.TimeUnit;
 public class HttpUtil {
 
     private final static Map<String, OkHttpClient> okHttpClientMap = new ConcurrentHashMap<>();
+
+    public static OkHttpClient addOkHttpClient(@NonNull String okHttpClientName, Supplier<OkHttpClient> supplier) {
+        return okHttpClientMap.computeIfAbsent(okHttpClientName, (key) -> supplier.get());
+    }
 
     public static OkHttpClient obtainOkHttpClient(@NonNull String okHttpClientName) {
 
