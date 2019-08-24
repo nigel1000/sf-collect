@@ -98,7 +98,7 @@ public class UnifiedException extends RuntimeException {
     }
 
 
-    public UnifiedException addContext(Map<String, Object> add) {
+    public <C> UnifiedException addContext(Map<String, C> add) {
         if (add == null) {
             return this;
         }

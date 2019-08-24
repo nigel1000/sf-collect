@@ -28,7 +28,7 @@ public class Response<T> implements Serializable {
         return this;
     }
 
-    public Response<T> addContext(Map<String, Object> add) {
+    public <C> Response<T> addContext(Map<String, C> add) {
         if (add == null) {
             return this;
         }
