@@ -23,6 +23,28 @@ import java.util.List;
 @Slf4j
 public class ImageUtil {
 
+    public static String suffix(String desc) {
+        if (EmptyUtil.isEmpty(desc)) {
+            return ".jpg";
+        }
+        if (desc.contains(".jpg")) {
+            return ".jpg";
+        }
+        if (desc.contains(".png")) {
+            return ".png";
+        }
+        if (desc.contains(".bmp")) {
+            return ".bmp";
+        }
+        if (desc.contains(".jpeg")) {
+            return ".jpeg";
+        }
+        if (desc.contains(".gif")) {
+            return ".gif";
+        }
+        return ".jpg";
+    }
+
     // 获取上传图片的宽高
     // 格式：_width_height
     public static String getImageFileSize(@NonNull Object source, @NonNull SourceFrom sourceFrom) {

@@ -35,6 +35,8 @@ public class ImageUtilTest {
                 "http://haitao.nos.netease.com/correct278052615520563592624856.jpg",
                 "http://haitao.nos.netease.com/a10186f33ad34b718ab428d1a9efdb35_750_258.jpg");
 
+        log.info("suffix:{}", ImageUtil.suffix("<p style=\"text-align:center;\"><img src=\"http://haitao.nos.netease.com/51699be535d04531bdd2e14d7fc98a901543839322364jp8a2l1710486.jpeg\" /></p>\n"));
+
         // 合图
         BufferedImage bufferedImage = ImageUtil.mergeImage(
                 FunctionUtil.valueList(urls, (t) ->
