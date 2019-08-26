@@ -1,6 +1,7 @@
 package com.common.collect.util;
 
 import com.common.collect.api.excps.UnifiedException;
+import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
@@ -12,6 +13,7 @@ import java.awt.image.ColorConvertOp;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +24,29 @@ import java.util.List;
 
 @Slf4j
 public class ImageUtil {
+
+    public enum SourceFrom {
+        FILE,
+        URL,
+        INPUT_STREAM,
+        IMAGE_INPUT_STREAM
+    }
+
+    @Data
+    public static class SegmentParam implements Serializable {
+
+        private int leftWPoint;
+        private int leftHPoint;
+        private int rightWPoint;
+        private int rightHPoint;
+
+        public SegmentParam(int leftWPoint, int leftHPoint, int rightWPoint, int rightHPoint) {
+            this.leftWPoint = leftWPoint;
+            this.leftHPoint = leftHPoint;
+            this.rightWPoint = rightWPoint;
+            this.rightHPoint = rightHPoint;
+        }
+    }
 
     public static String suffix(String desc) {
         if (EmptyUtil.isEmpty(desc)) {
@@ -48,9 +73,12 @@ public class ImageUtil {
     // 获取上传图片的宽高
     // 格式：_width_height
     public static String getImageFileSize(@NonNull Object source, @NonNull SourceFrom sourceFrom) {
+        return getImageFileSize(getBufferedImage(source, sourceFrom));
+    }
+
+    public static String getImageFileSize(@NonNull BufferedImage buff) {
         String size = "";
         try {
-            BufferedImage buff = getBufferedImage(source, sourceFrom);
             int width = buff.getWidth();
             int height = buff.getHeight();
             size += "_" + width + "_" + height;
@@ -58,13 +86,6 @@ public class ImageUtil {
             throw UnifiedException.gen("image 长宽获取失败", ex);
         }
         return size;
-    }
-
-    public enum SourceFrom {
-        FILE,
-        URL,
-        INPUT_STREAM,
-        IMAGE_INPUT_STREAM
     }
 
     // 文件地址 或者 url
@@ -109,9 +130,9 @@ public class ImageUtil {
 
     // BufferedImage 转 图片文件
     // nameSuffix=.jpg|.png
-    public static File generateFile(BufferedImage buffImg, @NonNull String nameSuffix) {
+    public static File generateFile(@NonNull BufferedImage buffImg, @NonNull String nameSuffix) {
         try {
-            File outFile = File.createTempFile(IdUtil.uuidHex(), nameSuffix);
+            File outFile = File.createTempFile(IdUtil.uuidHex() + getImageFileSize(buffImg) + "_", nameSuffix);
             if (!ImageIO.write(buffImg, nameSuffix.substring(1), outFile)) {
                 throw UnifiedException.gen("图片落文件失败");
             }
@@ -171,7 +192,7 @@ public class ImageUtil {
     // 切割图片 以白色横条为准切割图片
     // ignoreBlankHeight 高度在此之下的白色不视为切割点
     // lowestHeight 上一个切割点和下一个切割点需保持的最小的距离
-    public static List<BufferedImage> segmentImage(BufferedImage sourceImg, @NonNull int lowestHeight, @NonNull int ignoreBlankHeight) {
+    public static List<BufferedImage> segmentImage(@NonNull BufferedImage sourceImg, @NonNull int lowestHeight, @NonNull int ignoreBlankHeight) {
         // 转灰白
         BufferedImage grayImg = gray(sourceImg);
         int grayImgWidth = grayImg.getWidth();
@@ -234,17 +255,33 @@ public class ImageUtil {
             cutRowIndex.add(grayImgHeight);
         }
 
-        List<BufferedImage> bufferedImages = new ArrayList<>();
+        List<SegmentParam> segmentParams = new ArrayList<>();
         int preRow = 0;
         for (Integer rowIndex : cutRowIndex) {
-            int rowNum = rowIndex - preRow;
-            int[] destImageArray = sourceImg.getRGB(0, preRow, grayImgWidth, rowNum, null, 0, grayImgWidth);
-            BufferedImage destImage = new BufferedImage(grayImgWidth, rowNum, BufferedImage.TYPE_INT_RGB);
-            destImage.setRGB(0, 0, grayImgWidth, rowNum, destImageArray, 0, grayImgWidth);
-            bufferedImages.add(destImage);
+            segmentParams.add(new SegmentParam(0, preRow, grayImgWidth, rowIndex));
             preRow = rowIndex;
         }
 
+        return segmentImage(sourceImg, segmentParams);
+    }
+
+    public static List<BufferedImage> segmentImage(@NonNull BufferedImage sourceImg, List<SegmentParam> segmentParams) {
+        List<BufferedImage> bufferedImages = new ArrayList<>();
+        if (EmptyUtil.isEmpty(segmentParams)) {
+            bufferedImages.add(sourceImg);
+            return bufferedImages;
+        }
+        for (SegmentParam segmentParam : segmentParams) {
+            int width = segmentParam.getRightWPoint() - segmentParam.getLeftWPoint();
+            int height = segmentParam.getRightHPoint() - segmentParam.getLeftHPoint();
+            if (width <= 0 || height <= 0) {
+                throw UnifiedException.gen("切图时宽度和高度不合法");
+            }
+            BufferedImage destImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            int[] destImageArray = sourceImg.getRGB(segmentParam.getLeftWPoint(), segmentParam.getLeftHPoint(), width, height, null, 0, width);
+            destImage.setRGB(0, 0, width, height, destImageArray, 0, width);
+            bufferedImages.add(destImage);
+        }
         return bufferedImages;
     }
 
