@@ -1,11 +1,14 @@
 package com.common.collect.container;
 
+import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.trace.TraceIdUtil;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
@@ -93,15 +96,35 @@ public class ThreadPoolUtil {
         exec("default", command);
     }
 
-    public static <T> Future<T> submit(Callable<T> command) {
+    public static <T> Future<T> submit(@NonNull Callable<T> command) {
         return submit("default", command);
     }
 
-    public static void exec(String poolName, Runnable command) {
+    public static <T> List<T> submit(@NonNull List<Callable<T>> commands) {
+        return submit("default", commands);
+    }
+
+    public static <T> List<T> submit(@NonNull String poolName, @NonNull List<Callable<T>> commands) {
+        List<Future<T>> futures = new ArrayList<>();
+        for (Callable<T> command : commands) {
+            futures.add(submit(poolName, command));
+        }
+        List<T> t = new ArrayList<>();
+        for (Future<T> future : futures) {
+            try {
+                t.add(future.get(5, TimeUnit.SECONDS));
+            } catch (Exception ex) {
+                throw UnifiedException.gen("callable 操作失败", ex);
+            }
+        }
+        return t;
+    }
+
+    public static void exec(@NonNull String poolName, @NonNull Runnable command) {
         obtainExecutorService(poolName).execute(TraceIdUtil.wrap(command));
     }
 
-    public static <T> Future<T> submit(String poolName, Callable<T> command) {
+    public static <T> Future<T> submit(@NonNull String poolName, @NonNull Callable<T> command) {
         return obtainExecutorService(poolName).submit(TraceIdUtil.wrap(command));
     }
 

@@ -161,29 +161,17 @@ public class HttpUtil {
         // 返回
         if (String.class.equals(ret)) {
             try {
-                try {
-                    return (T) body.string();
-                } catch (IOException e) {
-                    throw UnifiedException.gen(StringUtil.format("{} 返回异常", url), e);
-                }
-            } finally {
-                response.close();
+                return (T) body.string();
+            } catch (IOException e) {
+                throw UnifiedException.gen(StringUtil.format("{} 返回异常", url), e);
             }
         } else if (InputStream.class.equals(ret)) {
-            try {
-                return (T) body.byteStream();
-            } finally {
-                response.close();
-            }
+            return (T) body.byteStream();
         } else if (byte[].class.equals(ret)) {
             try {
-                try {
-                    return (T) body.bytes();
-                } catch (IOException e) {
-                    throw UnifiedException.gen(StringUtil.format("{} 返回异常", url), e);
-                }
-            } finally {
-                response.close();
+                return (T) body.bytes();
+            } catch (IOException e) {
+                throw UnifiedException.gen(StringUtil.format("{} 返回异常", url), e);
             }
         } else if (ResponseBody.class.equals(ret)) {
             return (T) body;

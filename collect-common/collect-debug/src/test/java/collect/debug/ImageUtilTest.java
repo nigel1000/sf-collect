@@ -1,6 +1,7 @@
 package collect.debug;
 
 import com.common.collect.container.HttpUtil;
+import com.common.collect.container.ThreadPoolUtil;
 import com.common.collect.util.FunctionUtil;
 import com.common.collect.util.ImageUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -35,13 +36,37 @@ public class ImageUtilTest {
                 "http://haitao.nos.netease.com/correct278052615520563592624856.jpg",
                 "http://haitao.nos.netease.com/a10186f33ad34b718ab428d1a9efdb35_750_258.jpg");
 
-        log.info("suffix:{}", ImageUtil.suffix("<p style=\"text-align:center;\"><img src=\"http://haitao.nos.netease.com/51699be535d04531bdd2e14d7fc98a901543839322364jp8a2l1710486.jpeg\" /></p>\n"));
+        log.info("suffix:{}", ImageUtil.suffix("<p style=\"text-align:center;\">" +
+                "<img src=\"http://haitao.nos.netease.com/51699be535d04531bdd2e14d7fc98a901543839322364jp8a2l1710486.jpeg\" />" +
+                "</p>\n"));
+
+        long start;
+
+        List<InputStream> inputStreams;
+
+        // 第一次访问建立连接 存入连接池缓存
+        // Logger.getLogger(OkHttpClient.class.getName()).setLevel(java.util.logging.Level.FINE);
+        // https://blog.csdn.net/Gaugamela/article/details/78482564
+        HttpUtil.request(new HttpUtil.HttpParam(
+                        "http://haitao.nos.netease.com/51699be535d04531bdd2e14d7fc98a901543839322364jp8a2l1710486.jpeg"),
+                InputStream.class, "image");
+
+        start = System.currentTimeMillis();
+        inputStreams = FunctionUtil.valueList(
+                urls, (t) -> HttpUtil.request(new HttpUtil.HttpParam(t), InputStream.class, "image"));
+        log.info("sync:{}", System.currentTimeMillis() - start);
+
+        start = System.currentTimeMillis();
+        inputStreams = ThreadPoolUtil.submit(FunctionUtil.valueList(urls, (t) ->
+                () -> HttpUtil.request(new HttpUtil.HttpParam(t), InputStream.class, "image")
+        ));
+        log.info("async:{}", System.currentTimeMillis() - start);
 
         // 合图
         BufferedImage bufferedImage = ImageUtil.mergeImage(
-                FunctionUtil.valueList(urls, (t) ->
-                        ImageUtil.getBufferedImage(HttpUtil.request(new HttpUtil.HttpParam(t), InputStream.class, "image"),
-                                ImageUtil.SourceFrom.INPUT_STREAM)), false);
+                FunctionUtil.valueList(inputStreams, (t) ->
+                        ImageUtil.getBufferedImage(t, ImageUtil.SourceFrom.INPUT_STREAM)), false);
+
         File file = ImageUtil.generateFile(bufferedImage, ".jpg");
         log.info("mergeImage path:{}", file.getAbsolutePath());
 
@@ -51,11 +76,14 @@ public class ImageUtilTest {
         List<BufferedImage> bufferedImages = ImageUtil.segmentImage(
                 ImageUtil.getBufferedImage(url, ImageUtil.SourceFrom.URL), 250, 5);
         List<File> files = new ArrayList<>();
-        for (BufferedImage image : bufferedImages) {
+        for (
+                BufferedImage image : bufferedImages) {
             files.add(ImageUtil.generateFile(image, ".jpg"));
         }
+
         List<String> segmentUrls = new ArrayList<>();
-        for (int i = 0; i < files.size(); i++) {
+        for (
+                int i = 0; i < files.size(); i++) {
             segmentUrls.add(files.get(i).getAbsolutePath());
             log.info("segmentImage path:{}", files.get(i).getAbsolutePath());
         }
@@ -72,6 +100,8 @@ public class ImageUtilTest {
         bufferedImage = ImageUtil.gray(ImageUtil.getBufferedImage(file.getAbsolutePath(), ImageUtil.SourceFrom.FILE));
         file = ImageUtil.generateFile(bufferedImage, ".jpg");
         log.info("gray path:{}", file.getAbsolutePath());
+
+        System.exit(0);
 
     }
 
