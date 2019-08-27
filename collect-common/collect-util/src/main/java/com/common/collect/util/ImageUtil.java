@@ -194,20 +194,18 @@ public class ImageUtil {
     // lowestHeight 上一个切割点和下一个切割点需保持的最小的距离
     public static List<BufferedImage> segmentImage(@NonNull BufferedImage sourceImg, @NonNull int lowestHeight, @NonNull int ignoreBlankHeight) {
         // 转灰白
-        BufferedImage grayImg = gray(sourceImg);
-        int grayImgWidth = grayImg.getWidth();
-        int grayImgHeight = grayImg.getHeight();
+        int imgWidth = sourceImg.getWidth();
+        int imgHeight = sourceImg.getHeight();
         // 从图片中读取RGB
-        int[] grayImageArray = grayImg.getRGB(0, 0, grayImgWidth, grayImgHeight, null, 0, grayImgWidth);
-
+        int[] imgArray = sourceImg.getRGB(0, 0, imgWidth, imgHeight, null, 0, imgWidth);
         // 获取 全部白色行
         List<Integer> allBlankRows = new ArrayList<>();
         int height = 0;
-        for (int i = 0; i < grayImageArray.length; i = height * grayImgWidth) {
+        for (int i = 0; i < imgArray.length; i = height * imgWidth) {
             boolean isBlank = true;
-            for (int w = 0; w < grayImgWidth; w++) {
+            for (int w = 0; w < imgWidth; w++) {
                 // -1 是白色
-                if (grayImageArray[i + w] != -1) {
+                if (imgArray[i + w] != -1) {
                     isBlank = false;
                     break;
                 }
@@ -217,7 +215,7 @@ public class ImageUtil {
             }
             height++;
         }
-        // 去除相隔小于 lowestHeight 的空白行
+        // 合并连续的切割点
         List<List<Integer>> series = new ArrayList<>();
         List<Integer> serial = new ArrayList<>();
         for (int i = 0; i < allBlankRows.size(); i++) {
@@ -238,6 +236,8 @@ public class ImageUtil {
         }
         series.add(new ArrayList<>(serial));
 
+        // 去除连续的切割点高度小于 ignoreBlankHeight 的空白行
+        // 去除两个切割点相隔小于 lowestHeight 的切割点
         List<Integer> cutRowIndex = new ArrayList<>();
         for (List<Integer> rowIndex : series) {
             if (EmptyUtil.isEmpty(rowIndex) || rowIndex.size() < ignoreBlankHeight) {
@@ -249,15 +249,16 @@ public class ImageUtil {
                 cutRowIndex.add(currCutRow);
             }
         }
+
         // 加入最后一行
-        if (!cutRowIndex.contains(grayImgHeight)) {
-            cutRowIndex.add(grayImgHeight);
+        if (!cutRowIndex.contains(imgHeight)) {
+            cutRowIndex.add(imgHeight);
         }
 
         List<SegmentParam> segmentParams = new ArrayList<>();
         int preRow = 0;
         for (Integer rowIndex : cutRowIndex) {
-            segmentParams.add(new SegmentParam(0, preRow, grayImgWidth, rowIndex));
+            segmentParams.add(new SegmentParam(0, preRow, imgWidth, rowIndex));
             preRow = rowIndex;
         }
 
