@@ -206,9 +206,8 @@ public class ImageUtil {
         for (int i = 0; i < grayImageArray.length; i = height * grayImgWidth) {
             boolean isBlank = true;
             for (int w = 0; w < grayImgWidth; w++) {
-                // if (w != 0 && grayImageArray[i + w] != grayImageArray[i + w - 1]) {
                 // -1 是白色
-                if (w != 0 && grayImageArray[i + w] != -1 && grayImageArray[i + w - 1] != -1) {
+                if (grayImageArray[i + w] != -1) {
                     isBlank = false;
                     break;
                 }
