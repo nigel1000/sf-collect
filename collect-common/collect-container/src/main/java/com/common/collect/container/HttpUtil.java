@@ -38,13 +38,14 @@ public class HttpUtil {
 
     public static OkHttpClient obtainOkHttpClient(@NonNull String okHttpClientName) {
 
-        return okHttpClientMap.computeIfAbsent(okHttpClientName, (key) -> {
-            OkHttpClient.Builder httpClientBuilder = new OkHttpClient.Builder();
-            OkHttpClient httpClient =
-                    httpClientBuilder.connectionPool(new ConnectionPool()).connectTimeout(3, TimeUnit.SECONDS)
-                            .writeTimeout(3, TimeUnit.SECONDS).readTimeout(10, TimeUnit.SECONDS).build();
-            return httpClient;
-        });
+        return okHttpClientMap.computeIfAbsent(okHttpClientName, (key) ->
+                new OkHttpClient.Builder()
+                        .connectionPool(new ConnectionPool())
+                        .connectTimeout(3, TimeUnit.SECONDS) //设置连接超时
+                        .writeTimeout(3, TimeUnit.SECONDS) //设置写超时
+                        .readTimeout(10, TimeUnit.SECONDS) //设置读超时
+                        .build()
+        );
     }
 
     @Data
@@ -160,17 +161,29 @@ public class HttpUtil {
         // 返回
         if (String.class.equals(ret)) {
             try {
-                return (T) body.string();
-            } catch (IOException e) {
-                throw UnifiedException.gen(StringUtil.format("{} 返回异常", url), e);
+                try {
+                    return (T) body.string();
+                } catch (IOException e) {
+                    throw UnifiedException.gen(StringUtil.format("{} 返回异常", url), e);
+                }
+            } finally {
+                response.close();
             }
         } else if (InputStream.class.equals(ret)) {
-            return (T) body.byteStream();
+            try {
+                return (T) body.byteStream();
+            } finally {
+                response.close();
+            }
         } else if (byte[].class.equals(ret)) {
             try {
-                return (T) body.bytes();
-            } catch (IOException e) {
-                throw UnifiedException.gen(StringUtil.format("{} 返回异常", url), e);
+                try {
+                    return (T) body.bytes();
+                } catch (IOException e) {
+                    throw UnifiedException.gen(StringUtil.format("{} 返回异常", url), e);
+                }
+            } finally {
+                response.close();
             }
         } else if (ResponseBody.class.equals(ret)) {
             return (T) body;
