@@ -201,7 +201,10 @@ public abstract class AbstractElasticMapper<T> implements IElasticMapper<T>, IEl
             searchRequest.routing(routing);
         }
 
-        log.debug("es 查询 json :\r\n{}\r\n", sourceBuilder.toString());
+        if (log.isDebugEnabled()) {
+            log.debug("es 查询 json :\r\n{}\r\n", sourceBuilder.toString());
+        }
+
         try {
             SearchResponse searchResponse = getElasticClient().search(searchRequest, RequestOptions.DEFAULT);
             return PageResult.gen((int) searchResponse.getHits().getTotalHits(), resultMapping.apply(searchResponse), pageParam);
