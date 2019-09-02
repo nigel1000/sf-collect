@@ -23,18 +23,30 @@ public class ImageUtilTest {
     public static void main(String[] args) {
 
         List<String> urls = Arrays.asList(
-                "http://haitao.nos.netease.com/1bc22701e4d941e2b52b796d0e6f6e5b15525409026272780526-1.jpg",
-                "http://haitao.nos.netease.com/1ee1872501474cee9b72ecb86f6ffa92_750_500.jpg",
-                "http://haitao.nos.netease.com/correct278052615520563592624856.jpg",
-                "http://haitao.nos.netease.com/a10186f33ad34b718ab428d1a9efdb35_750_258.jpg",
-                "http://haitao.nos.netease.com/1bc22701e4d941e2b52b796d0e6f6e5b15525409026272780526-1.jpg",
-                "http://haitao.nos.netease.com/1ee1872501474cee9b72ecb86f6ffa92_750_500.jpg",
-                "http://haitao.nos.netease.com/correct278052615520563592624856.jpg",
-                "http://haitao.nos.netease.com/a10186f33ad34b718ab428d1a9efdb35_750_258.jpg",
-                "http://haitao.nos.netease.com/1bc22701e4d941e2b52b796d0e6f6e5b15525409026272780526-1.jpg",
-                "http://haitao.nos.netease.com/1ee1872501474cee9b72ecb86f6ffa92_750_500.jpg",
-                "http://haitao.nos.netease.com/correct278052615520563592624856.jpg",
-                "http://haitao.nos.netease.com/a10186f33ad34b718ab428d1a9efdb35_750_258.jpg");
+                "http://haitao.nos.netease.com/3067d54f1aa84e4abdd6b3a37ae6987d1557048755201jvaqmkn510221.jpg?imageView&quality=98&crop=0_0_750_500",
+                "http://haitao.nos.netease.com/3067d54f1aa84e4abdd6b3a37ae6987d1557048755201jvaqmkn510221.jpg?imageView&quality=98&crop=0_500_750_500",
+                "http://haitao.nos.netease.com/3067d54f1aa84e4abdd6b3a37ae6987d1557048755201jvaqmkn510221.jpg?imageView&quality=98&crop=0_1000_750_500",
+                "http://haitao.nos.netease.com/3067d54f1aa84e4abdd6b3a37ae6987d1557048755201jvaqmkn510221.jpg?imageView&quality=98&crop=0_1500_750_500",
+                "http://haitao.nos.netease.com/3067d54f1aa84e4abdd6b3a37ae6987d1557048755201jvaqmkn510221.jpg?imageView&quality=98&crop=0_2000_750_500",
+                "http://haitao.nos.netease.com/3067d54f1aa84e4abdd6b3a37ae6987d1557048755201jvaqmkn510221.jpg?imageView&quality=98&crop=0_2500_750_500",
+                "http://haitao.nos.netease.com/3067d54f1aa84e4abdd6b3a37ae6987d1557048755201jvaqmkn510221.jpg?imageView&quality=98&crop=0_3000_750_500",
+                "http://haitao.nos.netease.com/3067d54f1aa84e4abdd6b3a37ae6987d1557048755201jvaqmkn510221.jpg?imageView&quality=98&crop=0_3500_750_500",
+                "http://haitao.nos.netease.com/3067d54f1aa84e4abdd6b3a37ae6987d1557048755201jvaqmkn510221.jpg?imageView&quality=98&crop=0_4000_750_500",
+                "http://haitao.nos.netease.com/3067d54f1aa84e4abdd6b3a37ae6987d1557048755201jvaqmkn510221.jpg?imageView&quality=98&crop=0_4500_750_500",
+                "http://haitao.nos.netease.com/3067d54f1aa84e4abdd6b3a37ae6987d1557048755201jvaqmkn510221.jpg?imageView&quality=98&crop=0_5000_750_500",
+                "http://haitao.nos.netease.com/3067d54f1aa84e4abdd6b3a37ae6987d1557048755201jvaqmkn510221.jpg?imageView&quality=98&crop=0_5500_750_500",
+                "http://haitao.nos.netease.com/3067d54f1aa84e4abdd6b3a37ae6987d1557048755201jvaqmkn510221.jpg?imageView&quality=98&crop=0_6000_750_500",
+                "http://haitao.nos.netease.com/3067d54f1aa84e4abdd6b3a37ae6987d1557048755201jvaqmkn510221.jpg?imageView&quality=98&crop=0_6500_750_500",
+                "http://haitao.nos.netease.com/3067d54f1aa84e4abdd6b3a37ae6987d1557048755201jvaqmkn510221.jpg?imageView&quality=98&crop=0_7000_750_500",
+                "http://haitao.nos.netease.com/3067d54f1aa84e4abdd6b3a37ae6987d1557048755201jvaqmkn510221.jpg?imageView&quality=98&crop=0_7500_750_500",
+                "http://haitao.nos.netease.com/3067d54f1aa84e4abdd6b3a37ae6987d1557048755201jvaqmkn510221.jpg?imageView&quality=98&crop=0_8000_750_500",
+                "http://haitao.nos.netease.com/3067d54f1aa84e4abdd6b3a37ae6987d1557048755201jvaqmkn510221.jpg?imageView&quality=98&crop=0_8500_750_500",
+                "http://haitao.nos.netease.com/3067d54f1aa84e4abdd6b3a37ae6987d1557048755201jvaqmkn510221.jpg?imageView&quality=98&crop=0_9000_750_500",
+                "http://haitao.nos.netease.com/3067d54f1aa84e4abdd6b3a37ae6987d1557048755201jvaqmkn510221.jpg?imageView&quality=98&crop=0_9500_750_500",
+                "http://haitao.nos.netease.com/3067d54f1aa84e4abdd6b3a37ae6987d1557048755201jvaqmkn510221.jpg?imageView&quality=98&crop=0_10000_750_500",
+                "http://haitao.nos.netease.com/3067d54f1aa84e4abdd6b3a37ae6987d1557048755201jvaqmkn510221.jpg?imageView&quality=98&crop=0_10500_750_500",
+                "http://haitao.nos.netease.com/3067d54f1aa84e4abdd6b3a37ae6987d1557048755201jvaqmkn510221.jpg?imageView&quality=98&crop=0_11000_750_500",
+                "http://haitao.nos.netease.com/3067d54f1aa84e4abdd6b3a37ae6987d1557048755201jvaqmkn510221.jpg?imageView&quality=98&crop=0_11500_750_466");
 
         log.info("suffix:{}", ImageUtil.suffix("<p style=\"text-align:center;\">" +
                 "<img src=\"http://haitao.nos.netease.com/51699be535d04531bdd2e14d7fc98a901543839322364jp8a2l1710486.jpeg\" />" +
@@ -71,10 +83,10 @@ public class ImageUtilTest {
         log.info("mergeImage path:{}", file.getAbsolutePath());
 
         // 切图
-        String url = "http://haitao.nos.netease.com/f8c0286f5fb5415fadc325e9bbcbd6ca1543839629293jp8a95v010493.jpg";
+        String url = file.getAbsolutePath();
         // 网易考拉温馨提示 276 左右
         List<BufferedImage> bufferedImages = ImageUtil.segmentImage(
-                ImageUtil.getBufferedImage(url, ImageUtil.SourceFrom.URL), 250, 5);
+                ImageUtil.getBufferedImage(url, ImageUtil.SourceFrom.FILE), 250, 5);
         List<File> files = new ArrayList<>();
         for (
                 BufferedImage image : bufferedImages) {
@@ -94,7 +106,7 @@ public class ImageUtilTest {
 
         log.info("mergeImage 切图后合图:{},原图:{}",
                 ImageUtil.getImageFileSize(file, ImageUtil.SourceFrom.FILE),
-                ImageUtil.getImageFileSize(url, ImageUtil.SourceFrom.URL));
+                ImageUtil.getImageFileSize(url, ImageUtil.SourceFrom.FILE));
 
         // 黑白
         bufferedImage = ImageUtil.gray(ImageUtil.getBufferedImage(file.getAbsolutePath(), ImageUtil.SourceFrom.FILE));

@@ -11,7 +11,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.util.function.Supplier;
 
 /**
- * Created by hznijianfeng on 2018/8/15. 事务细粒度控制，控制到某一业务段
+ * Created by hznijianfeng on 2018/8/15.
+ * <p>
+ * 事务细粒度控制，控制到某一业务段
  */
 
 @Service
@@ -35,12 +37,15 @@ public class TransactionHelper {
         afterCommit(taskName, biz, false, false);
     }
 
-    public void afterCommit(@NonNull String taskName, Runnable biz, boolean isThrowWhenNoTransaction, boolean isUseDefaultPool) {
+    public void afterCommit(@NonNull String taskName, Runnable biz, boolean isThrowWhenNoTransaction,
+                            boolean isUseDefaultPool) {
         if (!TransactionSynchronizationManager.isSynchronizationActive()) {
             if (isThrowWhenNoTransaction) {
                 throw UnifiedException.gen("当前没有开启事务");
             } else {
-                log.info("事务未开启，任务执行:{}", taskName);
+                if (log.isDebugEnabled()) {
+                    log.debug("事务未开启，任务执行:{}", taskName);
+                }
                 if (isUseDefaultPool) {
                     ThreadPoolUtil.exec(biz);
                 } else {
@@ -55,7 +60,9 @@ public class TransactionHelper {
         TransactionSynchronizationAdapter adapter = new TransactionSynchronizationAdapter() {
             @Override
             public void afterCommit() {
-                log.info("事务提交，任务执行:{},transactionName:{}", taskName, transactionName);
+                if (log.isDebugEnabled()) {
+                    log.debug("事务提交，任务执行:{},transactionName:{}", taskName, transactionName);
+                }
                 // 异步任务自己负责异常的处理
                 if (isUseDefaultPool) {
                     ThreadPoolUtil.exec(biz);
@@ -67,11 +74,15 @@ public class TransactionHelper {
             @Override
             public void afterCompletion(int status) {
                 if (status == STATUS_ROLLED_BACK) {
-                    log.info("事务回滚,任务未执行:{},transactionName:{}", taskName, transactionName);
+                    if (log.isDebugEnabled()) {
+                        log.debug("事务回滚,任务未执行:{},transactionName:{}", taskName, transactionName);
+                    }
                 }
             }
         };
-        log.info("事务提交,任务注册:{},transactionName:{}", taskName, transactionName);
+        if (log.isDebugEnabled()) {
+            log.debug("事务提交,任务注册:{},transactionName:{}", taskName, transactionName);
+        }
         TransactionSynchronizationManager.registerSynchronization(adapter);
     }
 
