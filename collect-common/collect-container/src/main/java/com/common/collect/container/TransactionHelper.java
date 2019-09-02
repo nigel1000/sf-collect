@@ -39,11 +39,12 @@ public class TransactionHelper {
 
     public void afterCommit(@NonNull String taskName, Runnable biz, boolean isThrowWhenNoTransaction,
                             boolean isUseDefaultPool) {
+        boolean isDebug = log.isDebugEnabled();
         if (!TransactionSynchronizationManager.isSynchronizationActive()) {
             if (isThrowWhenNoTransaction) {
                 throw UnifiedException.gen("当前没有开启事务");
             } else {
-                if (log.isDebugEnabled()) {
+                if (isDebug) {
                     log.debug("事务未开启，任务执行:{}", taskName);
                 }
                 if (isUseDefaultPool) {
@@ -60,7 +61,7 @@ public class TransactionHelper {
         TransactionSynchronizationAdapter adapter = new TransactionSynchronizationAdapter() {
             @Override
             public void afterCommit() {
-                if (log.isDebugEnabled()) {
+                if (isDebug) {
                     log.debug("事务提交，任务执行:{},transactionName:{}", taskName, transactionName);
                 }
                 // 异步任务自己负责异常的处理
@@ -74,13 +75,13 @@ public class TransactionHelper {
             @Override
             public void afterCompletion(int status) {
                 if (status == STATUS_ROLLED_BACK) {
-                    if (log.isDebugEnabled()) {
+                    if (isDebug) {
                         log.debug("事务回滚,任务未执行:{},transactionName:{}", taskName, transactionName);
                     }
                 }
             }
         };
-        if (log.isDebugEnabled()) {
+        if (isDebug) {
             log.debug("事务提交,任务注册:{},transactionName:{}", taskName, transactionName);
         }
         TransactionSynchronizationManager.registerSynchronization(adapter);
