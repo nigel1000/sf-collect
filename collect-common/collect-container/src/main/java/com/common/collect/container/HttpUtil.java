@@ -15,6 +15,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -160,21 +161,43 @@ public class HttpUtil {
 
         // 返回
         if (String.class.equals(ret)) {
+            String strRet;
             try {
-                return (T) body.string();
+                strRet = body.string();
             } catch (IOException e) {
                 throw UnifiedException.gen(StringUtil.format("{} 返回异常", url), e);
             }
+            response.close();
+            return (T) strRet;
         } else if (InputStream.class.equals(ret)) {
-            return (T) body.byteStream();
-        } else if (byte[].class.equals(ret)) {
+            byte[] byteRet;
             try {
-                return (T) body.bytes();
+                byteRet = body.bytes();
             } catch (IOException e) {
                 throw UnifiedException.gen(StringUtil.format("{} 返回异常", url), e);
             }
+            InputStream inputStream = new ByteArrayInputStream(byteRet);
+            response.close();
+            return (T) inputStream;
+        } else if (byte[].class.equals(ret)) {
+            byte[] byteRet;
+            try {
+                byteRet = body.bytes();
+            } catch (IOException e) {
+                throw UnifiedException.gen(StringUtil.format("{} 返回异常", url), e);
+            }
+            response.close();
+            return (T) byteRet;
         } else if (ResponseBody.class.equals(ret)) {
-            return (T) body;
+            byte[] byteRet;
+            try {
+                byteRet = body.bytes();
+            } catch (IOException e) {
+                throw UnifiedException.gen(StringUtil.format("{} 返回异常", url), e);
+            }
+            ResponseBody bodyRet = ResponseBody.create(body.contentType(), byteRet);
+            response.close();
+            return (T) bodyRet;
         } else if (okhttp3.Response.class.equals(ret)) {
             return (T) response;
         } else {
