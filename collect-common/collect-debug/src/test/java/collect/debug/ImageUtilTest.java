@@ -36,8 +36,8 @@ public class ImageUtilTest {
     public static void testSegment() {
         // 网易考拉温馨提示 276 左右
         String url = "http://haitao.nos.netease.com/3067d54f1aa84e4abdd6b3a37ae6987d1557048755201jvaqmkn510221.jpg";
-        List<BufferedImage> bufferedImages = ImageUtil.segmentImage(
-                ImageUtil.getBufferedImage(url, ImageUtil.SourceFrom.URL), 250, 5);
+        BufferedImage source = ImageUtil.getBufferedImage(url, ImageUtil.SourceFrom.URL);
+        List<BufferedImage> bufferedImages = ImageUtil.segmentImage(source, 250, 5);
         List<File> files = new ArrayList<>();
         int height = 0;
         for (BufferedImage image : bufferedImages) {
@@ -47,7 +47,7 @@ public class ImageUtilTest {
         for (int i = 0; i < files.size(); i++) {
             log.info("segmentImage path:{}", files.get(i).getAbsolutePath());
         }
-        log.info("origin height:{}, segment height total:{}", ImageUtil.getBufferedImage(url, ImageUtil.SourceFrom.URL).getHeight(), height);
+        log.info("origin height:{}, segment height total:{}", source.getHeight(), height);
 
     }
 
