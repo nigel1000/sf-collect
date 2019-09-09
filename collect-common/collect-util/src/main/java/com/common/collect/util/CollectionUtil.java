@@ -1,6 +1,10 @@
 package com.common.collect.util;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Created by hznijianfeng on 2018/9/3.

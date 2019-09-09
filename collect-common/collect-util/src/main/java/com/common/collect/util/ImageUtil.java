@@ -144,6 +144,7 @@ public class ImageUtil {
 
     // 合并多张图片 isHorizontal 是否水平合并
     public static BufferedImage mergeImage(List<BufferedImage> sources, boolean isHorizontal) {
+        sources = CollectionUtil.removeNull(sources);
         if (EmptyUtil.isEmpty(sources)) {
             throw UnifiedException.gen(StringUtil.format("没有合图的图片"));
         }
