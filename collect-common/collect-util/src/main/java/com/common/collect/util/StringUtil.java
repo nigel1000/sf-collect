@@ -1,5 +1,10 @@
 package com.common.collect.util;
 
+import org.slf4j.helpers.FormattingTuple;
+import org.slf4j.helpers.MessageFormatter;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,15 +33,27 @@ public class StringUtil {
         return oldString.replaceAll(escapeRegex(regex), escapeRegex(newString));
     }
 
-    public static String format(String str, Object... args) {
-        if (EmptyUtil.isEmpty(str) || args == null || args.length == 0) {
-            return str;
+    public static String format(String pattern, Object... args) {
+        if (EmptyUtil.isEmpty(pattern) || args == null || args.length == 0) {
+            return pattern;
         }
-        String ret = str;
-        for (Object arg : args) {
-            ret = ret.replaceFirst("\\{}", escapeRegex(String.valueOf(arg)));
+        try {
+            FormattingTuple formattingTuple = MessageFormatter.arrayFormat(pattern, args);
+            String ret = formattingTuple.getMessage();
+            if (formattingTuple.getThrowable() != null) {
+                ret = ret + System.getProperty("line.separator");
+                StringWriter stringWriter = new StringWriter();
+                formattingTuple.getThrowable().printStackTrace(new PrintWriter(stringWriter));
+                ret = ret + stringWriter.toString();
+            }
+            return ret;
+        } catch (Exception ex) {
+            String ret = pattern;
+            for (Object arg : args) {
+                ret = ret.replaceFirst("\\{}", escapeRegex(String.valueOf(arg)));
+            }
+            return ret;
         }
-        return ret;
     }
 
     // 转义正则特殊字符

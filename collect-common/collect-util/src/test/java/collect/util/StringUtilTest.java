@@ -13,6 +13,9 @@ public class StringUtilTest {
     public static void main(String[] args) {
 
         log.info("{}", StringUtil.format("{}---{}---{}", "$^", "aa$bb", "!@#$%^&*()_"));
+        log.info("{}", StringUtil.format("{}---{}---{}", "$^", "aa$bb", "!@#$%^&*()_", new RuntimeException("测试")));
+
+
         log.info("{}", StringUtil.split2CharList("!@#$%^&*()_"));
         log.info("{}", StringUtil.replaceAll("{", "{}", "!@#$%^&*()_"));
         log.info("{}", StringUtil.escapeRegex("!@#$%^&*()_"));
