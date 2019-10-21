@@ -69,7 +69,7 @@ explain select * from user where id>3;
 
 ```mysql
 # id是主键，count 查询需要通过扫描索引上的全部数据来计数。
-explain count (*) from user;
+explain select count (*) from user;
 ```
 
 ### all
