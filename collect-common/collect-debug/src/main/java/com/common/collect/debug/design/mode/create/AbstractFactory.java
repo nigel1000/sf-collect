@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * Created by nijianfeng on 2019/10/28.
+ * 向客户端提供一个接口，创建一个产品中的产品结构对象。
  *
  * 产品：window mac linux
  * 产品结构：ram cpu

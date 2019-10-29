@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Created by nijianfeng on 2019/10/25.、
  *
+ * 由一个工厂对象决定创建出哪一个产品实例
  * 具体工厂 ShapeCreator
  * 产品抽象 Shape
  */

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Created by nijianfeng on 2019/10/28.
  *
+ * 定义一个创建产品对象的工厂接口，将实际创建工作推迟到子类中
  * 工厂抽象 ConnectionCreator
  * 产品抽象 Connection
  */
