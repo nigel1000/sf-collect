@@ -40,7 +40,7 @@ public class Bridge {
 // 抽象化角色
 abstract class Image {
 
-    protected ImagePlatform imagePlatform;
+    ImagePlatform imagePlatform;
 
     Image(ImagePlatform imagePlatform) {
         this.imagePlatform = imagePlatform;
