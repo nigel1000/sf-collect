@@ -86,7 +86,7 @@ class ForwardItr<T> implements Itr<T> {
     private int index;
     private ListCollect<T> collect;
 
-    public ForwardItr(ListCollect<T> collect) {
+    ForwardItr(ListCollect<T> collect) {
         this.collect = collect;
         index = 0;
     }
@@ -112,7 +112,7 @@ class BackItr<T> implements Itr<T> {
     private int index;
     private ListCollect<T> collect;
 
-    public BackItr(ListCollect<T> collect) {
+    BackItr(ListCollect<T> collect) {
         this.collect = collect;
         index = collect.size();
     }
