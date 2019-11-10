@@ -14,6 +14,7 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.FormulaError;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -276,7 +277,8 @@ public class PoiClient {
         } else if (cell.getCellTypeEnum() == CellType.BOOLEAN) {
             ret = String.valueOf(cell.getBooleanCellValue());
         } else if (cell.getCellTypeEnum() == CellType.ERROR) {
-            ret = String.valueOf(cell.getErrorCellValue());
+            FormulaError formulaError = FormulaError.forInt(cell.getErrorCellValue());
+            ret = String.valueOf(formulaError.getString());
         } else if (cell.getCellTypeEnum() == CellType.FORMULA) {
             ret = cell.getCellFormula();
         } else {
