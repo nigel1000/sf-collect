@@ -30,19 +30,15 @@ public class LogConstant {
             if (clazz.isArray() || obj instanceof Collection || obj instanceof Map) {
                 return JsonUtil.bean2json(obj);
             }
-            // 支持重写toString()
-            Method method = null;
             try {
-                method = clazz.getMethod("toString");
+                // 支持重写toString()
+                Method method = clazz.getMethod("toString");
+                Class<?> declaringClass = method.getDeclaringClass();
+                if (Object.class != declaringClass) {
+                    // 重写了toString()
+                    return String.valueOf(obj);
+                }
             } catch (NoSuchMethodException ignored) {
-            }
-            if (method == null) {
-                return "null";
-            }
-            Class<?> declaringClass = method.getDeclaringClass();
-            if (Object.class != declaringClass) {
-                // 重写了toString()
-                return String.valueOf(obj);
             }
             return JsonUtil.bean2json(obj);
         } catch (Exception e) {
