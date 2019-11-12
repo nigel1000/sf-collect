@@ -22,4 +22,17 @@ ssh -p1046 hznijianfeng@10.194.69.249
 # xshell
 ssh hznijianfeng@10.194.69.249 1046 
 
+# 在压缩文件中搜索
+bzgrep 'content' file.log.bz2 | wc -l
+bzcat file.log.bz2 | grep 'content' | wc -l
+less file.log.bz2 | grep 'content' | wc -l
+
+# 清空最大文件
+find . -type f -name "*log*" | xargs ls -lSh | more
+du -a . | sort -rn | grep log | more
+find . -name '*log*' -size +10M -exec du -h {} \;
+
+echo "" > big.file.log
+rm -rf a.log # 需要机器重启后才能真正释放占用空间(node 的设计)
+
 ```
