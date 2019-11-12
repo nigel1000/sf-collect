@@ -2,6 +2,7 @@ package com.common.collect.container.aops;
 
 import com.common.collect.container.JsonUtil;
 import com.google.common.base.Throwables;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -11,13 +12,14 @@ import java.util.Map;
  * Created by hznijianfeng on 2018/8/14.
  */
 
+@Slf4j
 public class LogConstant {
 
     // [module] class.method
-    public static final String LOG_PREFIX = "[{}] {}.{} ";
-    public static final String START_LOG_PREFIX = LOG_PREFIX + "start.";
-    public static final String FINISH_LOG_PREFIX = LOG_PREFIX + "finish.";
-    public static final String EXCP_LOG_PREFIX = LOG_PREFIX + "exception.";
+    static final String LOG_PREFIX = "[{}] {}.{} ";
+    static final String START_LOG_PREFIX = LOG_PREFIX + "start.";
+    static final String FINISH_LOG_PREFIX = LOG_PREFIX + "finish.";
+    static final String EXCP_LOG_PREFIX = LOG_PREFIX + "exception.";
 
     public static String getObjString(Object obj) {
 
@@ -38,7 +40,8 @@ public class LogConstant {
                     // 重写了toString()
                     return String.valueOf(obj);
                 }
-            } catch (NoSuchMethodException ignored) {
+            } catch (Exception ignored) {
+                log.error("unexpected exception ", ignored);
             }
             return JsonUtil.bean2json(obj);
         } catch (Exception e) {
