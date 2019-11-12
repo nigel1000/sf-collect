@@ -40,12 +40,12 @@ public class LogConstant {
                     // 重写了toString()
                     return String.valueOf(obj);
                 }
-            } catch (Exception ignored) {
-                log.error("unexpected exception ", ignored);
+            } catch (Exception ex) {
+                log.error("unexpected exception ", ex);
             }
             return JsonUtil.bean2json(obj);
-        } catch (Exception e) {
-            return "json 序列化失败. " + Throwables.getStackTraceAsString(e);
+        } catch (Exception ex) {
+            return "json 序列化失败. " + Throwables.getStackTraceAsString(ex);
         }
     }
 
