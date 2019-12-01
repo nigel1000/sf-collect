@@ -20,7 +20,7 @@ Linux 提供了**轮询**、**I/O 中断**以及 **DMA 传输**这 3 种磁盘�
 4. CPU 收到 I/O 中断以后将**磁盘缓冲区**中的数据拷贝到**内核缓冲区**，然后再从**内核缓冲区**拷贝到**用户缓冲区**。
 5. 用户进程由内核态切换回用户态，解除阻塞状态，然后等待 CPU 的下一个执行时间钟。
 
-![IO中断](/Users/nijianfeng/Documents/projects/sf-collect/collect-docs/images/IO%E4%B8%AD%E6%96%AD.jpg)
+![IO中断](../../images/IO%E4%B8%AD%E6%96%AD.jpg)
 
 ## DMA 传输原理
 
@@ -35,7 +35,7 @@ DMA 的全称叫直接内存存取（Direct Memory Access），是一种允许**
 5. DMA 磁盘控制器向 CPU 发出数据读完的信号，由 **CPU 负责**将数据从**内核缓冲区**拷贝到**用户缓冲区**。
 6. 用户进程由内核态切换回用户态，解除阻塞状态，然后等待 CPU 的下一个执行时间钟。
 
-![DMA](/Users/nijianfeng/Documents/projects/sf-collect/collect-docs/images/DMA%E4%BC%A0%E8%BE%93.jpg)
+![DMA](../../images/DMA%E4%BC%A0%E8%BE%93.jpg)
 
 ## 写时复制
 
