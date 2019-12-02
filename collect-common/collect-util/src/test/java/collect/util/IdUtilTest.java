@@ -44,7 +44,7 @@ public class IdUtilTest {
         log.info("sequence 达到最大值次数:{}", out);
         log.info("max size:{}, list size:{} , set size:{}", ms * (2 << (sequence - 1)), ids.size(), Sets.newHashSet(ids).size());
 
-        Slf4jUtil.setLogLevel("error");
+        Slf4jUtil.setLogLevel(null, "error");
         log.info("{}", IdUtil.timeDiy("diy"));
         log.info("{}", IdUtil.snowflakeId());
         log.info("{}", IdUtil.snowflakeId());

@@ -79,7 +79,7 @@ public class TestMybatis {
 
         });
 
-        Slf4jUtil.setLogLevel("debug");
+        Slf4jUtil.setLogLevel(null, "debug");
         // 获取执行 sql
         MybatisContext.setEnableSqlRecord(true);
         testDao.load(IdUtil.snowflakeId());
@@ -89,7 +89,7 @@ public class TestMybatis {
         testDao.load(IdUtil.snowflakeId());
     }
 
-    public static Test genTest(){
+    public static Test genTest() {
         Test test = new Test();
         test.setBigintType(1L);
         test.setBitType(Boolean.FALSE);

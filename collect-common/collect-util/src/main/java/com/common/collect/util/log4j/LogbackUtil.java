@@ -17,14 +17,14 @@ class LogbackUtil {
         LoggerContext loggerContext =
                 (LoggerContext) LoggerFactory.getILoggerFactory();
         for (Logger logger : loggerContext.getLoggerList()) {
-            loggerMap.putIfAbsent(logger.getName(), logger);
-            loggerLevelMap.putIfAbsent(logger.getName(),
+            loggerMap.put(logger.getName(), logger);
+            loggerLevelMap.put(logger.getName(),
                     NullUtil.validDefault(() -> logger.getLevel().toString(), null));
         }
         Logger rootLogger =
                 (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-        loggerMap.putIfAbsent(rootLogger.getName(), rootLogger);
-        loggerLevelMap.putIfAbsent(rootLogger.getName(),
+        loggerMap.put(rootLogger.getName(), rootLogger);
+        loggerLevelMap.put(rootLogger.getName(),
                 NullUtil.validDefault(() -> rootLogger.getLevel().toString(), null));
     }
 

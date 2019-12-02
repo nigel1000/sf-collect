@@ -17,13 +17,13 @@ class Log4j12Util {
         Enumeration enumeration = LogManager.getCurrentLoggers();
         while (enumeration.hasMoreElements()) {
             Logger logger = (Logger) enumeration.nextElement();
-            loggerMap.putIfAbsent(logger.getName(), logger);
-            loggerLevelMap.putIfAbsent(logger.getName(),
+            loggerMap.put(logger.getName(), logger);
+            loggerLevelMap.put(logger.getName(),
                     NullUtil.validDefault(() -> logger.getLevel().toString(), null));
         }
         Logger rootLogger = LogManager.getRootLogger();
-        loggerMap.putIfAbsent(rootLogger.getName(), rootLogger);
-        loggerLevelMap.putIfAbsent(rootLogger.getName(),
+        loggerMap.put(rootLogger.getName(), rootLogger);
+        loggerLevelMap.put(rootLogger.getName(),
                 NullUtil.validDefault(() -> rootLogger.getLevel().toString(), null));
     }
 

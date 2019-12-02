@@ -21,8 +21,8 @@ class Log4j2Util {
             if (key == null || "".equals(key.trim())) {
                 key = "root";
             }
-            loggerMap.putIfAbsent(key, loggerConfig);
-            loggerLevelMap.putIfAbsent(key,
+            loggerMap.put(key, loggerConfig);
+            loggerLevelMap.put(key,
                     NullUtil.validDefault(() -> loggerConfig.getLevel().toString(), null));
         }
     }

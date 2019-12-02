@@ -27,17 +27,20 @@ class SimpleUtil {
             for (Map.Entry<String, Logger> entry : simpleLoggerMap.entrySet()) {
                 String loggerName = entry.getKey();
                 SimpleLogger logger = (SimpleLogger) entry.getValue();
-                loggerMap.putIfAbsent(loggerName, logger);
-                if (logger.isErrorEnabled()) {
-                    loggerLevelMap.putIfAbsent(loggerName, LocationAwareLogger.ERROR_INT + "");
-                } else if (logger.isWarnEnabled()) {
-                    loggerLevelMap.putIfAbsent(loggerName, LocationAwareLogger.WARN_INT + "");
-                } else if (logger.isInfoEnabled()) {
-                    loggerLevelMap.putIfAbsent(loggerName, LocationAwareLogger.INFO_INT + "");
-                } else if (logger.isDebugEnabled()) {
-                    loggerLevelMap.putIfAbsent(loggerName, LocationAwareLogger.DEBUG_INT + "");
-                } else if (logger.isTraceEnabled()) {
-                    loggerLevelMap.putIfAbsent(loggerName, LocationAwareLogger.TRACE_INT + "");
+                loggerMap.put(loggerName, logger);
+                Field currentLogLevel = SimpleLogger.class.getDeclaredField("currentLogLevel");
+                currentLogLevel.setAccessible(true);
+                Integer level = (Integer) currentLogLevel.get(logger);
+                if (level == LocationAwareLogger.ERROR_INT) {
+                    loggerLevelMap.put(loggerName, "error");
+                } else if (level == LocationAwareLogger.WARN_INT) {
+                    loggerLevelMap.put(loggerName, "warn");
+                } else if (level == LocationAwareLogger.INFO_INT) {
+                    loggerLevelMap.put(loggerName, "info");
+                } else if (level == LocationAwareLogger.DEBUG_INT) {
+                    loggerLevelMap.put(loggerName, "debug");
+                } else if (level == LocationAwareLogger.TRACE_INT) {
+                    loggerLevelMap.put(loggerName, "trace");
                 }
             }
         } catch (Exception ex) {
