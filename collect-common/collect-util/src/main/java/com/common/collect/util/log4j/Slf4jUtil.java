@@ -27,7 +27,18 @@ public class Slf4jUtil {
     private final static String LOGBACK = "ch.qos.logback.classic.util.ContextSelectorStaticBinder";
     private final static List<String> levels = Arrays.asList("off", "fatal", "error", "warn", "info", "debug", "trace", "all");
 
-    private synchronized static void initAndSync() {
+    /**
+     * 清空快照数据
+     */
+    public synchronized static void clear() {
+        loggerMap.clear();
+        loggerLevelMap.clear();
+    }
+
+    /**
+     * 刷入当前 Logger 快照
+     */
+    public synchronized static void refresh() {
         if (LOG4J12.equals(currentLog4jName)) {
             Log4j12Util.fillLoggerInfo(loggerMap, loggerLevelMap);
         } else if (SIMPLE.equals(currentLog4jName)) {
@@ -48,7 +59,6 @@ public class Slf4jUtil {
      * @param like
      */
     public static void printLoggerInfo(String like) {
-        initAndSync();
         log.info("当前 Slf4j 使用的 LoggerFactory :[{}]", currentLog4jName);
         if (EmptyUtil.isBlank(like)) {
             for (Map.Entry<String, String> entry : loggerLevelMap.entrySet()) {
@@ -103,7 +113,6 @@ public class Slf4jUtil {
         if (!levels.contains(level)) {
             throw UnifiedException.gen("不支持设置 level:" + level);
         }
-        initAndSync();
         List<String> logNames = getLoggerNames(like);
         for (String logName : logNames) {
             if (currentLog4jName.equals(LOG4J12)) {

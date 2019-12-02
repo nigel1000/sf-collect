@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 public class Slf4jUtilTest {
 
     public static void main(String[] args) {
+
+        Slf4jUtil.refresh();
         log.info("开始测试 Slf4jUtilTest");
         Slf4jUtil.printLoggerInfo(null);
         log.info("Slf4jUtil.getLoggerFactoryClassName():{}", Slf4jUtil.getLoggerFactoryClassName());
@@ -20,7 +22,7 @@ public class Slf4jUtilTest {
 
         Slf4jUtil.setLogLevel("Slf4jUtilTest", "trace");
         Slf4jUtil.printLoggerInfo(null);
-
+        Slf4jUtil.clear();
 
     }
 
