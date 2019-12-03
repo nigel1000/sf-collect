@@ -9,9 +9,6 @@ import java.util.Map;
 @Data
 public class Response<T> implements Serializable {
 
-    public static final int SUCCESS = 200;
-    public static final int ERROR = 500;
-
     private int code;
     private boolean success;
 
@@ -46,11 +43,11 @@ public class Response<T> implements Serializable {
     }
 
     public static <T> Response<T> ok() {
-        return build(SUCCESS, null, null);
+        return build(Constants.SUCCESS, null, null);
     }
 
     public static <T> Response<T> ok(T data) {
-        return build(SUCCESS, data, null);
+        return build(Constants.SUCCESS, data, null);
     }
 
     public static <T> Response<T> ok(int code, T data) {
@@ -58,11 +55,11 @@ public class Response<T> implements Serializable {
     }
 
     public static <T> Response<T> fail() {
-        return build(ERROR, null, null);
+        return build(Constants.ERROR, null, null);
     }
 
     public static <T> Response<T> fail(Object desc) {
-        return build(ERROR, null, desc);
+        return build(Constants.ERROR, null, desc);
     }
 
     public static <T> Response<T> fail(int code, Object desc) {
@@ -75,7 +72,7 @@ public class Response<T> implements Serializable {
 
     public static <T> Response<T> build(int code, T data, Object desc) {
         Response<T> result = new Response<>(code, data, desc);
-        result.setSuccess(code >= SUCCESS && code < 300);
+        result.setSuccess(code >= Constants.SUCCESS && code < 300);
         return result;
     }
 

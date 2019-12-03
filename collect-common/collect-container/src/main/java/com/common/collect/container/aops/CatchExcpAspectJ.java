@@ -1,7 +1,7 @@
 package com.common.collect.container.aops;
 
+import com.common.collect.api.Constants;
 import com.common.collect.api.Response;
-import com.common.collect.api.enums.CommonError;
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.AopUtil;
 import com.common.collect.container.trace.TraceIdUtil;
@@ -13,10 +13,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.annotation.Order;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Component;
-
-import java.sql.SQLException;
 
 /**
  * Created by hznijianfeng on 2018/8/15. 加在provider上，譬如facade等
@@ -53,39 +50,34 @@ public class CatchExcpAspectJ {
             return point.proceed();
         } catch (UnifiedException ex) {
             if (ex.getCause() != null) {
-                log.info(LogConstant.START_LOG_PREFIX + " args:{}", module, point.getTarget().getClass().getName(),
-                        point.getSignature().getName(), LogConstant.getObjString(point.getArgs()));
-                log.error(LogConstant.EXCP_LOG_PREFIX + " excpModule:{}, excpMessage:{}, excpContext:{}", module,
-                        className, methodName, ex.getModule(), ex.getErrorMessage(), ex.getContext(), ex);
+                try {
+                    log.error("UnifiedException 异常。模块：{}，类名：{}，方法：{}，入参：{}，描述:{}, 上下文:{}",
+                            module, className, methodName,
+                            point.getArgs(),
+                            ex.getErrorMessage(), ex.getContext(),
+                            ex);
+                } catch (Exception exception) {
+                }
             }
             return returnResult(ex, returnType);
-        } catch (DataAccessException | SQLException ex) {
-            log.info(LogConstant.START_LOG_PREFIX + " args:{}", module, point.getTarget().getClass().getName(),
-                    point.getSignature().getName(), LogConstant.getObjString(point.getArgs()));
-            log.error(LogConstant.EXCP_LOG_PREFIX, module, className, methodName, ex);
-            return returnResult(CommonError.DB_ERROR.getErrorCode(), CommonError.DB_ERROR.getErrorMessage(),
-                    returnType);
-        } catch (RuntimeException ex) {
-            log.error("======================RuntimeException======================");
-            log.info(LogConstant.START_LOG_PREFIX + " args:{}", module, point.getTarget().getClass().getName(),
-                    point.getSignature().getName(), LogConstant.getObjString(point.getArgs()));
-            log.error(LogConstant.EXCP_LOG_PREFIX, module, className, methodName, ex);
-            return returnResult(CommonError.SYSTEM_ERROR.getErrorCode(), CommonError.SYSTEM_ERROR.getErrorMessage(),
-                    returnType);
         } catch (Exception ex) {
-            log.error("======================Exception======================");
-            log.info(LogConstant.START_LOG_PREFIX + " args:{}", module, point.getTarget().getClass().getName(),
-                    point.getSignature().getName(), LogConstant.getObjString(point.getArgs()));
-            log.error(LogConstant.EXCP_LOG_PREFIX, module, className, methodName, ex);
-            return returnResult(CommonError.SYSTEM_ERROR.getErrorCode(), CommonError.SYSTEM_ERROR.getErrorMessage(),
-                    returnType);
+            try {
+                log.error("Exception 异常。模块：{}，类名：{}，方法：{},入参：{}",
+                        module, className, methodName,
+                        point.getArgs(),
+                        ex);
+            } catch (Exception exception) {
+            }
+            return returnResult(Constants.ERROR, Constants.errorFromSystem, returnType);
         } catch (Throwable ex) {
-            log.error("======================Throwable======================");
-            log.info(LogConstant.START_LOG_PREFIX + " args:{}", module, point.getTarget().getClass().getName(),
-                    point.getSignature().getName(), LogConstant.getObjString(point.getArgs()));
-            log.error(LogConstant.EXCP_LOG_PREFIX, module, className, methodName, ex);
-            return returnResult(CommonError.SYSTEM_ERROR.getErrorCode(), CommonError.SYSTEM_ERROR.getErrorMessage(),
-                    returnType);
+            try {
+                log.error("Throwable 异常。模块：{}，类名：{}，方法：{},入参：{}",
+                        module, className, methodName,
+                        point.getArgs(),
+                        ex);
+            } catch (Exception exception) {
+            }
+            return returnResult(Constants.ERROR, Constants.errorFromSystem, returnType);
         }
     }
 

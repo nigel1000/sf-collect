@@ -1,14 +1,9 @@
 package com.common.collect.container.aops;
 
 import com.common.collect.container.AopUtil;
-import com.google.common.base.Throwables;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.AfterReturning;
-import org.aspectj.lang.annotation.AfterThrowing;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
-import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.annotation.*;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -35,8 +30,8 @@ public class EasyLogAspectJ {
         if (log.isDebugEnabled()) {
             EasyLog easyLog = AopUtil.getAnnotation(point, EasyLog.class);
             String module = easyLog.module();
-            log.debug(LogConstant.START_LOG_PREFIX + " args:{}", module, point.getTarget().getClass().getName(),
-                    point.getSignature().getName(), LogConstant.getObjString(point.getArgs()));
+            log.debug("执行之前。模块：{}，类名：{}，方法：{}，入参：{}", module, point.getTarget().getClass().getName(),
+                    point.getSignature().getName(), point.getArgs());
         }
     }
 
@@ -45,8 +40,8 @@ public class EasyLogAspectJ {
         if (log.isDebugEnabled()) {
             EasyLog easyLog = AopUtil.getAnnotation(point, EasyLog.class);
             String module = easyLog.module();
-            log.debug(LogConstant.FINISH_LOG_PREFIX + " return:{}", module, point.getTarget().getClass().getName(),
-                    point.getSignature().getName(), LogConstant.getObjString(rtObj));
+            log.debug("执行返回。执行之前。模块：{}，类名：{}，方法：{}，返回：{}", module, point.getTarget().getClass().getName(),
+                    point.getSignature().getName(), rtObj);
         }
     }
 
@@ -56,8 +51,8 @@ public class EasyLogAspectJ {
         if (log.isDebugEnabled()) {
             EasyLog easyLog = AopUtil.getAnnotation(point, EasyLog.class);
             String module = easyLog.module();
-            log.debug(LogConstant.FINISH_LOG_PREFIX + " exception:{}", module, point.getTarget().getClass().getName(),
-                    point.getSignature().getName(), Throwables.getStackTraceAsString(ex));
+            log.debug("执行异常。模块：{}，类名：{}，方法：{}", module, point.getTarget().getClass().getName(),
+                    point.getSignature().getName(), ex);
         }
     }
 

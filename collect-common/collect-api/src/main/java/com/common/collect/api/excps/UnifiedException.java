@@ -1,6 +1,6 @@
 package com.common.collect.api.excps;
 
-import com.common.collect.api.Response;
+import com.common.collect.api.Constants;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -68,11 +68,11 @@ public class UnifiedException extends RuntimeException {
     }
 
     private UnifiedException(String module, String errorMessage) {
-        this(module, Response.ERROR, errorMessage);
+        this(module, Constants.ERROR, errorMessage);
     }
 
     private UnifiedException(String module, String errorMessage, Throwable cause) {
-        this(module, Response.ERROR, errorMessage, cause);
+        this(module, Constants.ERROR, errorMessage, cause);
     }
 
     private UnifiedException(String module, int errorCode, String errorMessage) {
