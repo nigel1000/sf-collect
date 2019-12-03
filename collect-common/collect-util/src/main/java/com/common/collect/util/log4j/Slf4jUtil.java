@@ -59,6 +59,7 @@ public class Slf4jUtil {
      * @param like
      */
     public static void printLoggerInfo(String like) {
+        refresh();
         log.info("当前 Slf4j 使用的 LoggerFactory :[{}]", currentLog4jName);
         if (EmptyUtil.isBlank(like)) {
             for (Map.Entry<String, String> entry : loggerLevelMap.entrySet()) {
@@ -90,6 +91,7 @@ public class Slf4jUtil {
      * @return
      */
     public static List<String> getLoggerNames(String like) {
+        refresh();
         if (EmptyUtil.isBlank(like)) {
             return new ArrayList<>(loggerLevelMap.keySet());
         }
@@ -110,6 +112,7 @@ public class Slf4jUtil {
      * @param level
      */
     public static void setLogLevel(String like, String level) {
+        refresh();
         if (!levels.contains(level)) {
             throw UnifiedException.gen("不支持设置 level:" + level);
         }
