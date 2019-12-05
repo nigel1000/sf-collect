@@ -10,14 +10,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -104,6 +97,14 @@ public class ThreadPoolUtil {
         return submit("default", commands);
     }
 
+    public static void exec(@NonNull String poolName, @NonNull Runnable command) {
+        obtainExecutorService(poolName).execute(TraceIdUtil.wrap(command));
+    }
+
+    public static <T> Future<T> submit(@NonNull String poolName, @NonNull Callable<T> command) {
+        return obtainExecutorService(poolName).submit(TraceIdUtil.wrap(command));
+    }
+
     public static <T> List<T> submit(@NonNull String poolName, @NonNull List<Callable<T>> commands) {
         List<Future<T>> futures = new ArrayList<>();
         for (Callable<T> command : commands) {
@@ -118,14 +119,6 @@ public class ThreadPoolUtil {
             }
         }
         return t;
-    }
-
-    public static void exec(@NonNull String poolName, @NonNull Runnable command) {
-        obtainExecutorService(poolName).execute(TraceIdUtil.wrap(command));
-    }
-
-    public static <T> Future<T> submit(@NonNull String poolName, @NonNull Callable<T> command) {
-        return obtainExecutorService(poolName).submit(TraceIdUtil.wrap(command));
     }
 
 }
