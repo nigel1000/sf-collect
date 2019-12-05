@@ -19,10 +19,10 @@ public class TraceIdRequestUtil {
             try {
                 TraceIdUtil.initTraceId(contextTraceId);
             } catch (Exception ex) {
-                TraceIdUtil.initTraceId();
+                TraceIdUtil.initTraceId(null);
             }
         } else {
-            TraceIdUtil.initTraceId();
+            TraceIdUtil.initTraceId(null);
         }
 
     }

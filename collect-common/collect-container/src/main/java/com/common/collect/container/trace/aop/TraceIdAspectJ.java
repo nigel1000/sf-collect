@@ -27,7 +27,7 @@ public class TraceIdAspectJ {
 
     @Before("clazz() || method()")
     public void before(final JoinPoint point) {
-        TraceIdUtil.initTraceIdIfAbsent();
+        TraceIdUtil.initTraceId(null);
     }
 
     @AfterReturning("clazz() || method()")
