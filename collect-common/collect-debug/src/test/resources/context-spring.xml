@@ -15,7 +15,11 @@
     <!-- 启动@AspectJ支持 -->
     <aop:aspectj-autoproxy expose-proxy="true"/>
 
-    <context:component-scan base-package="collect.debug"/>
+    <context:component-scan base-package="collect.debug">
+        <!--<context:exclude-filter type="regex" expression="collect.debug.aop...*"/>-->
+        <!--<context:exclude-filter type="regex" expression="collect.debug.mybatis..*"/>-->
+    </context:component-scan>
+
     <context:component-scan base-package="com.common.collect">
         <context:exclude-filter type="regex" expression="com.common.collect.debug.spring..*"/>
     </context:component-scan>

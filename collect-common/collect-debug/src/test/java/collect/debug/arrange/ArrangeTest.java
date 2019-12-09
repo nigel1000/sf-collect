@@ -2,7 +2,6 @@ package collect.debug.arrange;
 
 import collect.debug.arrange.demo.ProductContext;
 import com.common.collect.container.JsonUtil;
-import com.common.collect.container.aops.LogConstant;
 import com.common.collect.container.arrange.ArrangeContext;
 import com.common.collect.container.arrange.ArrangeRetContext;
 import com.common.collect.util.EmptyUtil;
@@ -44,23 +43,23 @@ public class ArrangeTest {
         // 启动一个业务调用链并传入入参
         ArrangeRetContext context = ArrangeContext.runBiz("biz_queryProductAll", JsonUtil.bean2json(param));
 
-        log.info("最后一个入参：" + LogConstant.getObjString(context.getLastArg()));
+        log.info("最后一个入参：{}", JsonUtil.bean2json(context.getLastArg()));
         // 返回最后一个入参
         if (EmptyUtil.isNotEmpty(context.getInputMap())) {
             ProductContext in = context.getByIndexFromMap(context.getInputMap().size(), context.getInputMap());
-            log.info("最后一个入参：" + LogConstant.getObjString(in));
+            log.info("最后一个入参：{}", in);
         }
 
-        log.info("最后一个返回：" + LogConstant.getObjString(context.getLastRet()));
+        log.info("最后一个返回：{}", JsonUtil.bean2json(context.getLastRet()));
         // 返回最后一个返回
         if (EmptyUtil.isNotEmpty(context.getOutputMap())) {
             ProductContext out = context.getByIndexFromMap(context.getOutputMap().size(), context.getOutputMap());
-            log.info("最后一个返回：" + LogConstant.getObjString(out));
+            log.info("最后一个返回：{}", out);
         }
 
         context = ArrangeContext.runBiz("biz_fillProductSkuAndSale", JsonUtil.bean2json(context.getLastRet()));
-        log.info("最后一个入参：" + LogConstant.getObjString(context.getLastArg()));
-        log.info("最后一个返回：" + LogConstant.getObjString(context.getLastRet()));
+        log.info("最后一个入参：{}", JsonUtil.bean2json(context.getLastArg()));
+        log.info("最后一个返回：{}", JsonUtil.bean2json(context.getLastRet()));
 
     }
 

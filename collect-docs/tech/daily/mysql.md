@@ -72,10 +72,6 @@ mysql -p 3306 -h `127.0.0.1` -uroot -p123456
 create database sf-house default character set utf8mb4 collate utf8mb4_general_ci;
 -- 导入数据
 source ~/Documents/zcy_develop.sql;
--- 修改密码
-use mysql;
-update user set password=password("#/d5)anzaVlN") where user='root';
-flush privileges;
 -- 所有大于16M的SQL文件都会报ERROR 2006 (HY000) at line 17128: MySQL server has gone away，可以登录MySQL客户端，修改系统变量：
 set global max_allowed_packet=500*1024*1024;
 ```

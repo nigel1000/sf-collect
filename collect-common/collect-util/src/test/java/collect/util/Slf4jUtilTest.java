@@ -23,9 +23,10 @@ public class Slf4jUtilTest {
         log.info("##########Slf4jUtil.getLoggerNames(\"Slf4jUtil\")");
         log.info("{}", Slf4jUtil.getLoggerNames("Slf4jUtil"));
 
-
-        log.info("##########Slf4jUtil.setLogLevel(\"Slf4jUtilTest\", \"trace\")");
+        log.trace("##########Slf4jUtil.setLogLevel(\"Slf4jUtilTest\", \"trace\") start 不会打印");
         Slf4jUtil.setLogLevel("Slf4jUtilTest", "trace");
+        log.trace("##########Slf4jUtil.setLogLevel(\"Slf4jUtilTest\", \"trace\") end");
+
         Slf4jUtil.printLoggerInfo(null);
 
         Slf4jUtil.clear();

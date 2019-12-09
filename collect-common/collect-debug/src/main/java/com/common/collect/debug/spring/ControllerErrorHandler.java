@@ -4,7 +4,6 @@ import com.alibaba.dubbo.remoting.TimeoutException;
 import com.alibaba.dubbo.rpc.RpcException;
 import com.common.collect.api.Response;
 import com.common.collect.api.excps.UnifiedException;
-import com.common.collect.container.aops.LogConstant;
 import com.common.collect.container.trace.TraceIdUtil;
 import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.ThreadLocalUtil;
@@ -194,6 +193,6 @@ public class ControllerErrorHandler {
      * 打印日志信息
      */
     private void printLogInfo(NativeWebRequest request, Throwable ex) {
-        log.info("request parameters:{}", LogConstant.getObjString(request.getParameterMap()), ex);
+        log.info("request parameters:{}", request.getParameterMap(), ex);
     }
 }
