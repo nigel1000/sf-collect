@@ -1,5 +1,6 @@
 package com.common.collect.api.page;
 
+import com.common.collect.api.excps.UnifiedException;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -22,6 +23,9 @@ public class PageParam implements Serializable {
     private int defaultPageNo = 1; /* 页码默认从1开始 */
     private int defaultOffset = 0; /* mysql默认偏移量从0开始 */
     private int defaultPageSize = 10;
+
+    // 限制获取最大数量
+    private Long maxTotal = Long.MAX_VALUE;
 
     public static PageParam valueOfByLimit(int offset, int limit) throws RuntimeException {
         PageParam pageParam = new PageParam();
@@ -71,6 +75,9 @@ public class PageParam implements Serializable {
         }
         this.offset = (this.pageNo - 1) * this.pageSize;
         this.limit = this.pageSize;
+        if (this.pageNo * this.pageSize > maxTotal) {
+            throw UnifiedException.gen("当前获取数量大于了最大限额");
+        }
     }
 
 }
