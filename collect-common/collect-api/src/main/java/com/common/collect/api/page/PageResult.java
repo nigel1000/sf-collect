@@ -18,7 +18,7 @@ import java.util.Objects;
 public class PageResult<T> implements Serializable {
 
     /**
-     * 分页条件
+     * 分页详细
      */
     private Page page;
     /**
@@ -40,14 +40,9 @@ public class PageResult<T> implements Serializable {
         private Integer currentRecordCount;
 
         /**
-         * 当前页
+         * 入参请求
          */
-        private Integer currentPageNo;
-
-        /**
-         * 每页记录数
-         */
-        private Integer currentPageSize;
+        private PageParam pageParam;
 
         /**
          * 最大页码
@@ -74,7 +69,6 @@ public class PageResult<T> implements Serializable {
 
     private PageResult(@NonNull Integer total, @NonNull List<T> data, @NonNull PageParam pageParam) {
         this.records = data;
-        Integer pageNo = pageParam.getPageNo();
         Integer pageSize = pageParam.getPageSize();
         Integer maxPageNo;
         if (total <= pageSize) {
@@ -86,8 +80,7 @@ public class PageResult<T> implements Serializable {
         }
         this.page = Page.ofTotal(total)
                 .setCurrentRecordCount(data.size())
-                .setCurrentPageNo(pageNo)
-                .setCurrentPageSize(pageSize)
+                .setPageParam(pageParam)
                 .setMaxPageNo(maxPageNo)
         ;
     }
