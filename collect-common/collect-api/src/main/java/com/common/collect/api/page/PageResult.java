@@ -1,7 +1,9 @@
 package com.common.collect.api.page;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -16,58 +18,78 @@ import java.util.Objects;
 public class PageResult<T> implements Serializable {
 
     /**
-     * 总记录数
+     * 分页条件
      */
-    private Integer total;
+    private Page page;
     /**
-     * 数据
+     * 分页数据
      */
-    private List<T> data;
+    private List<T> records;
 
-    /* 一般前端插件会封装，pageNo和pageSize前端传进来的，pageTotal可以根据total和pageSize算 */
-    private PageParam pageParam;
-    /**
-     * 总页数
-     */
-    private Integer pageTotal;
-    /**
-     * 当前页
-     */
-    private Integer pageNo;
-    /**
-     * 每页记录数
-     */
-    private Integer pageSize;
+    @Data
+    @Accessors(chain = true)
+    public static class Page implements Serializable {
+        /**
+         * 总记录数
+         */
+        private Integer total;
+
+        /**
+         * 分页数据数量
+         */
+        private Integer currentRecordCount;
+
+        /**
+         * 当前页
+         */
+        private Integer currentPageNo;
+
+        /**
+         * 每页记录数
+         */
+        private Integer currentPageSize;
+
+        /**
+         * 最大页码
+         */
+        private Integer maxPageNo;
+
+        /**
+         * 游标，默认返回本页列表最后一条数据的 id 值
+         */
+        private String cursor;
+
+        public static Page ofTotal(Integer total) {
+            return new Page().setTotal(total);
+        }
+    }
 
     public PageResult() {
     }
 
     private PageResult(@NonNull Integer total, @NonNull List<T> data) {
-        this.data = data;
-        this.total = total;
+        this.records = data;
+        this.page = Page.ofTotal(total).setCurrentRecordCount(data.size());
     }
 
     private PageResult(@NonNull Integer total, @NonNull List<T> data, @NonNull PageParam pageParam) {
-        this.data = data;
-        this.total = total;
-        this.pageParam = pageParam;
-        this.pageNo = pageParam.getPageNo();
-        this.pageSize = pageParam.getPageSize();
-        if (this.total <= this.pageSize) {
-            this.pageTotal = 1;
-        } else if (this.total % this.pageSize == 0) {
-            this.pageTotal = this.total / this.pageSize;
+        this.records = data;
+        Integer pageNo = pageParam.getPageNo();
+        Integer pageSize = pageParam.getPageSize();
+        Integer maxPageNo;
+        if (total <= pageSize) {
+            maxPageNo = 1;
+        } else if (total % pageSize == 0) {
+            maxPageNo = total / pageSize;
         } else {
-            this.pageTotal = (this.total / this.pageSize) + 1;
+            maxPageNo = (total / pageSize) + 1;
         }
-    }
-
-    public Boolean isEmpty() {
-        return Objects.equals(0, this.total) || this.data == null || this.data.isEmpty();
-    }
-
-    public static <T> PageResult<T> empty() {
-        return new PageResult<>(0, new ArrayList<T>());
+        this.page = Page.ofTotal(total)
+                .setCurrentRecordCount(data.size())
+                .setCurrentPageNo(pageNo)
+                .setCurrentPageSize(pageSize)
+                .setMaxPageNo(maxPageNo)
+        ;
     }
 
     public static <T> PageResult<T> gen(Integer total, List<T> data) {
@@ -77,4 +99,13 @@ public class PageResult<T> implements Serializable {
     public static <T> PageResult<T> gen(Integer total, List<T> data, PageParam pageParam) {
         return new PageResult<>(total, data, pageParam);
     }
+
+    public static <T> PageResult<T> empty() {
+        return new PageResult<>(0, new ArrayList<T>());
+    }
+
+    public Boolean isEmpty() {
+        return Objects.equals(0, this.page.getTotal()) || this.records == null || this.records.isEmpty();
+    }
+
 }
