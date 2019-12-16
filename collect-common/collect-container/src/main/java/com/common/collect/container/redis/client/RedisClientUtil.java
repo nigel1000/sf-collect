@@ -315,7 +315,7 @@ public class RedisClientUtil {
                 logLock("lockWithBizId", key, lockId);
             }
         } catch (Exception e) {
-            log.error("rdbClientImpl setNx error", e);
+            log.error("redis lockWithBizId error", e);
         }
         return ret;
     }
