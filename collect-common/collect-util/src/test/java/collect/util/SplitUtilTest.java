@@ -28,12 +28,6 @@ public class SplitUtilTest {
         log.info("{}", SplitUtil.join(Arrays.asList(1, 2, 3), ":"));
         log.info("{}", SplitUtil.joinByComma(Arrays.asList(1, 2, 3)));
 
-        SplitUtil.splitExecute(Arrays.asList(1, 2, 3, 4, 5, 6), 2, (t) -> log.info("{}", t));
-        SplitUtil.splitExecute(Arrays.asList(1, 2, 3, 4, 5, 6), 2, (t) -> {
-            log.info("{}", (t));
-            return true;
-        }, true);
-
     }
 
 }

@@ -4,6 +4,7 @@ import lombok.NonNull;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -69,32 +70,5 @@ public class SplitUtil {
         }
     }
 
-    // 批处理限流
-    public static <T> void splitExecute(List<T> objList, int everyTimeSize, Consumer<List<T>> execute) {
-        if (objList == null || objList.size() == 0) {
-            return;
-        }
-        int totalPage = (objList.size() + everyTimeSize - 1) / everyTimeSize;
-        for (int i = 0; i < totalPage; i++) {
-            int fromIndex = i * everyTimeSize;
-            int toIndex = Math.min((i + 1) * everyTimeSize, objList.size());
-            execute.accept(objList.subList(fromIndex, toIndex));
-        }
-    }
-
-    public static <T, R> void splitExecute(List<T> objList, int everyTimeSize, Function<List<T>, R> execute, R breakFlag) {
-        if (objList == null || objList.size() == 0) {
-            return;
-        }
-        int totalPage = (objList.size() + everyTimeSize - 1) / everyTimeSize;
-        for (int i = 0; i < totalPage; i++) {
-            int fromIndex = i * everyTimeSize;
-            int toIndex = Math.min((i + 1) * everyTimeSize, objList.size());
-            R result = execute.apply(objList.subList(fromIndex, toIndex));
-            if (result == breakFlag || (result != null && result.equals(breakFlag))) {
-                break;
-            }
-        }
-    }
 
 }
