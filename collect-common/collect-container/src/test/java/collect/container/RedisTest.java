@@ -1,18 +1,16 @@
 package collect.container;
 
 import com.common.collect.api.excps.UnifiedException;
-import com.common.collect.container.redis.JedisOperator;
-import com.common.collect.container.redis.client.RedisClientFactory;
-import com.common.collect.container.redis.client.RedisClientUtil;
-import com.common.collect.container.redis.enums.SerializeEnum;
-import com.common.collect.util.FunctionUtil;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import com.common.collect.container.ThreadPoolUtil;
+import com.common.collect.container.redis.RedisClient;
+import com.common.collect.container.redis.RedisConfig;
+import com.common.collect.util.log4j.Slf4jUtil;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
+import java.util.function.Supplier;
 
 /**
  * Created by nijianfeng on 2019/3/16.
@@ -22,152 +20,170 @@ import java.util.Random;
 public class RedisTest {
 
     public static void main(String[] args) throws Exception {
+        RedisClient redisClient = new RedisClient();
 
-
-        RedisClientFactory redisClientFactory = new RedisClientFactory();
-        JedisOperator jedisOperator = (JedisOperator) redisClientFactory.newSingleClient();
-        jedisOperator.getRedisConfig().setSerializeEnum(SerializeEnum.HESSIAN);
-        jedisOperator.init();
-
-        RedisClientUtil redisClientUtil = new RedisClientUtil();
-        redisClientUtil.setRedisClient(jedisOperator);
-
-        String value = "value";
-        String lockId = "lockId";
         String prefix = "test_key_";
-        Long key = 1L;
-        String keyStr = prefix + key;
-        List<Long> keys = Lists.newArrayList(11L, 12L, 13L, 14L, 15L, 16L);
-        List<String> keysStr = FunctionUtil.valueList(keys, (t) -> prefix + t);
-        log.info("######################################################");
+        log.info("set without expireTime######################################################");
+        Slf4jUtil.setLogLevel(null, "info");
+        redisClient.set(prefix, new RedisConfig(), null);
+        RedisConfig obj = redisClient.get(prefix);
+        log.info("get:{}", obj);
+        redisClient.remove(prefix);
+        obj = redisClient.get(prefix);
+        log.info("get after remove:{}", obj);
 
-        log.info("put:{} {}", keyStr, redisClientUtil.put(keyStr, value, 10));
-        String ret = redisClientUtil.get(keyStr);
-        log.info("get:{} {}", keyStr, ret);
-        log.info("remove:{} {}", keyStr, redisClientUtil.del(keyStr));
-        ret = redisClientUtil.get(keyStr);
-        log.info("get:{} {}", keyStr, ret);
+        log.info("set with expireTime######################################################");
+        Slf4jUtil.setLogLevel(null, "info");
+        redisClient.set(prefix, new RedisConfig(), RedisClient.ONE_SECOND);
+        obj = redisClient.get(prefix);
+        log.info("get:{}", obj);
+        Thread.sleep(1000);
+        obj = redisClient.get(prefix);
+        log.info("get after expire:{}", obj);
 
-        log.info("######################################################");
+        log.info("getSet ######################################################");
+        Slf4jUtil.setLogLevel(null, "info");
+        Supplier<RedisConfig> supplier = () -> {
+            log.info("getSet: go into supplier");
+            return new RedisConfig();
+        };
+        redisClient.getSet(prefix, supplier, RedisClient.ONE_SECOND);
+        redisClient.getSet(prefix, supplier, RedisClient.ONE_SECOND);
+        obj = redisClient.get(prefix);
+        log.info("getSet:{}", obj);
+        Thread.sleep(1000);
+        obj = redisClient.get(prefix);
+        log.info("getSet after expire:{}", obj);
 
-        log.info("lock:{} {}", keyStr, redisClientUtil.lock(keyStr, 10));
-        log.info("lock:{} {}", keyStr, redisClientUtil.lock(keyStr, 10));
-        log.info("release:{} {}", keyStr, redisClientUtil.release(keyStr));
-        log.info("lock:{} {}", keyStr, redisClientUtil.lock(keyStr, 10));
-        log.info("releaseWithBizId:{} {}", keyStr, redisClientUtil.releaseWithBizId(keyStr, "1"));
+        log.info("batchGetSet ######################################################");
+        Slf4jUtil.setLogLevel(null, "info");
+        redisClient.batchGetSet(prefix, Arrays.asList(1, 2, 3), (keys) -> {
+            log.info("batchGetSet: go into function, keys:{}", keys);
+            Map<Integer, RedisConfig> map = new HashMap<>();
+            for (Integer key : keys) {
+                map.put(key, new RedisConfig());
+            }
+            return map;
+        }, RedisClient.ONE_SECOND);
+        redisClient.batchGetSet(prefix, Arrays.asList(1, 2, 3, 4, 5, 6), (keys) -> {
+            log.info("batchGetSet: go into function, keys:{}", keys);
+            Map<Integer, RedisConfig> map = new HashMap<>();
+            for (Integer key : keys) {
+                map.put(key, new RedisConfig());
+            }
+            return map;
+        }, RedisClient.ONE_SECOND);
+        redisClient.batchGetSet(prefix, Arrays.asList(1, 4, 6), (keys) -> {
+            log.info("batchGetSet: go into function, keys:{}", keys);
+            Map<Integer, RedisConfig> map = new HashMap<>();
+            for (Integer key : keys) {
+                map.put(key, new RedisConfig());
+            }
+            return map;
+        }, RedisClient.ONE_SECOND);
+        for (Integer key : Arrays.asList(1, 2, 3, 4, 5, 6)) {
+            obj = redisClient.get(prefix + key);
+            log.info("get, key:{}, value:{}", prefix + key, obj);
+        }
+        Thread.sleep(1000);
+        for (Integer key : Arrays.asList(1, 2, 3, 4, 5, 6)) {
+            obj = redisClient.get(prefix + key);
+            log.info("get after expire, key:{}, value:{}", prefix + key, obj);
+        }
 
-        log.info("######################################################");
-
-        log.info("lockWithBizId:{} {} {}", keyStr, lockId, redisClientUtil.lockWithBizId(keyStr, lockId, 10));
-        log.info("lockWithBizId:{} {} {}", keyStr, lockId, redisClientUtil.lockWithBizId(keyStr, lockId, 10));
-        log.info("releaseWithBizId:{} {} {}", keyStr, lockId, redisClientUtil.releaseWithBizId(keyStr, lockId));
-        log.info("lockWithBizId:{} {} {}", keyStr, lockId, redisClientUtil.lockWithBizId(keyStr, lockId, 10));
-        log.info("releaseWithBizId:{} {} {}", keyStr, lockId, redisClientUtil.releaseWithBizId(keyStr, lockId));
-        log.info("releaseWithBizId:{} {} {}", keyStr, lockId, redisClientUtil.releaseWithBizId(keyStr, lockId));
+        log.info("setWithNull######################################################");
+        Slf4jUtil.setLogLevel(null, "info");
         try {
-            redisClientUtil.lockRelease(keyStr, 10, "获取锁失败了，稍后再试", () -> {
-                log.info("lockRelease:{} {} {}", keyStr, lockId, "锁获取成功");
-                return true;
-            });
-            log.info("lockWithBizId:{} {} {}", keyStr, lockId, redisClientUtil.lockWithBizId(keyStr, lockId, 10));
-            redisClientUtil.lockRelease(keyStr, 10, "获取锁失败了，稍后再试", () -> {
-                log.info("lockRelease:{} {} {}", keyStr, lockId, "锁获取成功");
-                return true;
-            });
-        } catch (UnifiedException ex) {
-            log.info("lockRelease:{} {} {}", keyStr, lockId, ex.getErrorMessage());
+            obj = redisClient.getWithNull(prefix);
+            log.info("getWithNull null from cache:{}", obj);
+            redisClient.setWithNull(prefix, new RedisConfig(), null, null);
+            obj = redisClient.getWithNull(prefix);
+            log.info("getWithNull:{}", obj);
+            // 抛出异常代表缓存中有值但是空值
+            redisClient.setWithNull(prefix, null, null, null);
+            redisClient.getWithNull(prefix);
+        } catch (RedisClient.NullValueException ex) {
+            log.info("getWithNull null value from cache");
         }
-        log.info("######################################################");
+        redisClient.remove(prefix);
+        obj = redisClient.get(prefix);
+        log.info("getWithNull after remove:{}", obj);
 
-        for (String s : keysStr) {
-            log.info("put:{} {}", s, redisClientUtil.put(s, value, 10));
+        log.info("getSetWithNull ######################################################");
+        Slf4jUtil.setLogLevel(null, "info");
+        supplier = () -> {
+            log.info("getSetWithNull: go into supplier, return object");
+            return new RedisConfig();
+        };
+        redisClient.getSetWithNull(prefix, supplier, RedisClient.ONE_SECOND, RedisClient.ONE_SECOND);
+        redisClient.getSetWithNull(prefix, supplier, RedisClient.ONE_SECOND, RedisClient.ONE_SECOND);
+        obj = redisClient.getWithNull(prefix);
+        log.info("getWithNull, return object:{}", obj);
+        Thread.sleep(1000);
+        obj = redisClient.get(prefix);
+        log.info("getSetWithNull after expire:{}", obj);
+
+        supplier = () -> {
+            log.info("getSetWithNull: go into supplier, return null");
+            return null;
+        };
+        redisClient.getSetWithNull(prefix, supplier, RedisClient.ONE_SECOND, RedisClient.ONE_SECOND);
+        redisClient.getSetWithNull(prefix, supplier, RedisClient.ONE_SECOND, RedisClient.ONE_SECOND);
+        try {
+            redisClient.getWithNull(prefix);
+        } catch (RedisClient.NullValueException ex) {
+            log.info("getWithNull, return null value from cache");
         }
-        List<String> personList = redisClientUtil.batchGet(keysStr);
-        log.info("batchGet:{} {}", keysStr, personList);
-        Map<String, String> personMap = redisClientUtil.batchGetMap(keysStr);
-        log.info("batchGetMap:{} {}", keysStr, personMap);
+        Thread.sleep(1000);
+        obj = redisClient.get(prefix);
+        log.info("getSetWithNull after expire:{}", obj);
 
-        log.info("######################################################");
-
-//        Slf4jUtil.setLogLevel("debug");
-        Random random = new Random();
-
-        redisClientUtil.batchDel(keysStr);
-        for (String s : keysStr) {
-            redisClientUtil.put(s, value, 10);
+        log.info("batchGetSetWithNull ######################################################");
+        Slf4jUtil.setLogLevel(null, "info");
+        redisClient.batchGetSetWithNull(prefix, Arrays.asList(1, 2, 3), (keys) -> {
+            log.info("batchGetSetWithNull: go into function, keys:{}", keys);
+            Map<Integer, RedisConfig> map = new HashMap<>();
+            for (Integer key : keys) {
+                map.put(key, new RedisConfig());
+            }
+            return map;
+        }, RedisClient.ONE_SECOND, RedisClient.ONE_SECOND);
+        redisClient.batchGetSetWithNull(prefix, Arrays.asList(1, 2, 3, 4, 5, 6), (keys) -> {
+            log.info("batchGetSetWithNull: go into function, keys:{}", keys);
+            Map<Integer, RedisConfig> map = new HashMap<>();
+            for (Integer key : keys) {
+                map.put(key, null);
+            }
+            return map;
+        }, RedisClient.ONE_SECOND, RedisClient.ONE_SECOND);
+        redisClient.batchGetSetWithNull(prefix, Arrays.asList(1, 4, 6), (keys) -> {
+            log.info("batchGetSetWithNull: go into function, keys:{}", keys);
+            Map<Integer, RedisConfig> map = new HashMap<>();
+            for (Integer key : keys) {
+                map.put(key, new RedisConfig());
+            }
+            return map;
+        }, RedisClient.ONE_SECOND, RedisClient.ONE_SECOND);
+        for (Integer key : Arrays.asList(1, 2, 3, 4, 5, 6, 7)) {
+            try {
+                obj = redisClient.getWithNull(prefix + key);
+                log.info("get, key:{}, value:{}", prefix + key, obj);
+            } catch (RedisClient.NullValueException ex) {
+                log.info("get, key:{}, null value:{}", prefix + key, null);
+            }
         }
-        redisClientUtil.batchDel(keysStr.subList(2, 4));
-        Map<String, String> batchGetPutStringMap =
-                redisClientUtil.batchGetPut(keysStr, 10, (t) -> {
-                    Map<String, String> biz = Maps.newHashMap();
-                    for (String s : t) {
-                        if (random.nextInt(100) > 50) {
-                            biz.put(s, value + s);
-                        }
-                    }
-                    return biz;
-                });
-        log.info("batchGetPutStringMap:{}", batchGetPutStringMap);
-
-
-        redisClientUtil.batchDel(keysStr);
-        for (String s : keysStr) {
-            redisClientUtil.put(s, value, 10);
+        Thread.sleep(1000);
+        for (Integer key : Arrays.asList(1, 2, 3, 4, 5, 6)) {
+            obj = redisClient.get(prefix + key);
+            log.info("get after expire, key:{}, value:{}", prefix + key, obj);
         }
-        redisClientUtil.batchDel(keysStr.subList(2, 4));
-        batchGetPutStringMap =
-                redisClientUtil.batchGetPut(keysStr, 10, (t) -> {
-                    Map<String, String> biz = Maps.newHashMap();
-                    for (String s : t) {
-                        if (random.nextInt(100) > 50) {
-                            biz.put(s, value + s);
-                        }
-                    }
-                    return biz;
-                }, "default");
-        log.info("batchGetPutStringMap:{}", batchGetPutStringMap);
-        log.info("batchGetPutStringMap:{}", redisClientUtil.batchGetMap(keysStr));
 
-
-        redisClientUtil.batchDel(prefix, keys);
-        for (Long s : keys) {
-            redisClientUtil.put(prefix + s, value, 10);
-        }
-        redisClientUtil.batchDel(prefix, keys.subList(2, 4));
-        Map<Long, String> batchGetPutObjectMap =
-                redisClientUtil.batchGetPut(prefix, keys, 10, (t) -> {
-                    Map<Long, String> biz = Maps.newHashMap();
-                    for (Long s : t) {
-                        if (random.nextInt(100) > 50) {
-                            biz.put(s, value + s);
-                        }
-                    }
-                    return biz;
-                });
-        log.info("batchGetPutObjectMap:{}", batchGetPutObjectMap);
-
-
-        redisClientUtil.batchDel(prefix, keys);
-        for (Long s : keys) {
-            redisClientUtil.put(prefix + s, value, 10);
-        }
-        redisClientUtil.batchDel(prefix, keys.subList(2, 4));
-        batchGetPutObjectMap =
-                redisClientUtil.batchGetPut(prefix, keys, 10, (t) -> {
-                    Map<Long, String> biz = Maps.newHashMap();
-                    for (Long s : t) {
-                        if (random.nextInt(100) > 50) {
-                            biz.put(s, value + s);
-                        }
-                    }
-                    return biz;
-                }, "default");
-        log.info("batchGetPutObjectMap:{}", batchGetPutObjectMap);
-        log.info("batchGetPutObjectMap:{}", redisClientUtil.batchGetMap(prefix, keys));
-
-//        Slf4jUtil.setLogLevel("info");
-
-        log.info("######################################################");
+        log.info("lockRelease ######################################################");
+        log.info("lock:{}", redisClient.lock(prefix, 1));
+        log.info("lock:{}", redisClient.lock(prefix, 1));
+        log.info("release:{}", redisClient.release(prefix));
+        log.info("lock:{}", redisClient.lock(prefix, 1));
+        log.info("release:{}", redisClient.release(prefix));
 
         System.exit(0);
     }

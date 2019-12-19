@@ -1,17 +1,17 @@
 package com.common.collect.container.redis;
 
-import com.common.collect.container.redis.enums.SerializeEnum;
 import lombok.Data;
+import lombok.experimental.Accessors;
+
+import java.io.Serializable;
 
 /**
  * Created by nijianfeng on 2019/3/16.
  */
-
+@Accessors(chain = true)
 @Data
-public class RedisConfig {
-
-    // 序列化方式
-    private SerializeEnum serializeEnum = SerializeEnum.HESSIAN;
+public class RedisConfig implements Serializable {
+    private static final long serialVersionUID = 2130760718083668250L;
 
     // 连接池的配置
     // 最大连接数
