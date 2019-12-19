@@ -35,7 +35,7 @@ public class RedisTest {
         redisClient.set(prefix, new RedisConfig(), RedisClient.ONE_SECOND);
         obj = redisClient.get(prefix);
         log.info("get:{}", obj);
-        Thread.sleep(1000);
+        Thread.sleep(1500);
         obj = redisClient.get(prefix);
         log.info("get after expire:{}", obj);
 
@@ -49,7 +49,7 @@ public class RedisTest {
         redisClient.getSet(prefix, supplier, RedisClient.ONE_SECOND);
         obj = redisClient.get(prefix);
         log.info("getSet:{}", obj);
-        Thread.sleep(1000);
+        Thread.sleep(1500);
         obj = redisClient.get(prefix);
         log.info("getSet after expire:{}", obj);
 
@@ -83,7 +83,7 @@ public class RedisTest {
             obj = redisClient.get(prefix + key);
             log.info("get, key:{}, value:{}", prefix + key, obj);
         }
-        Thread.sleep(1000);
+        Thread.sleep(1500);
         for (Integer key : Arrays.asList(1, 2, 3, 4, 5, 6)) {
             obj = redisClient.get(prefix + key);
             log.info("get after expire, key:{}, value:{}", prefix + key, obj);
@@ -117,7 +117,7 @@ public class RedisTest {
         redisClient.getSetWithNull(prefix, supplier, RedisClient.ONE_SECOND, RedisClient.ONE_SECOND);
         obj = redisClient.getWithNull(prefix);
         log.info("getWithNull, return object:{}", obj);
-        Thread.sleep(1000);
+        Thread.sleep(1500);
         obj = redisClient.get(prefix);
         log.info("getSetWithNull after expire:{}", obj);
 
@@ -132,7 +132,7 @@ public class RedisTest {
         } catch (RedisClient.NullValueException ex) {
             log.info("getWithNull, return null value from cache");
         }
-        Thread.sleep(1000);
+        Thread.sleep(1500);
         obj = redisClient.get(prefix);
         log.info("getSetWithNull after expire:{}", obj);
 
@@ -170,7 +170,7 @@ public class RedisTest {
                 log.info("get, key:{}, null value:{}", prefix + key, null);
             }
         }
-        Thread.sleep(1000);
+        Thread.sleep(1500);
         for (Integer key : Arrays.asList(1, 2, 3, 4, 5, 6)) {
             obj = redisClient.get(prefix + key);
             log.info("get after expire, key:{}, value:{}", prefix + key, obj);

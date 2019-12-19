@@ -77,7 +77,6 @@ public class RedisClient {
             @Override
             public Boolean useJedis(Jedis jedis) {
                 Long ret = jedis.del(serialize(key));
-                logDel(key);
                 if (ret == null || ret < 1) {
                     return false;
                 } else {
@@ -85,6 +84,7 @@ public class RedisClient {
                 }
             }
         };
+        logDel(key);
         return redisService.useJedis(callback);
     }
 
@@ -102,10 +102,10 @@ public class RedisClient {
                 } else {
                     ret = jedis.setex(serialize(key), expireTime.intValue(), serialize(obj));
                 }
-                logUpsert(key, obj);
                 return RETURN_OK.equals(ret);
             }
         };
+        logUpsert(key, obj, expireTime);
         boolean result = redisService.useJedis(callback);
         if (!result) {
             log.error("set(key:{}, obj:{}, expireTime:{}) failed", key, obj, expireTime);
@@ -119,11 +119,12 @@ public class RedisClient {
             public T useJedis(Jedis jedis) {
                 byte[] ret = jedis.get(serialize(key));
                 T t = deserialize(ret);
-                logGet(key, t);
                 return t;
             }
         };
-        return redisService.useJedis(callback);
+        T t = redisService.useJedis(callback);
+        logGet(key, t);
+        return t;
     }
 
     public <T> T getSet(@NonNull String key, @NonNull Supplier<T> supplier, Long expireTime) {
@@ -132,9 +133,7 @@ public class RedisClient {
             return t;
         }
         t = supplier.get();
-        if (!set(key, t, expireTime)) {
-            log.error("set(key:{}, t:{}, expireTime:{}) fail", key, t, expireTime);
-        }
+        set(key, t, expireTime);
         return t;
     }
 
@@ -154,11 +153,7 @@ public class RedisClient {
         }
         if (EmptyUtil.isNotEmpty(unCachedKeys)) {
             Map<K, T> fromDB = function.apply(unCachedKeys);
-            fromDB.forEach((k, v) -> {
-                if (!set(keyPrefix + k, v, expireTime)) {
-                    log.error("set(key:{}, t:{}, expireTime:{}) fail", keyPrefix + k, v, expireTime);
-                }
-            });
+            fromDB.forEach((k, v) -> set(keyPrefix + k, v, expireTime));
             result.putAll(fromDB);
         }
         return result;
@@ -261,7 +256,7 @@ public class RedisClient {
         Callback<Boolean> callback = new Callback<Boolean>() {
             @Override
             public Boolean useJedis(Jedis jedis) {
-                String ret = jedis.set(key, lockId, "nx", "ex", Long.valueOf(seconds));
+                String ret = jedis.set(key, lockId, "nx", "ex", (long) seconds);
                 logLock(key, lockId);
                 return RETURN_OK.equals(ret);
             }
@@ -274,23 +269,17 @@ public class RedisClient {
     }
 
     public boolean releaseWithBizId(@NonNull String key, @NonNull String lockId) {
-        Callback<Long> callback = new Callback<Long>() {
+        Callback<Boolean> callback = new Callback<Boolean>() {
             @Override
-            public Long useJedis(Jedis jedis) {
+            public Boolean useJedis(Jedis jedis) {
                 String script = "if redis.call('get', KEYS[1]) == '" + lockId + "' then return redis.call('del', KEYS[1]) "
                         + "else return 0 end";
                 Object ret = jedis.eval(script, 1, key);
-                logUpsert(key, lockId);
-                return Long.valueOf(ret.toString());
+                logRelease("releaseWithBizId", key, lockId);
+                return Long.valueOf(1).equals(Long.valueOf(ret.toString()));
             }
         };
-        boolean ret = Long.valueOf(1).equals(redisService.useJedis(callback));
-        if (ret) {
-            logRelease("releaseWithBizId", key, lockId);
-            return true;
-        } else {
-            return false;
-        }
+        return redisService.useJedis(callback);
     }
 
     public static class NullValueException extends Exception {
