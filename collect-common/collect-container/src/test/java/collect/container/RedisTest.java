@@ -1,7 +1,5 @@
 package collect.container;
 
-import com.common.collect.api.excps.UnifiedException;
-import com.common.collect.container.ThreadPoolUtil;
 import com.common.collect.container.redis.RedisClient;
 import com.common.collect.container.redis.RedisConfig;
 import com.common.collect.util.log4j.Slf4jUtil;
