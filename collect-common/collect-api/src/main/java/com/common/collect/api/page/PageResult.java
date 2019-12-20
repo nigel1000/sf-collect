@@ -1,9 +1,11 @@
 package com.common.collect.api.page;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -16,6 +18,7 @@ import java.util.Objects;
 
 @Getter
 public class PageResult<T> implements Serializable {
+    private static final long serialVersionUID = 5645629639975335821L;
 
     /**
      * 分页详细
@@ -26,8 +29,56 @@ public class PageResult<T> implements Serializable {
      */
     private List<T> records;
 
+    public PageResult() {
+    }
+
+    private PageResult(@NonNull Integer total, @NonNull List<T> data) {
+        this.records = data;
+        this.page = Page.builder()
+                .total(total)
+                .currentRecordCount(data.size())
+                .build();
+    }
+
+    private PageResult(@NonNull Integer total, @NonNull List<T> data, @NonNull PageParam pageParam) {
+        this.records = data;
+        Integer pageSize = pageParam.getPageSize();
+        int maxPageNo;
+        if (total <= pageSize) {
+            maxPageNo = 1;
+        } else if (total % pageSize == 0) {
+            maxPageNo = total / pageSize;
+        } else {
+            maxPageNo = (total / pageSize) + 1;
+        }
+        this.page = Page.builder()
+                .total(total)
+                .currentRecordCount(data.size())
+                .pageParam(pageParam)
+                .maxPageNo(maxPageNo)
+                .build();
+    }
+
+    public static <T> PageResult<T> gen(Integer total, List<T> data) {
+        return new PageResult<>(total, data);
+    }
+
+    public static <T> PageResult<T> gen(Integer total, List<T> data, PageParam pageParam) {
+        return new PageResult<>(total, data, pageParam);
+    }
+
+    public static <T> PageResult<T> empty() {
+        return new PageResult<>(0, new ArrayList<T>());
+    }
+
+    public Boolean isEmpty() {
+        return Objects.equals(0, this.page.getTotal()) || this.records == null || this.records.isEmpty();
+    }
+
     @Data
-    @Accessors(chain = true)
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class Page implements Serializable {
         /**
          * 总记录数
@@ -49,56 +100,6 @@ public class PageResult<T> implements Serializable {
          */
         private Integer maxPageNo;
 
-        /**
-         * 游标，默认返回本页列表最后一条数据的 id 值
-         */
-        private String cursor;
-
-        public static Page ofTotal(Integer total) {
-            return new Page().setTotal(total);
-        }
-    }
-
-    public PageResult() {
-    }
-
-    private PageResult(@NonNull Integer total, @NonNull List<T> data) {
-        this.records = data;
-        this.page = Page.ofTotal(total).setCurrentRecordCount(data.size());
-    }
-
-    private PageResult(@NonNull Integer total, @NonNull List<T> data, @NonNull PageParam pageParam) {
-        this.records = data;
-        Integer pageSize = pageParam.getPageSize();
-        Integer maxPageNo;
-        if (total <= pageSize) {
-            maxPageNo = 1;
-        } else if (total % pageSize == 0) {
-            maxPageNo = total / pageSize;
-        } else {
-            maxPageNo = (total / pageSize) + 1;
-        }
-        this.page = Page.ofTotal(total)
-                .setCurrentRecordCount(data.size())
-                .setPageParam(pageParam)
-                .setMaxPageNo(maxPageNo)
-        ;
-    }
-
-    public static <T> PageResult<T> gen(Integer total, List<T> data) {
-        return new PageResult<>(total, data);
-    }
-
-    public static <T> PageResult<T> gen(Integer total, List<T> data, PageParam pageParam) {
-        return new PageResult<>(total, data, pageParam);
-    }
-
-    public static <T> PageResult<T> empty() {
-        return new PageResult<>(0, new ArrayList<T>());
-    }
-
-    public Boolean isEmpty() {
-        return Objects.equals(0, this.page.getTotal()) || this.records == null || this.records.isEmpty();
     }
 
 }

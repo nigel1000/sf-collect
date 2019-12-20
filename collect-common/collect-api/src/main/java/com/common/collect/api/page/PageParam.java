@@ -3,7 +3,6 @@ package com.common.collect.api.page;
 import com.common.collect.api.excps.UnifiedException;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 
@@ -13,18 +12,14 @@ import java.io.Serializable;
 
 @NoArgsConstructor
 @Data
-@Accessors(chain = true)
 public class PageParam implements Serializable {
+    private static final long serialVersionUID = 4340348427537645063L;
 
     private Integer pageNo;
     private Integer pageSize;
     private Integer offset;
     private Integer limit;
     private String sortBy;
-    /**
-     * 游标，默认返回本页列表最后一条数据的 id 值
-     */
-    private String cursor;
 
     private int defaultPageNo = 1; /* 页码默认从1开始 */
     private int defaultOffset = 0; /* mysql默认偏移量从0开始 */
