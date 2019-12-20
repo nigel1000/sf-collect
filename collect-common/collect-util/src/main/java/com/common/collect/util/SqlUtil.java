@@ -5,7 +5,7 @@ import lombok.NonNull;
 import java.util.List;
 
 /**
- * Created by fanxiaozhen on 2017/2/14.
+ * Created by hznijianfeng on 2017/2/14.
  */
 public class SqlUtil {
 
@@ -40,13 +40,13 @@ public class SqlUtil {
     public static String paging(String sortBy, Integer limit, Integer offset) {
         String sql = "";
         if (EmptyUtil.isNotBlank(sortBy)) {
-            sql = " order by " + sortBy;
+            sql += " order by " + sortBy;
         }
         if (limit != null) {
-            sql = " limit " + limit;
+            sql += " limit " + limit;
         }
         if (offset != null) {
-            sql = " offset " + offset;
+            sql += " offset " + offset;
         }
         return sql;
     }
@@ -61,14 +61,24 @@ public class SqlUtil {
             if (i == 0) {
                 sql = key + " in ( ";
             }
-            sql = sql + "'" + args.get(i) + "'";
+            sql += "'" + args.get(i) + "'";
             if (size == i) {
-                sql = sql + " ) ";
+                sql += " ) ";
             } else {
-                sql = sql + " , ";
+                sql += " , ";
             }
         }
         return sql;
+    }
+
+    public static String set(@NonNull String sql, @NonNull List<Object> args, @NonNull String field, @NonNull Object value) {
+        if (sql.contains(" set ")) {
+            args.add(value);
+            return " , " + field + " = ? ";
+        } else {
+            args.add(value);
+            return " set " + field + " = ? ";
+        }
     }
 
 }
