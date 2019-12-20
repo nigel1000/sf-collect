@@ -88,6 +88,20 @@ public class RedisClient {
         return redisService.useJedis(callback);
     }
 
+    public String increaseVersion(@NonNull String versionKey) {
+        String version = System.currentTimeMillis() + "_";
+        this.set(versionKey, version, null);
+        return version;
+    }
+
+    public String getVersion(@NonNull String versionKey) {
+        String version = this.get(versionKey);
+        if (version == null) {
+            version = this.increaseVersion(versionKey);
+        }
+        return version;
+    }
+
     // 不处理空值
     public <T> boolean set(@NonNull String key, T obj, Long expireTime) {
         if (obj == null) {
