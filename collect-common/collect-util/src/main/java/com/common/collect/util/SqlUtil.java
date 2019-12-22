@@ -11,28 +11,28 @@ public class SqlUtil {
 
     public static String aroundLike(String column) {
         if (EmptyUtil.isBlank(column)) {
-            return null;
+            return "";
         }
         return "%" + trim(column) + "%";
     }
 
     public static String tailLike(String column) {
         if (EmptyUtil.isBlank(column)) {
-            return null;
+            return "";
         }
         return trim(column) + "%";
     }
 
     public static String headLike(String column) {
         if (EmptyUtil.isBlank(column)) {
-            return null;
+            return "";
         }
         return "%" + trim(column);
     }
 
     public static String trim(String column) {
         if (EmptyUtil.isBlank(column)) {
-            return null;
+            return "";
         }
         return column.trim();
     }
@@ -51,17 +51,17 @@ public class SqlUtil {
         return sql;
     }
 
-    public static String in(@NonNull String key, @NonNull List<?> args) {
-        String sql = "";
-        if (EmptyUtil.isEmpty(args)) {
-            return sql;
+    public static String in(@NonNull String field, @NonNull List<?> values) {
+        if (EmptyUtil.isEmpty(values)) {
+            return "";
         }
-        int size = args.size() - 1;
+        String sql = "";
+        int size = values.size() - 1;
         for (int i = 0; i < size + 1; i++) {
             if (i == 0) {
-                sql = key + " in ( ";
+                sql = field + " in ( ";
             }
-            sql += "'" + args.get(i) + "'";
+            sql += "'" + values.get(i) + "'";
             if (size == i) {
                 sql += " ) ";
             } else {
@@ -71,7 +71,10 @@ public class SqlUtil {
         return sql;
     }
 
-    public static String set(@NonNull String sql, @NonNull List<Object> args, @NonNull String field, @NonNull Object value) {
+    public static String set(@NonNull String sql, @NonNull List<Object> args, @NonNull String field, Object value) {
+        if (value == null) {
+            return "";
+        }
         if (sql.contains(" set ")) {
             args.add(value);
             return " , " + field + " = ? ";
