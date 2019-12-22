@@ -2,6 +2,7 @@ package com.common.collect.util;
 
 import lombok.NonNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -9,118 +10,237 @@ import java.util.List;
  */
 public class SqlUtil {
 
-    public static String aroundLike(String column) {
-        if (EmptyUtil.isBlank(column)) {
-            return "";
-        }
-        return "%" + column + "%";
+    private StringBuilder sb = new StringBuilder();
+    private List<Object> args = new ArrayList<>();
+    private boolean hasWhere = false;
+    private boolean hasSet = false;
+
+    public boolean hasWhere() {
+        return hasWhere;
     }
 
-    public static String tailLike(String column) {
-        if (EmptyUtil.isBlank(column)) {
-            return "";
-        }
-        return column + "%";
+    public String getSql() {
+        return sb.toString();
     }
 
-    public static String headLike(String column) {
-        if (EmptyUtil.isBlank(column)) {
-            return "";
-        }
-        return "%" + column;
+    public List<Object> getSqlArgs() {
+        return args;
     }
 
-    public static String paging(String sortBy, Integer limit, Integer offset) {
-        String sql = "";
-        if (EmptyUtil.isNotBlank(sortBy)) {
-            sql += " order by " + sortBy + " ";
-        }
-        if (limit != null) {
-            sql += " limit " + limit + " ";
-        }
-        if (offset != null) {
-            sql += " offset " + offset + " ";
-        }
-        return sql;
+    private SqlUtil() {
     }
 
-    public static String in(@NonNull String field, @NonNull List<?> values) {
+    public static SqlUtil of(String sql) {
+        SqlUtil sqlUtil = new SqlUtil();
+        sqlUtil.sql(sql);
+        return sqlUtil;
+    }
+
+    public SqlUtil sql(String sql) {
+        if (sql == null) {
+            return this;
+        }
+        sb.append(sql).append(" ");
+        return this;
+    }
+
+    // and
+    public SqlUtil whereEqAnd(@NonNull String field, Object value) {
+        return where("=", "and", field, value);
+    }
+
+    public SqlUtil whereGtAnd(@NonNull String field, Object value) {
+        return where(">", "and", field, value);
+    }
+
+    public SqlUtil whereGtEqAnd(@NonNull String field, Object value) {
+        return where(">=", "and", field, value);
+    }
+
+    public SqlUtil whereLtAnd(@NonNull String field, Object value) {
+        return where("<", "and", field, value);
+    }
+
+    public SqlUtil whereLtEqAnd(@NonNull String field, Object value) {
+        return where("<=", "and", field, value);
+    }
+
+    public SqlUtil whereLikeTailAnd(@NonNull String field, String value) {
+        if (EmptyUtil.isBlank(value)) {
+            return this;
+        }
+        return where("like", "and", field, value + "%");
+    }
+
+    public SqlUtil whereLikeHeadAnd(@NonNull String field, String value) {
+        if (EmptyUtil.isBlank(value)) {
+            return this;
+        }
+        return where("like", "and", field, "%" + value);
+    }
+
+    public SqlUtil whereLikeAroundAnd(@NonNull String field, String value) {
+        if (EmptyUtil.isBlank(value)) {
+            return this;
+        }
+        return where("like", "and", field, "%" + value + "%");
+    }
+
+    public SqlUtil whereInAnd(@NonNull String field, List<?> values) {
+        return whereIn("in", "and", field, values);
+    }
+
+    public SqlUtil whereNotInAnd(@NonNull String field, List<?> values) {
+        return whereIn("not in", "and", field, values);
+    }
+
+    // or
+    public SqlUtil whereEqOr(@NonNull String field, Object value) {
+        return where("=", "or", field, value);
+    }
+
+    public SqlUtil whereGtOr(@NonNull String field, Object value) {
+        return where(">", "or", field, value);
+    }
+
+    public SqlUtil whereGtEqOr(@NonNull String field, Object value) {
+        return where(">=", "or", field, value);
+    }
+
+    public SqlUtil whereLtOr(@NonNull String field, Object value) {
+        return where("<", "or", field, value);
+    }
+
+    public SqlUtil whereLtEqOr(@NonNull String field, Object value) {
+        return where("<=", "or", field, value);
+    }
+
+    public SqlUtil whereLikeTailOr(@NonNull String field, String value) {
+        if (EmptyUtil.isBlank(value)) {
+            return this;
+        }
+        return where("like", "or", field, value + "%");
+    }
+
+    public SqlUtil whereLikeHeadOr(@NonNull String field, String value) {
+        if (EmptyUtil.isBlank(value)) {
+            return this;
+        }
+        return where("like", "or", field, "%" + value);
+    }
+
+    public SqlUtil whereLikeAroundOr(@NonNull String field, String value) {
+        if (EmptyUtil.isBlank(value)) {
+            return this;
+        }
+        return where("like", "or", field, "%" + value + "%");
+    }
+
+    public SqlUtil whereInOr(@NonNull String field, List<?> values) {
+        return whereIn("in", "or", field, values);
+    }
+
+    public SqlUtil whereNotInOr(@NonNull String field, List<?> values) {
+        return whereIn("not in", "or", field, values);
+    }
+
+    // order by
+    public SqlUtil orderBy(@NonNull String orderBy) {
+        sb.append("order by ");
+        sb.append(orderBy);
+        sb.append(" ");
+        return this;
+    }
+
+    // limit
+    public SqlUtil limit(int limit) {
+        sb.append("limit ");
+        sb.append(limit);
+        sb.append(" ");
+        return this;
+    }
+
+    // offset
+    public SqlUtil offset(int offset) {
+        sb.append("offset ");
+        sb.append(offset);
+        sb.append(" ");
+        return this;
+    }
+
+    // set
+    public SqlUtil set(@NonNull String field,
+                       Object value) {
+        if (value == null) {
+            return this;
+        }
+        if (!hasSet) {
+            hasSet = true;
+            sb.append("set");
+        } else {
+            sb.append(",");
+        }
+        sb.append(" ");
+        sb.append(field);
+        sb.append(" = ");
+        args.add(value);
+        sb.append("? ");
+        return this;
+    }
+
+    // relate and or
+    // symbol != = > <
+    private SqlUtil where(@NonNull String compare,
+                          @NonNull String relate,
+                          @NonNull String field,
+                          Object value) {
+        if (value == null) {
+            return this;
+        }
+        if (!hasWhere) {
+            hasWhere = true;
+            sb.append("where");
+        } else {
+            sb.append(relate);
+        }
+        sb.append(" ");
+        sb.append(field);
+        sb.append(" ");
+        sb.append(compare);
+        args.add(value);
+        sb.append(" ? ");
+        return this;
+    }
+
+    private SqlUtil whereIn(@NonNull String compare, @NonNull String relate, @NonNull String field, List<?> values) {
         if (EmptyUtil.isEmpty(values)) {
-            return "";
+            return this;
         }
-        String sql = "";
+
         int size = values.size() - 1;
         for (int i = 0; i < size + 1; i++) {
             if (i == 0) {
-                sql = " " + field + " in (";
+                if (!hasWhere) {
+                    hasWhere = true;
+                    sb.append("where");
+                } else {
+                    sb.append(relate);
+                }
+                sb.append(" ");
+                sb.append(field);
+                sb.append(" ");
+                sb.append(compare);
+                sb.append(" (");
             }
-            sql += "'" + values.get(i) + "'";
+            args.add(values.get(i));
+            sb.append("?");
             if (size == i) {
-                sql += ") ";
+                sb.append(") ");
             } else {
-                sql += " , ";
+                sb.append(",");
             }
         }
-        return sql;
-    }
-
-    public static String where(@NonNull String sql,
-                               @NonNull List<Object> args,
-                               @NonNull String field,
-                               Object value) {
-        return where(sql, "and", "=", args, field, value);
-    }
-
-    // link and or
-    // symbol != = > <
-    public static String where(@NonNull String sql,
-                               @NonNull String link,
-                               @NonNull String symbol,
-                               @NonNull List<Object> args,
-                               @NonNull String field,
-                               Object value) {
-        if (value == null) {
-            return "";
-        }
-        String where = " where ";
-        if (sql.contains(where) && sql.split(where).length == 2) {
-            args.add(value);
-            return link + " " + field + symbol + "? ";
-        } else {
-            args.add(value);
-            return " where " + field + symbol + "? ";
-        }
-    }
-
-
-    public static String set(@NonNull String sql,
-                             @NonNull List<Object> args,
-                             @NonNull String field,
-                             Object value) {
-        if (value == null) {
-            return "";
-        }
-        String set = " set ";
-        if (sql.contains(set) && sql.split(set).length == 2) {
-            args.add(value);
-            return " , " + field + " = ? ";
-        } else {
-            args.add(value);
-            return " set " + field + " = ? ";
-        }
-    }
-
-    public static String concat(String... sqls) {
-        if (sqls == null) {
-            return "";
-        }
-        String result = "";
-        for (String sql : sqls) {
-            if (sql != null) {
-                result = result.concat(" ").concat(sql).concat(" ");
-            }
-        }
-        return result;
+        return this;
     }
 
 }

@@ -3,9 +3,7 @@ package collect.util;
 import com.common.collect.util.SqlUtil;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by nijianfeng on 2019/12/22.
@@ -14,19 +12,46 @@ import java.util.List;
 public class SqlUtilTest {
 
     public static void main(String[] args) {
-        log.info(SqlUtil.aroundLike("like"));
-        log.info(SqlUtil.tailLike("like"));
-        log.info(SqlUtil.headLike("like"));
 
-        List<Object> values = new ArrayList<>();
-        String head = "select * from table";
-        String where1 = SqlUtil.where(head, values, "id", 1);
-        String where2 = SqlUtil.where(head + where1, values, "key", "value");
-        String in = SqlUtil.in("keys", Arrays.asList("value1", "value2"));
-        String paging = SqlUtil.paging("id asc, createAt desc", 2, 2);
+        SqlUtil sqlUtil = SqlUtil.of("select * from table")
+                .whereEqAnd("eqField", 1)
+                .whereEqOr("eqField", 1L)
+                .whereGtAnd("gtField", 1L)
+                .whereGtOr("gtField", 1L)
+                .whereGtEqAnd("gtEqField", 1L)
+                .whereGtEqOr("gtEqField", 1L)
+                .whereLtAnd("ltField", 1L)
+                .whereLtOr("ltField", 1L)
+                .whereLtEqAnd("ltEqField", 1L)
+                .whereLtEqOr("ltEqField", 1L)
+                .whereLikeAroundAnd("likeAroundField", "1")
+                .whereLikeHeadAnd("likeHeadField", "1")
+                .whereLikeTailAnd("likeTailField", "1")
+                .whereLikeAroundOr("likeAroundField", "1")
+                .whereLikeHeadOr("likeHeadField", "1")
+                .whereLikeTailOr("likeTailField", "1")
+                .whereInAnd("inField", Arrays.asList("1", "2"))
+                .whereInOr("inField", Arrays.asList("1", "2"))
+                .whereNotInAnd("notInField", Arrays.asList("1", "2"))
+                .whereNotInOr("notInField", Arrays.asList("1", "2"))
+                .orderBy("id asc, type desc")
+                .limit(10)
+                .offset(5);
 
-        log.info("{}", values);
-        log.info(SqlUtil.concat(head, where1, where2, "and", in, paging));
+        log.info("args:{},size:{}", sqlUtil.getSqlArgs(), sqlUtil.getSqlArgs().size());
+        log.info(sqlUtil.getSql());
+
+        sqlUtil = SqlUtil.of("update table")
+                .set("field1", 1)
+                .set("field2", 2)
+                .set("field3", 3)
+                .whereEqOr("eqField", 1L)
+                .whereLikeHeadAnd("likeHeadField", "1")
+                .whereNotInOr("notInField", Arrays.asList("1", "2"))
+        ;
+
+        log.info("args:{},size:{}", sqlUtil.getSqlArgs(), sqlUtil.getSqlArgs().size());
+        log.info(sqlUtil.getSql());
 
     }
 
