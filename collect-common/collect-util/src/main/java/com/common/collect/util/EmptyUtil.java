@@ -1,6 +1,7 @@
 package com.common.collect.util;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Created by hznijianfeng on 2019/3/26.
@@ -46,6 +47,14 @@ public class EmptyUtil {
 
     public static boolean isNotEmpty(Object[] array) {
         return !isEmpty(array);
+    }
+
+    public static boolean isEmpty(Map<?, ?> map) {
+        return map == null || map.isEmpty();
+    }
+
+    public static boolean isNotEmpty(Map<?, ?> map) {
+        return !isEmpty(map);
     }
 
 }
