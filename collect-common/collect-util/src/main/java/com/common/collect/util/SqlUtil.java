@@ -15,8 +15,23 @@ public class SqlUtil {
     private boolean hasWhere = false;
     private boolean hasSet = false;
 
+    private SqlUtil() {
+    }
+
+    public static SqlUtil of(@NonNull String... sqls) {
+        SqlUtil sqlUtil = new SqlUtil();
+        for (String sql : sqls) {
+            sqlUtil.sql(sql);
+        }
+        return sqlUtil;
+    }
+
     public boolean hasWhere() {
         return hasWhere;
+    }
+
+    public boolean hasSet() {
+        return hasSet;
     }
 
     public String getSql() {
@@ -27,13 +42,18 @@ public class SqlUtil {
         return args;
     }
 
-    private SqlUtil() {
+    public Object[] getSqlArgsArray() {
+        return args.toArray();
     }
 
-    public static SqlUtil of(String sql) {
-        SqlUtil sqlUtil = new SqlUtil();
-        sqlUtil.sql(sql);
-        return sqlUtil;
+    public SqlUtil addSqlArgs(@NonNull List<Object> args) {
+        this.args.addAll(args);
+        return this;
+    }
+
+    public SqlUtil addSqlArg(@NonNull Object arg) {
+        this.args.add(arg);
+        return this;
     }
 
     public SqlUtil sql(String sql) {
@@ -183,9 +203,18 @@ public class SqlUtil {
         sb.append(" ");
         sb.append(field);
         sb.append(" = ");
-        args.add(value);
+        addSqlArg(value);
         sb.append("? ");
         return this;
+    }
+
+    private void startWhere(@NonNull String relate) {
+        if (!hasWhere) {
+            hasWhere = true;
+            sb.append("where");
+        } else {
+            sb.append(relate);
+        }
     }
 
     // relate and or
@@ -197,17 +226,12 @@ public class SqlUtil {
         if (value == null) {
             return this;
         }
-        if (!hasWhere) {
-            hasWhere = true;
-            sb.append("where");
-        } else {
-            sb.append(relate);
-        }
+        startWhere(relate);
         sb.append(" ");
         sb.append(field);
         sb.append(" ");
         sb.append(compare);
-        args.add(value);
+        addSqlArg(value);
         sb.append(" ? ");
         return this;
     }
@@ -216,23 +240,17 @@ public class SqlUtil {
         if (EmptyUtil.isEmpty(values)) {
             return this;
         }
-
         int size = values.size() - 1;
         for (int i = 0; i < size + 1; i++) {
             if (i == 0) {
-                if (!hasWhere) {
-                    hasWhere = true;
-                    sb.append("where");
-                } else {
-                    sb.append(relate);
-                }
+                startWhere(relate);
                 sb.append(" ");
                 sb.append(field);
                 sb.append(" ");
                 sb.append(compare);
                 sb.append(" (");
             }
-            args.add(values.get(i));
+            addSqlArg(values.get(i));
             sb.append("?");
             if (size == i) {
                 sb.append(") ");

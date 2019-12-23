@@ -39,6 +39,7 @@ public class SqlUtilTest {
                 .offset(5);
 
         log.info("args:{},size:{}", sqlUtil.getSqlArgs(), sqlUtil.getSqlArgs().size());
+        log.info("args:{},size:{}", sqlUtil.getSqlArgsArray(), sqlUtil.getSqlArgsArray().length);
         log.info(sqlUtil.getSql());
 
         sqlUtil = SqlUtil.of("update table")
@@ -51,6 +52,7 @@ public class SqlUtilTest {
         ;
 
         log.info("args:{},size:{}", sqlUtil.getSqlArgs(), sqlUtil.getSqlArgs().size());
+        log.info("args:{},size:{}", sqlUtil.getSqlArgsArray(), sqlUtil.getSqlArgsArray().length);
         log.info(sqlUtil.getSql());
 
     }
