@@ -1,13 +1,10 @@
 package com.common.collect.util;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.Collection;
 
 /**
  * Created by hznijianfeng on 2019/3/26.
  */
-
 public class EmptyUtil {
 
     public static boolean isEmpty(CharSequence cs) {
@@ -35,28 +32,20 @@ public class EmptyUtil {
         return !isBlank(cs);
     }
 
-    public static boolean isEmpty(List<?> list) {
+    public static boolean isEmpty(Collection<?> list) {
         return list == null || list.isEmpty();
     }
 
-    public static boolean isNotEmpty(List<?> list) {
+    public static boolean isNotEmpty(Collection<?> list) {
         return !isEmpty(list);
     }
 
-    public static boolean isEmpty(Map<?, ?> map) {
-        return map == null || map.isEmpty();
+    public static boolean isEmpty(Object[] array) {
+        return array == null || array.length == 0;
     }
 
-    public static boolean isNotEmpty(Map<?, ?> map) {
-        return !isEmpty(map);
-    }
-
-    public static boolean isEmpty(Set<?> set) {
-        return set == null || set.isEmpty();
-    }
-
-    public static boolean isNotEmpty(Set<?> set) {
-        return !isEmpty(set);
+    public static boolean isNotEmpty(Object[] array) {
+        return !isEmpty(array);
     }
 
 }
