@@ -1,5 +1,7 @@
 package collect.container;
 
+import com.common.collect.api.excps.UnifiedException;
+import com.common.collect.container.ThreadPoolUtil;
 import com.common.collect.container.redis.RedisClient;
 import com.common.collect.container.redis.RedisConfig;
 import com.common.collect.util.log4j.Slf4jUtil;
@@ -183,6 +185,20 @@ public class RedisTest {
         log.info("lock:{}", redisClient.lock(prefix, 1));
         log.info("release:{}", redisClient.release(prefix));
 
+        for (int i = 0; i < 10; i++) {
+            ThreadPoolUtil.exec(() -> {
+                try {
+                    redisClient.lockRelease(prefix, 1, "获取锁失败", () -> {
+                        log.info("lockRelease:获取锁成功!!");
+                        return true;
+                    });
+                } catch (UnifiedException ex) {
+                    log.info(ex.getErrorMessage());
+                }
+            });
+        }
+
+        Thread.sleep(2000);
         System.exit(0);
     }
 

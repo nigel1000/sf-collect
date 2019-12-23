@@ -11,7 +11,6 @@ import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisSentinelPool;
 import redis.clients.util.Pool;
 
@@ -60,8 +59,8 @@ public class JedisProvider {
         if (EmptyUtil.isEmpty(hostName)) {
             throw UnifiedException.gen("hostName 不能为空");
         }
-        JedisPoolConfig poolConfig = BeanUtil.genBean(new RedisConfig(), JedisPoolConfig.class);
-        Pool<Jedis> pool = new JedisPool(poolConfig, hostName, port, timeout);
+        GenericObjectPoolConfig genericObjectPoolConfig = BeanUtil.genBean(new RedisConfig(), GenericObjectPoolConfig.class);
+        Pool<Jedis> pool = new JedisPool(genericObjectPoolConfig, hostName, port, timeout);
         // 关闭 客户端
         Runtime.getRuntime().addShutdownHook(new Thread(pool::close));
         return pool;
