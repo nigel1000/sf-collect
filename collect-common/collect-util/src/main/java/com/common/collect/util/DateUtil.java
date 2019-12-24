@@ -14,7 +14,6 @@ import java.util.Date;
 /**
  * Created by hznijianfeng on 2018/8/14.
  */
-
 public class DateUtil {
 
     private DateUtil() {
@@ -99,6 +98,11 @@ public class DateUtil {
     }
 
     // 增减时间
+    public static Date plusSeconds(@NonNull Date date, long seconds) {
+        LocalDateTime localDateTime = toLocalDateTime(date);
+        return toDate(localDateTime.plusSeconds(seconds));
+    }
+
     public static Date plusHours(@NonNull Date date, long hours) {
         LocalDateTime localDateTime = toLocalDateTime(date);
         return toDate(localDateTime.plusHours(hours));
@@ -117,6 +121,11 @@ public class DateUtil {
     public static Date plusYears(@NonNull Date date, long years) {
         LocalDateTime localDateTime = toLocalDateTime(date);
         return toDate(localDateTime.plusYears(years));
+    }
+
+    public static Date minusSeconds(@NonNull Date date, long seconds) {
+        LocalDateTime localDateTime = toLocalDateTime(date);
+        return toDate(localDateTime.minusSeconds(seconds));
     }
 
     public static Date minusHours(@NonNull Date date, long hours) {
