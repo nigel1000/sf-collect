@@ -2,6 +2,7 @@ package com.common.collect.container.redis;
 
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.JsonUtil;
+import com.common.collect.util.CtrlUtil;
 import com.common.collect.util.EmptyUtil;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -167,8 +168,10 @@ public class RedisClient {
         }
         if (EmptyUtil.isNotEmpty(unCachedKeys)) {
             Map<K, T> fromDB = function.apply(unCachedKeys);
-            fromDB.forEach((k, v) -> set(keyPrefix + k, v, expireTime));
             result.putAll(fromDB);
+            for (K unCachedKey : unCachedKeys) {
+                set(keyPrefix + unCachedKey, fromDB.get(unCachedKey), expireTime);
+            }
         }
         return result;
     }
@@ -229,15 +232,9 @@ public class RedisClient {
         }
         if (EmptyUtil.isNotEmpty(unCachedKeys)) {
             Map<K, T> fromDB = function.apply(unCachedKeys);
-            fromDB.forEach((k, v) -> {
-                setWithNull(keyPrefix + k, v, notNullExpireTime, nullExpireTime);
-            });
             result.putAll(fromDB);
-            unCachedKeys.removeAll(fromDB.keySet());
-        }
-        if (EmptyUtil.isNotEmpty(unCachedKeys)) {
-            for (K k : unCachedKeys) {
-                setWithNull(keyPrefix + k, null, notNullExpireTime, nullExpireTime);
+            for (K unCachedKey : unCachedKeys) {
+                setWithNull(keyPrefix + unCachedKey, fromDB.get(unCachedKey), notNullExpireTime, nullExpireTime);
             }
         }
         return result;
@@ -294,6 +291,94 @@ public class RedisClient {
             }
         };
         return redisService.useJedis(callback);
+    }
+
+    /**
+     * key 缓存不存在时，只透过一次从数据库取值，重试一次
+     *
+     * @param key
+     * @param fromDB               从存储取数据
+     * @param dataExpireSecondTime 数据缓存时间
+     * @param lockExpireSecondTime 锁释放时间 建议100ms
+     * @param sleepMillTime        重试时间隔时间 建议10ms
+     */
+    public <T> T lockMutexGetSet(@NonNull String key, Supplier<T> fromDB,
+                                 Long dataExpireSecondTime, int lockExpireSecondTime, long sleepMillTime) {
+        T obj = get(key);
+        if (obj != null) {
+            logGet(key);
+            return obj;
+        }
+        String lockMutexKey = "mutex:" + key;
+        obj = CtrlUtil.retry(2, () -> {
+            if (lock(lockMutexKey, lockExpireSecondTime)) {
+                try {
+                    T db = fromDB.get();
+                    set(key, db, dataExpireSecondTime);
+                    return db;
+                } finally {
+                    release(lockMutexKey);
+                }
+            } else {
+                try {
+                    Thread.sleep(sleepMillTime);
+                } catch (InterruptedException e) {
+                    log.info("sleep 失败", e);
+                }
+                T cache = get(key);
+                if (cache != null) {
+                    logGet(key);
+                    return cache;
+                } else {
+                    throw UnifiedException.gen("系统繁忙，请稍后再试");
+                }
+            }
+        });
+        return obj;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T lockMutexGetSetWithNull(@NonNull String key, Supplier<T> fromDB,
+                                         Long dataNotNullExpireSecondTime, Long dataNullExpireSecondTime, int lockExpireSecondTime, long sleepMillTime) {
+        Object obj = get(key);
+        if (obj != null) {
+            logGet(key);
+            if (obj instanceof NullValue) {
+                return null;
+            } else {
+                return (T) obj;
+            }
+        }
+        String lockMutexKey = "mutex:" + key;
+        obj = CtrlUtil.retry(2, () -> {
+            if (lock(lockMutexKey, lockExpireSecondTime)) {
+                try {
+                    T db = fromDB.get();
+                    setWithNull(key, db, dataNotNullExpireSecondTime, dataNullExpireSecondTime);
+                    return db;
+                } finally {
+                    release(lockMutexKey);
+                }
+            } else {
+                try {
+                    Thread.sleep(sleepMillTime);
+                } catch (InterruptedException e) {
+                    log.info("sleep 失败", e);
+                }
+                Object cache = get(key);
+                if (cache != null) {
+                    logGet(key);
+                    if (cache instanceof NullValue) {
+                        return null;
+                    } else {
+                        return (T) cache;
+                    }
+                } else {
+                    throw UnifiedException.gen("系统繁忙，请稍后再试");
+                }
+            }
+        });
+        return (T) obj;
     }
 
     public static class NullValueException extends Exception {

@@ -198,7 +198,39 @@ public class RedisTest {
             });
         }
 
+        for (int i = 0; i < 10; i++) {
+            ThreadPoolUtil.exec(() -> {
+                try {
+                    redisClient.lockMutexGetSet(prefix, () -> {
+                        log.info("go into from db start");
+                        try {
+                            Thread.sleep(40);
+                        } catch (InterruptedException e) {
+                            log.info("sleep 失败", e);
+                        }
+                        log.info("go into from db end");
+                        return new RedisConfig();
+                    }, 1L, 2, 20L);
+                } catch (UnifiedException ex) {
+                    log.info(ex.getErrorMessage());
+                }
+            });
+        }
+        Thread.sleep(4000);
+
+        redisClient.lockMutexGetSet(prefix, () -> {
+            log.info("go into from db start");
+            try {
+                Thread.sleep(30);
+            } catch (InterruptedException e) {
+                log.info("sleep 失败", e);
+            }
+            log.info("go into from db end");
+            return new RedisConfig();
+        }, 1L, 2, 20L);
         Thread.sleep(2000);
+
+
         System.exit(0);
     }
 
