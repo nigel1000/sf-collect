@@ -72,6 +72,18 @@ public class RedisClient {
         return t;
     }
 
+    public <K, T> Map<K, T> batchGet(@NonNull String keyPrefix,
+                                     @NonNull List<K> keys) {
+        Map<K, T> result = new HashMap<>();
+        for (K key : keys) {
+            ValueWrapper<T> wrapper = getValueWrapper(keyPrefix + key);
+            if (wrapper != null) {
+                result.put(key, wrapper.getTarget());
+            }
+        }
+        return result;
+    }
+
     public <T> T getSet(@NonNull String key,
                         @NonNull Supplier<T> supplier,
                         Long notNullExpireTime,
@@ -86,22 +98,14 @@ public class RedisClient {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public <K, T> Map<K, T> batchGetSet(@NonNull String keyPrefix,
                                         @NonNull List<K> keys,
                                         @NonNull Function<List<K>, Map<K, T>> function,
                                         Long notNullCacheTime,
                                         Long nullCacheTime) {
-        Map<K, T> result = new HashMap<>();
-        List<K> unCachedKeys = new ArrayList<>();
-        for (K key : keys) {
-            ValueWrapper<T> wrapper = getValueWrapper(keyPrefix + key);
-            if (wrapper == null) {
-                unCachedKeys.add(key);
-            } else {
-                result.put(key, wrapper.getTarget());
-            }
-        }
+        Map<K, T> result = batchGet(keyPrefix, keys);
+        List<K> unCachedKeys = new ArrayList<>(keys);
+        unCachedKeys.removeAll(result.keySet());
         if (EmptyUtil.isNotEmpty(unCachedKeys)) {
             Map<K, T> fromDB = function.apply(unCachedKeys);
             if (fromDB == null) {
@@ -205,15 +209,15 @@ public class RedisClient {
      * key 缓存不存在时，只透过一次从数据库取值，重试一次
      *
      * @param key
-     * @param fromDB               从存储取数据
-     * @param dataNotNullCacheTime 数据缓存时间
-     * @param lockReleaseTime      锁释放时间 建议100ms
-     * @param retryWaitTime        重试时间隔时间 建议10ms
+     * @param supplier         从存储取数据
+     * @param notNullCacheTime 数据缓存时间
+     * @param lockReleaseTime  锁释放时间 建议100ms
+     * @param retryWaitTime    重试时间隔时间 建议10ms
      */
     public <T> T lockMutexGetSet(@NonNull String key,
-                                 Supplier<T> fromDB,
-                                 Long dataNotNullCacheTime,
-                                 Long dataNullCacheTime,
+                                 Supplier<T> supplier,
+                                 Long notNullCacheTime,
+                                 Long nullCacheTime,
                                  long lockReleaseTime,
                                  long retryWaitTime) {
         ValueWrapper<T> wrapper = getValueWrapper(key);
@@ -225,9 +229,9 @@ public class RedisClient {
         return CtrlUtil.retry(2, () -> {
             if (lock(lockMutexKey, lockReleaseTime)) {
                 try {
-                    T db = fromDB.get();
-                    set(key, db, dataNotNullCacheTime, dataNullCacheTime);
-                    return db;
+                    T fromDB = supplier.get();
+                    set(key, fromDB, notNullCacheTime, nullCacheTime);
+                    return fromDB;
                 } finally {
                     release(lockMutexKey);
                 }

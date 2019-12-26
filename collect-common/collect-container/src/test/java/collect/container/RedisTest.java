@@ -79,7 +79,11 @@ public class RedisTest {
                     log.info("batchGetSet: go into function, keys:{}", keys);
                     Map<Integer, RedisConfig> map = new HashMap<>();
                     for (Integer key : keys) {
-                        map.put(key, new RedisConfig());
+                        if (map.size() > 1) {
+                            map.put(key, new RedisConfig());
+                        } else {
+                            map.put(key, null);
+                        }
                     }
                     return map;
                 },
