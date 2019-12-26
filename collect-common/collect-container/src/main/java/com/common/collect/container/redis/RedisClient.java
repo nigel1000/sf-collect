@@ -39,6 +39,7 @@ public class RedisClient {
                            Long nullCacheTime) {
         ValueWrapper<T> wrapper = new ValueWrapper<>(obj);
         Long cacheTime = wrapper.getCacheTime(notNullCacheTime, nullCacheTime);
+        wrapper.setExpireTime(cacheTime);
         Callback<Boolean> callback = new Callback<Boolean>() {
             @Override
             public Boolean useJedis(Jedis jedis) {
@@ -72,13 +73,13 @@ public class RedisClient {
         return t;
     }
 
-    public <K, T> Map<K, T> batchGet(@NonNull String keyPrefix,
-                                     @NonNull List<K> keys) {
-        Map<K, T> result = new HashMap<>();
+    public <K, T> Map<K, ValueWrapper<T>> batchGetValueWrapper(@NonNull String keyPrefix,
+                                                               @NonNull List<K> keys) {
+        Map<K, ValueWrapper<T>> result = new HashMap<>();
         for (K key : keys) {
             ValueWrapper<T> wrapper = getValueWrapper(keyPrefix + key);
             if (wrapper != null) {
-                result.put(key, wrapper.getTarget());
+                result.put(key, wrapper);
             }
         }
         return result;
@@ -86,16 +87,19 @@ public class RedisClient {
 
     public <T> T getSet(@NonNull String key,
                         @NonNull Supplier<T> supplier,
-                        Long notNullExpireTime,
-                        Long nullExpireTime) {
+                        Long notNullCacheTime,
+                        Long nullCacheTime) {
         ValueWrapper<T> wrapper = getValueWrapper(key);
-        if (wrapper == null) {
-            T t = supplier.get();
-            set(key, t, notNullExpireTime, nullExpireTime);
-            return t;
-        } else {
-            return wrapper.getTarget();
+        if (wrapper != null) {
+            if (wrapper.isExpire()) {
+                set(key, wrapper.getTarget(), notNullCacheTime, nullCacheTime);
+            } else {
+                return wrapper.getTarget();
+            }
         }
+        T t = supplier.get();
+        set(key, t, notNullCacheTime, nullCacheTime);
+        return t;
     }
 
     public <K, T> Map<K, T> batchGetSet(@NonNull String keyPrefix,
@@ -103,9 +107,22 @@ public class RedisClient {
                                         @NonNull Function<List<K>, Map<K, T>> function,
                                         Long notNullCacheTime,
                                         Long nullCacheTime) {
-        Map<K, T> result = batchGet(keyPrefix, keys);
-        List<K> unCachedKeys = new ArrayList<>(keys);
-        unCachedKeys.removeAll(result.keySet());
+        Map<K, ValueWrapper<T>> wrapperMap = batchGetValueWrapper(keyPrefix, keys);
+        Map<K, T> result = new HashMap<>();
+        List<K> unCachedKeys = new ArrayList<>();
+        for (K key : keys) {
+            ValueWrapper<T> wrapper = wrapperMap.get(key);
+            if (wrapper != null) {
+                if (wrapper.isExpire()) {
+                    set(keyPrefix + key, wrapper.getTarget(), notNullCacheTime, notNullCacheTime);
+                    unCachedKeys.add(key);
+                } else {
+                    result.put(key, wrapper.getTarget());
+                }
+            } else {
+                unCachedKeys.add(key);
+            }
+        }
         if (EmptyUtil.isNotEmpty(unCachedKeys)) {
             Map<K, T> fromDB = function.apply(unCachedKeys);
             if (fromDB == null) {

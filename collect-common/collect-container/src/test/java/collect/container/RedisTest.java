@@ -63,6 +63,8 @@ public class RedisTest {
             return new RedisConfig();
         };
         redisClient.getSet(prefix, supplier, RedisClient.ONE_SECOND, RedisClient.ONE_SECOND);
+        wrapper = redisClient.getValueWrapper(prefix);
+        log.info("getSet:{}", wrapper);
         redisClient.getSet(prefix, supplier, RedisClient.ONE_SECOND, RedisClient.ONE_SECOND);
         wrapper = redisClient.getValueWrapper(prefix);
         log.info("getSet:{}", wrapper);
@@ -72,6 +74,7 @@ public class RedisTest {
 
         log.info("batchGetSet ######################################################");
         Slf4jUtil.setLogLevel(null, "info");
+        // 缓存3秒，不会被提前两秒失效
         redisClient.batchGetSet(
                 prefix,
                 Arrays.asList(1, 2, 3),
@@ -87,8 +90,8 @@ public class RedisTest {
                     }
                     return map;
                 },
-                RedisClient.ONE_SECOND,
-                RedisClient.ONE_SECOND);
+                RedisClient.ONE_SECOND * 3,
+                RedisClient.ONE_SECOND * 3);
 
         redisClient.batchGetSet(
                 prefix,
@@ -96,17 +99,20 @@ public class RedisTest {
                     log.info("batchGetSet: go into function, keys:{}", keys);
                     return null;
                 },
-                RedisClient.ONE_SECOND,
-                RedisClient.ONE_SECOND);
+                RedisClient.ONE_SECOND * 3,
+                RedisClient.ONE_SECOND * 3);
 
         for (Integer key : Arrays.asList(1, 2, 3, 4, 5, 6)) {
             wrapper = redisClient.getValueWrapper(prefix + key);
             log.info("batchGetSet, key:{}, value:{}", prefix + key, wrapper);
         }
-        Thread.sleep(1500);
+        Thread.sleep(3000);
         for (Integer key : Arrays.asList(1, 2, 3, 4, 5, 6)) {
             wrapper = redisClient.getValueWrapper(prefix + key);
             log.info("batchGetSet after expire, key:{}, value:{}", prefix + key, wrapper);
+        }
+        for (Integer key : Arrays.asList(1, 2, 3, 4, 5, 6)) {
+            redisClient.remove(prefix + key);
         }
 
         log.info("version ######################################################");
