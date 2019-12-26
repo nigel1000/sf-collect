@@ -8,7 +8,6 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import redis.clients.jedis.Jedis;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,16 +23,230 @@ import java.util.function.Supplier;
 public class RedisClient {
 
     // 时间
-    public static final long ONE_SECOND = TimeUnit.SECONDS.toSeconds(1);
-    public static final long ONE_MINUTE = TimeUnit.MINUTES.toSeconds(1);
-    public static final long ONE_HOUR = TimeUnit.HOURS.toSeconds(1);
-    public static final long ONE_DAY = TimeUnit.DAYS.toSeconds(1);
+    public static final long ONE_SECOND = TimeUnit.SECONDS.toMillis(1);
+    public static final long ONE_MINUTE = TimeUnit.MINUTES.toMillis(1);
+    public static final long ONE_HOUR = TimeUnit.HOURS.toMillis(1);
+    public static final long ONE_DAY = TimeUnit.DAYS.toMillis(1);
 
     // redis 返回
     public static final String RETURN_OK = "OK";
-
     private RedisService redisService = new RedisService();
     private RedisSerialize hessianRedisSerialize = new HessianRedisSerialize();
+
+    public <T> boolean set(@NonNull String key,
+                           T obj,
+                           Long notNullCacheTime,
+                           Long nullCacheTime) {
+        ValueWrapper<T> wrapper = new ValueWrapper<>(obj);
+        Long cacheTime = wrapper.getCacheTime(notNullCacheTime, nullCacheTime);
+        Callback<Boolean> callback = new Callback<Boolean>() {
+            @Override
+            public Boolean useJedis(Jedis jedis) {
+                String ret;
+                if (cacheTime == null || cacheTime <= 0) {
+                    ret = jedis.set(serialize(key), serialize(wrapper));
+                } else {
+                    ret = jedis.setex(serialize(key), cacheTime.intValue() / 1000, serialize(wrapper));
+                }
+                return RETURN_OK.equals(ret);
+            }
+        };
+        logUpsert(key, wrapper, cacheTime);
+        boolean result = redisService.useJedis(callback);
+        if (!result) {
+            log.error("set(key:{}, obj:{}, cacheTime:{}) failed", key, wrapper, cacheTime);
+        }
+        return result;
+    }
+
+    public <T> ValueWrapper<T> getValueWrapper(@NonNull String key) {
+        Callback<ValueWrapper<T>> callback = new Callback<ValueWrapper<T>>() {
+            @Override
+            public ValueWrapper<T> useJedis(Jedis jedis) {
+                byte[] ret = jedis.get(serialize(key));
+                return deserialize(ret);
+            }
+        };
+        ValueWrapper<T> t = redisService.useJedis(callback);
+        logGet(key, t);
+        return t;
+    }
+
+    public <T> T getSet(@NonNull String key,
+                        @NonNull Supplier<T> supplier,
+                        Long notNullExpireTime,
+                        Long nullExpireTime) {
+        ValueWrapper<T> wrapper = getValueWrapper(key);
+        if (wrapper == null) {
+            T t = supplier.get();
+            set(key, t, notNullExpireTime, nullExpireTime);
+            return t;
+        } else {
+            return wrapper.getTarget();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public <K, T> Map<K, T> batchGetSet(@NonNull String keyPrefix,
+                                        @NonNull List<K> keys,
+                                        @NonNull Function<List<K>, Map<K, T>> function,
+                                        Long notNullCacheTime,
+                                        Long nullCacheTime) {
+        Map<K, T> result = new HashMap<>();
+        List<K> unCachedKeys = new ArrayList<>();
+        for (K key : keys) {
+            ValueWrapper<T> wrapper = getValueWrapper(keyPrefix + key);
+            if (wrapper == null) {
+                unCachedKeys.add(key);
+            } else {
+                result.put(key, wrapper.getTarget());
+            }
+        }
+        if (EmptyUtil.isNotEmpty(unCachedKeys)) {
+            Map<K, T> fromDB = function.apply(unCachedKeys);
+            if (fromDB == null) {
+                fromDB = new HashMap<>();
+            }
+            result.putAll(fromDB);
+            for (K unCachedKey : unCachedKeys) {
+                set(keyPrefix + unCachedKey, fromDB.get(unCachedKey), notNullCacheTime, nullCacheTime);
+            }
+        }
+        return result;
+    }
+
+    public boolean remove(@NonNull String key) {
+        Callback<Boolean> callback = new Callback<Boolean>() {
+            @Override
+            public Boolean useJedis(Jedis jedis) {
+                Long ret = jedis.del(serialize(key));
+                if (ret == null || ret < 1) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+        };
+        logDel(key);
+        return redisService.useJedis(callback);
+    }
+
+    public String increaseVersion(@NonNull String versionKey) {
+        String version = System.currentTimeMillis() + "_";
+        this.set(versionKey, version, null, null);
+        return version;
+    }
+
+    public String getVersion(@NonNull String versionKey) {
+        ValueWrapper<String> t = getValueWrapper(versionKey);
+        String version;
+        if (t != null && !t.isNullValue()) {
+            version = t.getTarget();
+        } else {
+            version = this.increaseVersion(versionKey);
+        }
+        return version;
+    }
+
+    public boolean lock(@NonNull String key, long millis) {
+        return lockWithBizId(key, "1", millis);
+    }
+
+    // 有 lockId 表示 解锁时只能此业务来解锁，key 还是只能被设置一次的
+    public boolean lockWithBizId(@NonNull String key, @NonNull String lockId, long millis) {
+        if (millis <= 0) {
+            throw UnifiedException.gen("过期时间不合法");
+        }
+        Callback<Boolean> callback = new Callback<Boolean>() {
+            @Override
+            public Boolean useJedis(Jedis jedis) {
+                String ret = jedis.set(key, lockId, "nx", "ex", millis / 1000);
+                logLock(key, lockId);
+                return RETURN_OK.equals(ret);
+            }
+        };
+        return redisService.useJedis(callback);
+    }
+
+    public boolean release(@NonNull String key) {
+        return releaseWithBizId(key, "1");
+    }
+
+    public boolean releaseWithBizId(@NonNull String key, @NonNull String lockId) {
+        Callback<Boolean> callback = new Callback<Boolean>() {
+            @Override
+            public Boolean useJedis(Jedis jedis) {
+                String script = "if redis.call('get', KEYS[1]) == '" + lockId + "' then return redis.call('del', KEYS[1]) "
+                        + "else return 0 end";
+                Object ret = jedis.eval(script, 1, key);
+                logRelease("releaseWithBizId", key, lockId);
+                return Long.valueOf(1).equals(Long.valueOf(ret.toString()));
+            }
+        };
+        return redisService.useJedis(callback);
+    }
+
+    public <T> T lockRelease(@NonNull String key, long millis, String tips, @NonNull Supplier<T> supplier) {
+        if (lock(key, millis)) {
+            try {
+                return supplier.get();
+            } finally {
+                release(key);
+            }
+        } else {
+            if (EmptyUtil.isEmpty(tips)) {
+                tips = "获取 " + key + " 锁失败";
+            }
+            throw UnifiedException.gen(tips);
+        }
+    }
+
+    /**
+     * key 缓存不存在时，只透过一次从数据库取值，重试一次
+     *
+     * @param key
+     * @param fromDB               从存储取数据
+     * @param dataNotNullCacheTime 数据缓存时间
+     * @param lockReleaseTime      锁释放时间 建议100ms
+     * @param retryWaitTime        重试时间隔时间 建议10ms
+     */
+    public <T> T lockMutexGetSet(@NonNull String key,
+                                 Supplier<T> fromDB,
+                                 Long dataNotNullCacheTime,
+                                 Long dataNullCacheTime,
+                                 long lockReleaseTime,
+                                 long retryWaitTime) {
+        ValueWrapper<T> wrapper = getValueWrapper(key);
+        if (wrapper != null) {
+            logGet(key);
+            return wrapper.getTarget();
+        }
+        String lockMutexKey = "mutex:" + key;
+        return CtrlUtil.retry(2, () -> {
+            if (lock(lockMutexKey, lockReleaseTime)) {
+                try {
+                    T db = fromDB.get();
+                    set(key, db, dataNotNullCacheTime, dataNullCacheTime);
+                    return db;
+                } finally {
+                    release(lockMutexKey);
+                }
+            } else {
+                try {
+                    Thread.sleep(retryWaitTime);
+                } catch (InterruptedException e) {
+                    log.info("sleep 失败", e);
+                }
+                ValueWrapper<T> cache = getValueWrapper(key);
+                if (cache != null) {
+                    logGet(key);
+                    return cache.getTarget();
+                } else {
+                    throw UnifiedException.gen("系统繁忙，请稍后再试");
+                }
+            }
+        });
+    }
 
     private byte[] serialize(Object obj) {
         return hessianRedisSerialize.serialize(obj);
@@ -71,322 +284,6 @@ public class RedisClient {
         if (log.isDebugEnabled()) {
             log.debug("[release cache] [content:{}] ", JsonUtil.bean2json(content));
         }
-    }
-
-    public boolean remove(@NonNull String key) {
-        Callback<Boolean> callback = new Callback<Boolean>() {
-            @Override
-            public Boolean useJedis(Jedis jedis) {
-                Long ret = jedis.del(serialize(key));
-                if (ret == null || ret < 1) {
-                    return false;
-                } else {
-                    return true;
-                }
-            }
-        };
-        logDel(key);
-        return redisService.useJedis(callback);
-    }
-
-    public String increaseVersion(@NonNull String versionKey) {
-        String version = System.currentTimeMillis() + "_";
-        this.set(versionKey, version, null);
-        return version;
-    }
-
-    public String getVersion(@NonNull String versionKey) {
-        String version = this.get(versionKey);
-        if (version == null) {
-            version = this.increaseVersion(versionKey);
-        }
-        return version;
-    }
-
-    // 不处理空值
-    public <T> boolean set(@NonNull String key, T obj, Long expireTime) {
-        if (obj == null) {
-            return true;
-        }
-        Callback<Boolean> callback = new Callback<Boolean>() {
-            @Override
-            public Boolean useJedis(Jedis jedis) {
-                String ret;
-                if (expireTime == null || expireTime <= 0) {
-                    ret = jedis.set(serialize(key), serialize(obj));
-                } else {
-                    ret = jedis.setex(serialize(key), expireTime.intValue(), serialize(obj));
-                }
-                return RETURN_OK.equals(ret);
-            }
-        };
-        logUpsert(key, obj, expireTime);
-        boolean result = redisService.useJedis(callback);
-        if (!result) {
-            log.error("set(key:{}, obj:{}, expireTime:{}) failed", key, obj, expireTime);
-        }
-        return result;
-    }
-
-    public <T> T get(@NonNull String key) {
-        Callback<T> callback = new Callback<T>() {
-            @Override
-            public T useJedis(Jedis jedis) {
-                byte[] ret = jedis.get(serialize(key));
-                T t = deserialize(ret);
-                return t;
-            }
-        };
-        T t = redisService.useJedis(callback);
-        logGet(key, t);
-        return t;
-    }
-
-    public <T> T getSet(@NonNull String key, @NonNull Supplier<T> supplier, Long expireTime) {
-        T t = get(key);
-        if (t != null) {
-            return t;
-        }
-        t = supplier.get();
-        set(key, t, expireTime);
-        return t;
-    }
-
-    public <K, T> Map<K, T> batchGetSet(@NonNull String keyPrefix,
-                                        @NonNull List<K> keys,
-                                        @NonNull Function<List<K>, Map<K, T>> function,
-                                        Long expireTime) {
-        Map<K, T> result = new HashMap<>();
-        List<K> unCachedKeys = new ArrayList<>();
-        for (K key : keys) {
-            T t = get(keyPrefix + key);
-            if (t != null) {
-                result.put(key, t);
-            } else {
-                unCachedKeys.add(key);
-            }
-        }
-        if (EmptyUtil.isNotEmpty(unCachedKeys)) {
-            Map<K, T> fromDB = function.apply(unCachedKeys);
-            result.putAll(fromDB);
-            for (K unCachedKey : unCachedKeys) {
-                set(keyPrefix + unCachedKey, fromDB.get(unCachedKey), expireTime);
-            }
-        }
-        return result;
-    }
-
-    // 处理空值 避免穿透
-    public <T> boolean setWithNull(@NonNull String key, T obj, Long notNullExpireTime, Long nullExpireTime) {
-        if (obj == null) {
-            return set(key, new NullValue(), nullExpireTime);
-        } else {
-            return set(key, obj, notNullExpireTime);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T> T getWithNull(@NonNull String key) throws NullValueException {
-        Object obj = get(key);
-        if (obj == null) {
-            return null;
-        } else if (obj instanceof NullValue) {
-            // 抛出异常代表缓存中有值但是空值
-            throw new NullValueException();
-        } else {
-            return (T) obj;
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T> T getSetWithNull(@NonNull String key, @NonNull Supplier<T> supplier, Long notNullExpireTime, Long nullExpireTime) {
-        Object obj = get(key);
-        if (obj == null) {
-            T t = supplier.get();
-            setWithNull(key, t, notNullExpireTime, nullExpireTime);
-            return t;
-        } else if ((obj instanceof NullValue)) {
-            return null;
-        } else {
-            return (T) obj;
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    public <K, T> Map<K, T> batchGetSetWithNull(@NonNull String keyPrefix,
-                                                @NonNull List<K> keys,
-                                                @NonNull Function<List<K>, Map<K, T>> function,
-                                                Long notNullExpireTime,
-                                                Long nullExpireTime) {
-        Map<K, T> result = new HashMap<>();
-        List<K> unCachedKeys = new ArrayList<>();
-        for (K key : keys) {
-            Object obj = get(keyPrefix + key);
-            if (obj == null) {
-                unCachedKeys.add(key);
-            } else if ((obj instanceof NullValue)) {
-                result.put(key, null);
-            } else {
-                result.put(key, (T) obj);
-            }
-        }
-        if (EmptyUtil.isNotEmpty(unCachedKeys)) {
-            Map<K, T> fromDB = function.apply(unCachedKeys);
-            result.putAll(fromDB);
-            for (K unCachedKey : unCachedKeys) {
-                setWithNull(keyPrefix + unCachedKey, fromDB.get(unCachedKey), notNullExpireTime, nullExpireTime);
-            }
-        }
-        return result;
-    }
-
-    public <T> T lockRelease(@NonNull String key, int seconds, String tips, @NonNull Supplier<T> supplier) {
-        if (lock(key, seconds)) {
-            try {
-                return supplier.get();
-            } finally {
-                release(key);
-            }
-        } else {
-            if (EmptyUtil.isEmpty(tips)) {
-                tips = "获取 " + key + " 锁失败";
-            }
-            throw UnifiedException.gen(tips);
-        }
-    }
-
-    public boolean lock(@NonNull String key, int seconds) {
-        return lockWithBizId(key, "1", seconds);
-    }
-
-    // 有 lockId 表示 解锁时只能此业务来解锁，key 还是只能被设置一次的
-    public boolean lockWithBizId(@NonNull String key, @NonNull String lockId, int seconds) {
-        if (seconds <= 0) {
-            throw UnifiedException.gen("过期时间不合法");
-        }
-        Callback<Boolean> callback = new Callback<Boolean>() {
-            @Override
-            public Boolean useJedis(Jedis jedis) {
-                String ret = jedis.set(key, lockId, "nx", "ex", (long) seconds);
-                logLock(key, lockId);
-                return RETURN_OK.equals(ret);
-            }
-        };
-        return redisService.useJedis(callback);
-    }
-
-    public boolean release(@NonNull String key) {
-        return releaseWithBizId(key, "1");
-    }
-
-    public boolean releaseWithBizId(@NonNull String key, @NonNull String lockId) {
-        Callback<Boolean> callback = new Callback<Boolean>() {
-            @Override
-            public Boolean useJedis(Jedis jedis) {
-                String script = "if redis.call('get', KEYS[1]) == '" + lockId + "' then return redis.call('del', KEYS[1]) "
-                        + "else return 0 end";
-                Object ret = jedis.eval(script, 1, key);
-                logRelease("releaseWithBizId", key, lockId);
-                return Long.valueOf(1).equals(Long.valueOf(ret.toString()));
-            }
-        };
-        return redisService.useJedis(callback);
-    }
-
-    /**
-     * key 缓存不存在时，只透过一次从数据库取值，重试一次
-     *
-     * @param key
-     * @param fromDB               从存储取数据
-     * @param dataExpireSecondTime 数据缓存时间
-     * @param lockExpireSecondTime 锁释放时间 建议100ms
-     * @param sleepMillTime        重试时间隔时间 建议10ms
-     */
-    public <T> T lockMutexGetSet(@NonNull String key, Supplier<T> fromDB,
-                                 Long dataExpireSecondTime, int lockExpireSecondTime, long sleepMillTime) {
-        T obj = get(key);
-        if (obj != null) {
-            logGet(key);
-            return obj;
-        }
-        String lockMutexKey = "mutex:" + key;
-        obj = CtrlUtil.retry(2, () -> {
-            if (lock(lockMutexKey, lockExpireSecondTime)) {
-                try {
-                    T db = fromDB.get();
-                    set(key, db, dataExpireSecondTime);
-                    return db;
-                } finally {
-                    release(lockMutexKey);
-                }
-            } else {
-                try {
-                    Thread.sleep(sleepMillTime);
-                } catch (InterruptedException e) {
-                    log.info("sleep 失败", e);
-                }
-                T cache = get(key);
-                if (cache != null) {
-                    logGet(key);
-                    return cache;
-                } else {
-                    throw UnifiedException.gen("系统繁忙，请稍后再试");
-                }
-            }
-        });
-        return obj;
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T> T lockMutexGetSetWithNull(@NonNull String key, Supplier<T> fromDB,
-                                         Long dataNotNullExpireSecondTime, Long dataNullExpireSecondTime, int lockExpireSecondTime, long sleepMillTime) {
-        Object obj = get(key);
-        if (obj != null) {
-            logGet(key);
-            if (obj instanceof NullValue) {
-                return null;
-            } else {
-                return (T) obj;
-            }
-        }
-        String lockMutexKey = "mutex:" + key;
-        obj = CtrlUtil.retry(2, () -> {
-            if (lock(lockMutexKey, lockExpireSecondTime)) {
-                try {
-                    T db = fromDB.get();
-                    setWithNull(key, db, dataNotNullExpireSecondTime, dataNullExpireSecondTime);
-                    return db;
-                } finally {
-                    release(lockMutexKey);
-                }
-            } else {
-                try {
-                    Thread.sleep(sleepMillTime);
-                } catch (InterruptedException e) {
-                    log.info("sleep 失败", e);
-                }
-                Object cache = get(key);
-                if (cache != null) {
-                    logGet(key);
-                    if (cache instanceof NullValue) {
-                        return null;
-                    } else {
-                        return (T) cache;
-                    }
-                } else {
-                    throw UnifiedException.gen("系统繁忙，请稍后再试");
-                }
-            }
-        });
-        return (T) obj;
-    }
-
-    public static class NullValueException extends Exception {
-        private static final long serialVersionUID = -8452694128579803995L;
-    }
-
-    public static class NullValue implements Serializable {
-        private static final long serialVersionUID = -1368725118708856931L;
     }
 
 }

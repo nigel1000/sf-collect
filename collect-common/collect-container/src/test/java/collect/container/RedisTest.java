@@ -4,6 +4,7 @@ import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.ThreadPoolUtil;
 import com.common.collect.container.redis.RedisClient;
 import com.common.collect.container.redis.RedisConfig;
+import com.common.collect.container.redis.ValueWrapper;
 import com.common.collect.util.log4j.Slf4jUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,21 +26,35 @@ public class RedisTest {
         String prefix = "test_key_";
         log.info("set without expireTime######################################################");
         Slf4jUtil.setLogLevel(null, "info");
-        redisClient.set(prefix, new RedisConfig(), null);
-        RedisConfig obj = redisClient.get(prefix);
-        log.info("get:{}", obj);
+        redisClient.set(prefix, new RedisConfig(), null, null);
+        ValueWrapper<RedisConfig> wrapper = redisClient.getValueWrapper(prefix);
+        log.info("get obj:{}", wrapper);
         redisClient.remove(prefix);
-        obj = redisClient.get(prefix);
-        log.info("get after remove:{}", obj);
+        wrapper = redisClient.getValueWrapper(prefix);
+        log.info("get obj after remove:{}", wrapper);
+
+        redisClient.set(prefix, null, null, null);
+        wrapper = redisClient.getValueWrapper(prefix);
+        log.info("get null:{}", wrapper);
+        redisClient.remove(prefix);
+        wrapper = redisClient.getValueWrapper(prefix);
+        log.info("get null after remove:{}", wrapper);
 
         log.info("set with expireTime######################################################");
         Slf4jUtil.setLogLevel(null, "info");
-        redisClient.set(prefix, new RedisConfig(), RedisClient.ONE_SECOND);
-        obj = redisClient.get(prefix);
-        log.info("get:{}", obj);
+        redisClient.set(prefix, new RedisConfig(), RedisClient.ONE_SECOND, RedisClient.ONE_SECOND);
+        wrapper = redisClient.getValueWrapper(prefix);
+        log.info("get obj:{}", wrapper);
         Thread.sleep(1500);
-        obj = redisClient.get(prefix);
-        log.info("get after expire:{}", obj);
+        wrapper = redisClient.getValueWrapper(prefix);
+        log.info("get obj after expire:{}", wrapper);
+
+        redisClient.set(prefix, null, RedisClient.ONE_SECOND, RedisClient.ONE_SECOND);
+        wrapper = redisClient.getValueWrapper(prefix);
+        log.info("get null:{}", wrapper);
+        Thread.sleep(1500);
+        wrapper = redisClient.getValueWrapper(prefix);
+        log.info("get null after expire:{}", wrapper);
 
         log.info("getSet ######################################################");
         Slf4jUtil.setLogLevel(null, "info");
@@ -47,148 +62,61 @@ public class RedisTest {
             log.info("getSet: go into supplier");
             return new RedisConfig();
         };
-        redisClient.getSet(prefix, supplier, RedisClient.ONE_SECOND);
-        redisClient.getSet(prefix, supplier, RedisClient.ONE_SECOND);
-        obj = redisClient.get(prefix);
-        log.info("getSet:{}", obj);
+        redisClient.getSet(prefix, supplier, RedisClient.ONE_SECOND, RedisClient.ONE_SECOND);
+        redisClient.getSet(prefix, supplier, RedisClient.ONE_SECOND, RedisClient.ONE_SECOND);
+        wrapper = redisClient.getValueWrapper(prefix);
+        log.info("getSet:{}", wrapper);
         Thread.sleep(1500);
-        obj = redisClient.get(prefix);
-        log.info("getSet after expire:{}", obj);
+        wrapper = redisClient.getValueWrapper(prefix);
+        log.info("getSet after expire:{}", wrapper);
 
         log.info("batchGetSet ######################################################");
         Slf4jUtil.setLogLevel(null, "info");
-        redisClient.batchGetSet(prefix, Arrays.asList(1, 2, 3), (keys) -> {
-            log.info("batchGetSet: go into function, keys:{}", keys);
-            Map<Integer, RedisConfig> map = new HashMap<>();
-            for (Integer key : keys) {
-                map.put(key, new RedisConfig());
-            }
-            return map;
-        }, RedisClient.ONE_SECOND);
-        redisClient.batchGetSet(prefix, Arrays.asList(1, 2, 3, 4, 5, 6), (keys) -> {
-            log.info("batchGetSet: go into function, keys:{}", keys);
-            Map<Integer, RedisConfig> map = new HashMap<>();
-            for (Integer key : keys) {
-                map.put(key, new RedisConfig());
-            }
-            return map;
-        }, RedisClient.ONE_SECOND);
-        redisClient.batchGetSet(prefix, Arrays.asList(1, 4, 6), (keys) -> {
-            log.info("batchGetSet: go into function, keys:{}", keys);
-            Map<Integer, RedisConfig> map = new HashMap<>();
-            for (Integer key : keys) {
-                map.put(key, new RedisConfig());
-            }
-            return map;
-        }, RedisClient.ONE_SECOND);
+        redisClient.batchGetSet(
+                prefix,
+                Arrays.asList(1, 2, 3),
+                (keys) -> {
+                    log.info("batchGetSet: go into function, keys:{}", keys);
+                    Map<Integer, RedisConfig> map = new HashMap<>();
+                    for (Integer key : keys) {
+                        map.put(key, new RedisConfig());
+                    }
+                    return map;
+                },
+                RedisClient.ONE_SECOND,
+                RedisClient.ONE_SECOND);
+
+        redisClient.batchGetSet(
+                prefix,
+                Arrays.asList(1, 2, 3, 4, 5, 6), (keys) -> {
+                    log.info("batchGetSet: go into function, keys:{}", keys);
+                    return null;
+                },
+                RedisClient.ONE_SECOND,
+                RedisClient.ONE_SECOND);
+
         for (Integer key : Arrays.asList(1, 2, 3, 4, 5, 6)) {
-            obj = redisClient.get(prefix + key);
-            log.info("get, key:{}, value:{}", prefix + key, obj);
+            wrapper = redisClient.getValueWrapper(prefix + key);
+            log.info("batchGetSet, key:{}, value:{}", prefix + key, wrapper);
         }
         Thread.sleep(1500);
         for (Integer key : Arrays.asList(1, 2, 3, 4, 5, 6)) {
-            obj = redisClient.get(prefix + key);
-            log.info("get after expire, key:{}, value:{}", prefix + key, obj);
+            wrapper = redisClient.getValueWrapper(prefix + key);
+            log.info("batchGetSet after expire, key:{}, value:{}", prefix + key, wrapper);
         }
 
-        log.info("setWithNull######################################################");
-        Slf4jUtil.setLogLevel(null, "info");
-        try {
-            obj = redisClient.getWithNull(prefix);
-            log.info("getWithNull null from cache:{}", obj);
-            redisClient.setWithNull(prefix, new RedisConfig(), null, null);
-            obj = redisClient.getWithNull(prefix);
-            log.info("getWithNull:{}", obj);
-            // 抛出异常代表缓存中有值但是空值
-            redisClient.setWithNull(prefix, null, null, null);
-            redisClient.getWithNull(prefix);
-        } catch (RedisClient.NullValueException ex) {
-            log.info("getWithNull null value from cache");
-        }
+        log.info("version ######################################################");
+        String version = redisClient.getVersion(prefix);
+        log.info("version get, key:{}, value:{}", prefix, version);
+        version = redisClient.increaseVersion(prefix);
+        log.info("version increase, key:{}, value:{}", prefix, version);
         redisClient.remove(prefix);
-        obj = redisClient.get(prefix);
-        log.info("getWithNull after remove:{}", obj);
-
-        log.info("getSetWithNull ######################################################");
-        Slf4jUtil.setLogLevel(null, "info");
-        supplier = () -> {
-            log.info("getSetWithNull: go into supplier, return object");
-            return new RedisConfig();
-        };
-        redisClient.getSetWithNull(prefix, supplier, RedisClient.ONE_SECOND, RedisClient.ONE_SECOND);
-        redisClient.getSetWithNull(prefix, supplier, RedisClient.ONE_SECOND, RedisClient.ONE_SECOND);
-        obj = redisClient.getWithNull(prefix);
-        log.info("getWithNull, return object:{}", obj);
-        Thread.sleep(1500);
-        obj = redisClient.get(prefix);
-        log.info("getSetWithNull after expire:{}", obj);
-
-        supplier = () -> {
-            log.info("getSetWithNull: go into supplier, return null");
-            return null;
-        };
-        redisClient.getSetWithNull(prefix, supplier, RedisClient.ONE_SECOND, RedisClient.ONE_SECOND);
-        redisClient.getSetWithNull(prefix, supplier, RedisClient.ONE_SECOND, RedisClient.ONE_SECOND);
-        try {
-            redisClient.getWithNull(prefix);
-        } catch (RedisClient.NullValueException ex) {
-            log.info("getWithNull, return null value from cache");
-        }
-        Thread.sleep(1500);
-        obj = redisClient.get(prefix);
-        log.info("getSetWithNull after expire:{}", obj);
-
-        log.info("batchGetSetWithNull ######################################################");
-        Slf4jUtil.setLogLevel(null, "info");
-        redisClient.batchGetSetWithNull(prefix, Arrays.asList(1, 2, 3), (keys) -> {
-            log.info("batchGetSetWithNull: go into function, keys:{}", keys);
-            Map<Integer, RedisConfig> map = new HashMap<>();
-            for (Integer key : keys) {
-                map.put(key, new RedisConfig());
-            }
-            return map;
-        }, RedisClient.ONE_SECOND, RedisClient.ONE_SECOND);
-        redisClient.batchGetSetWithNull(prefix, Arrays.asList(1, 2, 3, 4, 5, 6), (keys) -> {
-            log.info("batchGetSetWithNull: go into function, keys:{}", keys);
-            Map<Integer, RedisConfig> map = new HashMap<>();
-            for (Integer key : keys) {
-                map.put(key, null);
-            }
-            return map;
-        }, RedisClient.ONE_SECOND, RedisClient.ONE_SECOND);
-        redisClient.batchGetSetWithNull(prefix, Arrays.asList(1, 4, 6), (keys) -> {
-            log.info("batchGetSetWithNull: go into function, keys:{}", keys);
-            Map<Integer, RedisConfig> map = new HashMap<>();
-            for (Integer key : keys) {
-                map.put(key, new RedisConfig());
-            }
-            return map;
-        }, RedisClient.ONE_SECOND, RedisClient.ONE_SECOND);
-        for (Integer key : Arrays.asList(1, 2, 3, 4, 5, 6, 7)) {
-            try {
-                obj = redisClient.getWithNull(prefix + key);
-                log.info("get, key:{}, value:{}", prefix + key, obj);
-            } catch (RedisClient.NullValueException ex) {
-                log.info("get, key:{}, null value:{}", prefix + key, null);
-            }
-        }
-        Thread.sleep(1500);
-        for (Integer key : Arrays.asList(1, 2, 3, 4, 5, 6)) {
-            obj = redisClient.get(prefix + key);
-            log.info("get after expire, key:{}, value:{}", prefix + key, obj);
-        }
 
         log.info("lockRelease ######################################################");
-        log.info("lock:{}", redisClient.lock(prefix, 1));
-        log.info("lock:{}", redisClient.lock(prefix, 1));
-        log.info("release:{}", redisClient.release(prefix));
-        log.info("lock:{}", redisClient.lock(prefix, 1));
-        log.info("release:{}", redisClient.release(prefix));
-
         for (int i = 0; i < 10; i++) {
             ThreadPoolUtil.exec(() -> {
                 try {
-                    redisClient.lockRelease(prefix, 1, "获取锁失败", () -> {
+                    redisClient.lockRelease(prefix, RedisClient.ONE_SECOND, "获取锁失败", () -> {
                         log.info("lockRelease:获取锁成功!!");
                         return true;
                     });
@@ -197,39 +125,34 @@ public class RedisTest {
                 }
             });
         }
+        Thread.sleep(2000);
 
+        log.info("lockMutexGetSet ######################################################");
         for (int i = 0; i < 10; i++) {
             ThreadPoolUtil.exec(() -> {
                 try {
-                    redisClient.lockMutexGetSet(prefix, () -> {
-                        log.info("go into from db start");
-                        try {
-                            Thread.sleep(40);
-                        } catch (InterruptedException e) {
-                            log.info("sleep 失败", e);
-                        }
-                        log.info("go into from db end");
-                        return new RedisConfig();
-                    }, 1L, 2, 20L);
+                    redisClient.lockMutexGetSet(
+                            prefix,
+                            () -> {
+                                log.info("go into from db start");
+                                try {
+                                    Thread.sleep(40);
+                                } catch (InterruptedException e) {
+                                    log.info("sleep 失败", e);
+                                }
+                                log.info("go into from db end");
+                                return new RedisConfig();
+                            },
+                            RedisClient.ONE_SECOND,
+                            RedisClient.ONE_SECOND,
+                            RedisClient.ONE_SECOND,
+                            20L);
                 } catch (UnifiedException ex) {
-                    log.info(ex.getErrorMessage());
+                    log.info(ex.getErrorMessage(), ex.getCause());
                 }
             });
         }
-        Thread.sleep(4000);
-
-        redisClient.lockMutexGetSet(prefix, () -> {
-            log.info("go into from db start");
-            try {
-                Thread.sleep(30);
-            } catch (InterruptedException e) {
-                log.info("sleep 失败", e);
-            }
-            log.info("go into from db end");
-            return new RedisConfig();
-        }, 1L, 2, 20L);
-        Thread.sleep(2000);
-
+        Thread.sleep(3000);
 
         System.exit(0);
     }
