@@ -7,6 +7,7 @@ import com.common.collect.util.EmptyUtil;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,24 +66,36 @@ public class RedisClient {
             @Override
             public ValueWrapper<T> useJedis(Jedis jedis) {
                 byte[] ret = jedis.get(serialize(key));
-                return deserialize(ret);
+                ValueWrapper<T> wrapper = deserialize(ret);
+                logGet(key, wrapper);
+                return wrapper;
             }
         };
-        ValueWrapper<T> t = redisService.useJedis(callback);
-        logGet(key, t);
-        return t;
+        return redisService.useJedis(callback);
     }
 
     public <K, T> Map<K, ValueWrapper<T>> batchGetValueWrapper(@NonNull String keyPrefix,
                                                                @NonNull List<K> keys) {
-        Map<K, ValueWrapper<T>> result = new HashMap<>();
-        for (K key : keys) {
-            ValueWrapper<T> wrapper = getValueWrapper(keyPrefix + key);
-            if (wrapper != null) {
-                result.put(key, wrapper);
+        Callback<Map<K, ValueWrapper<T>>> callback = new Callback<Map<K, ValueWrapper<T>>>() {
+            @Override
+            public Map<K, ValueWrapper<T>> useJedis(Jedis jedis) {
+                Pipeline pipeline = jedis.pipelined();
+                for (K key : keys) {
+                    pipeline.get(serialize(keyPrefix + key));
+                }
+                List<Object> cacheWrappers = pipeline.syncAndReturnAll();
+                Map<K, ValueWrapper<T>> wrapperMap = new HashMap<>();
+                for (int i = 0; i < keys.size(); i++) {
+                    ValueWrapper<T> wrapper = deserialize((byte[]) cacheWrappers.get(i));
+                    if (wrapper != null) {
+                        logGet(keys.get(i), wrapper);
+                        wrapperMap.put(keys.get(i), wrapper);
+                    }
+                }
+                return wrapperMap;
             }
-        }
-        return result;
+        };
+        return redisService.useJedis(callback);
     }
 
     public <T> T getSet(@NonNull String key,
