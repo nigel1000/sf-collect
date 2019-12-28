@@ -1,29 +1,16 @@
 package com.common.collect.container.excel.context;
 
 import com.common.collect.api.excps.UnifiedException;
-import com.common.collect.container.excel.annotations.ExcelCheck;
-import com.common.collect.container.excel.annotations.ExcelConvert;
-import com.common.collect.container.excel.annotations.ExcelEntity;
-import com.common.collect.container.excel.annotations.ExcelExport;
-import com.common.collect.container.excel.annotations.ExcelImport;
+import com.common.collect.container.excel.annotations.*;
 import com.common.collect.container.excel.base.ExcelConstants;
-import com.common.collect.container.excel.define.IBeanFactory;
-import com.common.collect.container.excel.define.ICellConfig;
-import com.common.collect.container.excel.define.ICheckImportHandler;
-import com.common.collect.container.excel.define.IColIndexParser;
-import com.common.collect.container.excel.define.IConvertExportHandler;
-import com.common.collect.container.excel.define.IConvertImportHandler;
+import com.common.collect.container.excel.define.*;
 import com.common.collect.container.excel.define.bean.SingletonBeanFactory;
 import com.common.collect.container.excel.define.check.MaxCheckImportHandler;
 import com.common.collect.container.excel.define.check.RegexCheckImportHandler;
 import com.common.collect.container.excel.define.check.RequireCheckImportHandler;
 import com.common.collect.container.excel.define.convert.ByTypeConvertExportHandler;
 import com.common.collect.container.excel.define.convert.ByTypeConvertImportHandler;
-import com.common.collect.util.ClassUtil;
-import com.common.collect.util.CollectionUtil;
-import com.common.collect.util.ConvertUtil;
-import com.common.collect.util.EmptyUtil;
-import com.common.collect.util.StringUtil;
+import com.common.collect.util.*;
 import com.google.common.collect.Lists;
 import lombok.Getter;
 
@@ -171,9 +158,10 @@ public class ExcelContext {
                         colIndexNums.add(fieldImportIndex++);
                         break;
                     case by_field_place_default:
-                        colIndexNums.add(fieldImportIndex++);
                         if (EmptyUtil.isNotBlank(colIndex)) {
                             colIndexNums = CollectionUtil.removeDuplicate(colIndexParser.parseColIndex(colIndex));
+                        }else{
+                            colIndexNums.add(fieldImportIndex++);
                         }
                         break;
                 }
@@ -212,9 +200,10 @@ public class ExcelContext {
                         colIndex = fieldExportIndex++;
                         break;
                     case by_field_place_default:
-                        colIndex = fieldExportIndex++;
                         if (excelExport.colIndex() != ExcelConstants.EXCEL_EXPORT_COL_INDEX_DEFAULT) {
                             colIndex = excelExport.colIndex();
+                        }else{
+                            colIndex = fieldExportIndex++;
                         }
                         break;
                 }
