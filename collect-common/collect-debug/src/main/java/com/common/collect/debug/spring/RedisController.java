@@ -4,6 +4,7 @@ import com.common.collect.api.Response;
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.JsonUtil;
 import com.common.collect.container.redis.RedisClient;
+import com.common.collect.container.redis.ValueWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -68,9 +69,14 @@ public class RedisController {
         if ("del".equals(type)) {
             redisClient.remove(key);
         } else if ("get".equals(type)) {
-            return Response.ok(redisClient.get(key));
+            ValueWrapper<Object> wrapper =  redisClient.getValueWrapper(key);
+            if(wrapper == null){
+                return Response.ok(null);
+            }else {
+                return Response.ok(wrapper.getTarget());
+            }
         } else if ("set".equals(type)) {
-            redisClient.set(key, obj, Long.valueOf(expire));
+            redisClient.set(key, obj, Long.valueOf(expire), Long.valueOf(expire));
         } else {
             return Response.ok("操作类型不存在");
         }
