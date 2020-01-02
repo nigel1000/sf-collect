@@ -53,11 +53,11 @@ public class RedisClient {
                 return RETURN_OK.equals(ret);
             }
         };
-        logUpsert(key, wrapper, cacheTime);
         boolean result = redisService.useJedis(callback);
         if (!result) {
             log.error("set(key:{}, obj:{}, cacheTime:{}) failed", key, wrapper, cacheTime);
         }
+        logUpsert(key, wrapper, cacheTime);
         return result;
     }
 
