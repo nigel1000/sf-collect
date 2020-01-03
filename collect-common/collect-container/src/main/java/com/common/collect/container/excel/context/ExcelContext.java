@@ -1,16 +1,29 @@
 package com.common.collect.container.excel.context;
 
 import com.common.collect.api.excps.UnifiedException;
-import com.common.collect.container.excel.annotations.*;
+import com.common.collect.container.excel.annotations.ExcelCheck;
+import com.common.collect.container.excel.annotations.ExcelConvert;
+import com.common.collect.container.excel.annotations.ExcelEntity;
+import com.common.collect.container.excel.annotations.ExcelExport;
+import com.common.collect.container.excel.annotations.ExcelImport;
 import com.common.collect.container.excel.base.ExcelConstants;
-import com.common.collect.container.excel.define.*;
+import com.common.collect.container.excel.define.IBeanFactory;
+import com.common.collect.container.excel.define.ICellConfig;
+import com.common.collect.container.excel.define.ICheckImportHandler;
+import com.common.collect.container.excel.define.IColIndexParser;
+import com.common.collect.container.excel.define.IConvertExportHandler;
+import com.common.collect.container.excel.define.IConvertImportHandler;
 import com.common.collect.container.excel.define.bean.SingletonBeanFactory;
 import com.common.collect.container.excel.define.check.MaxCheckImportHandler;
 import com.common.collect.container.excel.define.check.RegexCheckImportHandler;
 import com.common.collect.container.excel.define.check.RequireCheckImportHandler;
 import com.common.collect.container.excel.define.convert.ByTypeConvertExportHandler;
 import com.common.collect.container.excel.define.convert.ByTypeConvertImportHandler;
-import com.common.collect.util.*;
+import com.common.collect.util.ClassUtil;
+import com.common.collect.util.CollectionUtil;
+import com.common.collect.util.ConvertUtil;
+import com.common.collect.util.EmptyUtil;
+import com.common.collect.util.StringUtil;
 import com.google.common.collect.Lists;
 import lombok.Getter;
 
@@ -29,6 +42,7 @@ import java.util.Map;
 @Getter
 public class ExcelContext {
 
+    private static Map<Class, ExcelContext> cacheClassParseResult = new LinkedHashMap<>();
     // class
     private Class<?> clazz;
     // ExcelEntity
@@ -38,7 +52,6 @@ public class ExcelContext {
     private ICellConfig cellConfig;
     private Class<? extends IBeanFactory> beanFactoryCls;
     private IBeanFactory beanFactory;
-
     // field
     private Map<String, Field> fieldMap = new LinkedHashMap<>();
     private Map<String, Class> fieldClsMap = new LinkedHashMap<>();
@@ -79,12 +92,6 @@ public class ExcelContext {
     private Map<String, String> excelConvertDateFormatMap = new LinkedHashMap<>();
     private Map<String, List<IConvertExportHandler>> excelConvertExportHandlerMap = new LinkedHashMap<>();
 
-    private static Map<Class, ExcelContext> cacheClassParseResult = new LinkedHashMap<>();
-
-    public static ExcelContext excelContext(Class clazz) {
-        return cacheClassParseResult.computeIfAbsent(clazz, (cls) -> new ExcelContext(clazz));
-    }
-
     private ExcelContext(Class<?> clazz) {
         if (clazz == null) {
             throw UnifiedException.gen("参数不能为空");
@@ -121,6 +128,10 @@ public class ExcelContext {
             }
         }
         init();
+    }
+
+    public static ExcelContext excelContext(Class clazz) {
+        return cacheClassParseResult.computeIfAbsent(clazz, (cls) -> new ExcelContext(clazz));
     }
 
     private void init() {
@@ -160,7 +171,7 @@ public class ExcelContext {
                     case by_field_place_default:
                         if (EmptyUtil.isNotBlank(colIndex)) {
                             colIndexNums = CollectionUtil.removeDuplicate(colIndexParser.parseColIndex(colIndex));
-                        }else{
+                        } else {
                             colIndexNums.add(fieldImportIndex++);
                         }
                         break;
@@ -202,7 +213,7 @@ public class ExcelContext {
                     case by_field_place_default:
                         if (excelExport.colIndex() != ExcelConstants.EXCEL_EXPORT_COL_INDEX_DEFAULT) {
                             colIndex = excelExport.colIndex();
-                        }else{
+                        } else {
                             colIndex = fieldExportIndex++;
                         }
                         break;
@@ -216,7 +227,8 @@ public class ExcelContext {
                 excelExportTitleMap.put(fieldName, excelExport.title());
                 Class<? extends ICellConfig> cellConfigCls = excelExport.cellConfig();
                 excelExportCellConfigClsMap.put(fieldName, cellConfigCls);
-                ICellConfig cellConfig = ConvertUtil.selectAfter(this.cellConfig, beanFactory.getBean(cellConfigCls));
+                ICellConfig excelExportCellConfigCls = beanFactory.getBean(cellConfigCls);
+                ICellConfig cellConfig = (excelExportCellConfigCls != null ? excelExportCellConfigCls : this.cellConfig);
                 excelExportCellConfigMap.put(fieldName, cellConfig);
             }
 

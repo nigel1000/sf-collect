@@ -2,6 +2,7 @@ package collect.debug;
 
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.TransactionHelper;
+import com.common.collect.util.ThreadUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -30,11 +31,7 @@ public class TransactionHelperTest {
             log.info("commit transaction end");
         });
 
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        ThreadUtil.sleep(1000);
 
         try {
             transactionHelper.aroundBiz(() -> {
@@ -71,7 +68,7 @@ public class TransactionHelperTest {
         }, false, true);
 
 
-        Thread.sleep(3000);
+        ThreadUtil.sleep(3000);
         System.exit(-1);
     }
 

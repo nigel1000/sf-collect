@@ -1,6 +1,7 @@
 package collect.util;
 
 import com.common.collect.util.ConvertUtil;
+import com.common.collect.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -26,6 +27,8 @@ public class ConvertUtilTest {
 
         log.info(ConvertUtil.firstUpper("UnderLine"));
         log.info(ConvertUtil.firstUpper("underLine"));
+
+        log.info("{}", ConvertUtil.escapeRegex("!@#$%^&*()_"));
 
     }
 

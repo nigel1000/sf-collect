@@ -2,7 +2,7 @@ package com.common.collect.container.elastic;
 
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.util.EmptyUtil;
-import com.common.collect.util.SplitUtil;
+import com.common.collect.util.StringUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHost;
@@ -57,7 +57,7 @@ public class ElasticClient {
             }
         }
 
-        List<String> hosts = SplitUtil.split2StringByComma(host.trim());
+        List<String> hosts = StringUtil.split2StringByComma(host.trim());
         HttpHost[] httpHosts = new HttpHost[hosts.size()];
         int count = 0;
         for (String h : hosts) {

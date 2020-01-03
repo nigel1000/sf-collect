@@ -9,7 +9,7 @@ import com.common.collect.container.mybatis.generator.domain.param.GlobalParam;
 import com.common.collect.container.mybatis.generator.domain.param.MapperParam;
 import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.FileUtil;
-import com.common.collect.util.SplitUtil;
+import com.common.collect.util.StringUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -73,7 +73,7 @@ public class MybatisController {
         globalParam.setDbPwd(password);
         globalParam.setDbDriver(driver);
         globalParam.setAuthor(author);
-        globalParam.setTableNames(SplitUtil.split2StringByComma(tableName));
+        globalParam.setTableNames(StringUtil.split2StringByComma(tableName));
         globalParam.validSelf();
 
         String domainPackagePath = "com.common.collect.web.meta";

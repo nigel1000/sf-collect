@@ -5,6 +5,7 @@ import com.common.collect.container.ThreadPoolUtil;
 import com.common.collect.container.redis.RedisClient;
 import com.common.collect.container.redis.RedisConfig;
 import com.common.collect.container.redis.ValueWrapper;
+import com.common.collect.util.ThreadUtil;
 import com.common.collect.util.log4j.Slf4jUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -45,14 +46,14 @@ public class RedisTest {
         redisClient.set(prefix, new RedisConfig(), RedisClient.ONE_SECOND, RedisClient.ONE_SECOND);
         wrapper = redisClient.getValueWrapper(prefix);
         log.info("get obj:{}", wrapper);
-        Thread.sleep(1500);
+        ThreadUtil.sleep(1500);
         wrapper = redisClient.getValueWrapper(prefix);
         log.info("get obj after expire:{}", wrapper);
 
         redisClient.set(prefix, null, RedisClient.ONE_SECOND, RedisClient.ONE_SECOND);
         wrapper = redisClient.getValueWrapper(prefix);
         log.info("get null:{}", wrapper);
-        Thread.sleep(1500);
+        ThreadUtil.sleep(1500);
         wrapper = redisClient.getValueWrapper(prefix);
         log.info("get null after expire:{}", wrapper);
 
@@ -68,7 +69,7 @@ public class RedisTest {
         redisClient.getSet(prefix, supplier, RedisClient.ONE_SECOND, RedisClient.ONE_SECOND);
         wrapper = redisClient.getValueWrapper(prefix);
         log.info("getSet:{}", wrapper);
-        Thread.sleep(1500);
+        ThreadUtil.sleep(1500);
         wrapper = redisClient.getValueWrapper(prefix);
         log.info("getSet after expire:{}", wrapper);
 
@@ -106,7 +107,7 @@ public class RedisTest {
             wrapper = redisClient.getValueWrapper(prefix + key);
             log.info("batchGetSet, key:{}, value:{}", prefix + key, wrapper);
         }
-        Thread.sleep(3000);
+        ThreadUtil.sleep(3000);
         for (Integer key : Arrays.asList(1, 2, 3, 4, 5, 6)) {
             wrapper = redisClient.getValueWrapper(prefix + key);
             log.info("batchGetSet after expire, key:{}, value:{}", prefix + key, wrapper);
@@ -135,7 +136,7 @@ public class RedisTest {
                 }
             });
         }
-        Thread.sleep(2000);
+        ThreadUtil.sleep(2000);
 
         log.info("lockMutexGetSet ######################################################");
         for (int i = 0; i < 10; i++) {
@@ -145,11 +146,7 @@ public class RedisTest {
                             prefix,
                             () -> {
                                 log.info("go into from db start");
-                                try {
-                                    Thread.sleep(40);
-                                } catch (InterruptedException e) {
-                                    log.info("sleep 失败", e);
-                                }
+                                ThreadUtil.sleep(40);
                                 log.info("go into from db end");
                                 return new RedisConfig();
                             },
@@ -162,7 +159,7 @@ public class RedisTest {
                 }
             });
         }
-        Thread.sleep(3000);
+        ThreadUtil.sleep(3000);
 
         System.exit(0);
     }

@@ -8,7 +8,7 @@ import com.common.collect.container.arrange.context.BizFunctionChain;
 import com.common.collect.container.arrange.context.ConfigContext;
 import com.common.collect.container.arrange.model.FunctionDefineModel;
 import com.common.collect.util.EmptyUtil;
-import com.common.collect.util.SplitUtil;
+import com.common.collect.util.StringUtil;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -47,7 +47,7 @@ public class ArrangeController {
         Map<String, FunctionDefineModel> functionDefineModelMap = new LinkedHashMap<>();
         if ("get".equals(type)) {
             if (EmptyUtil.isNotEmpty(bizKeys)) {
-                for (String bizKey : SplitUtil.split(bizKeys, ",", (t) -> t)) {
+                for (String bizKey : StringUtil.split(bizKeys, ",", (t) -> t)) {
                     BizContext bizContext = BizContext.getBizContextByKey(bizKey);
                     if (bizContext != null) {
                         bizContextMap.put(bizKey, bizContext);
@@ -59,7 +59,7 @@ public class ArrangeController {
                 }
             }
             if (EmptyUtil.isNotEmpty(functionKeys)) {
-                for (String functionKey : SplitUtil.split(functionKeys, ",", (t) -> t)) {
+                for (String functionKey : StringUtil.split(functionKeys, ",", (t) -> t)) {
                     functionDefineModelMap.put(functionKey, ConfigContext.getFunctionByKey(functionKey));
                 }
             }

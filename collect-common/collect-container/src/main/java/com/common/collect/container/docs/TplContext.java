@@ -6,7 +6,7 @@ import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.JsonUtil;
 import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.PathUtil;
-import com.common.collect.util.SplitUtil;
+import com.common.collect.util.StringUtil;
 import lombok.Data;
 import lombok.NonNull;
 
@@ -67,7 +67,7 @@ public class TplContext {
         tplContext.setMethodDesc(docsApiMethod.methodDesc());
         tplContext.setReCreate(priorityConfig(globalConfig.isReCreate(), docsApi != null && docsApi.reCreate(), docsApiMethod.reCreate()));
         tplContext.setShowComment(priorityConfig(globalConfig.isShowComment(), docsApi != null && docsApi.showComment(), docsApiMethod.showComment()));
-        tplContext.setSupportRequest(SplitUtil.join(Arrays.asList(docsApiMethod.supportRequest()), " | "));
+        tplContext.setSupportRequest(StringUtil.join(Arrays.asList(docsApiMethod.supportRequest()), " | "));
 
         docsMethodConfig.valid();
         tplContext.setMethodParamType(docsMethodConfig.getMethodParamType().name());

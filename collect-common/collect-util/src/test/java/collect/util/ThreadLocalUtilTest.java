@@ -26,9 +26,9 @@ public class ThreadLocalUtilTest {
                 log.info("thread:{},pullClear:{}", value, ThreadLocalUtil.pullClear(key));
                 ThreadUtil.sleep(sleep);
                 log.info("thread:{},push:{}", value, ThreadLocalUtil.push(key, Arrays.asList(value, value)));
-                ThreadUtil.sleepThrow(sleep);
+                ThreadUtil.sleep(sleep);
                 log.info("thread:{},pullClear:{}", value, ThreadLocalUtil.pullClear(key));
-                ThreadUtil.sleepThrow(sleep);
+                ThreadUtil.sleep(sleep);
                 log.info("thread:{},pull:{}", value, ThreadLocalUtil.pull(key));
             });
             t.start();

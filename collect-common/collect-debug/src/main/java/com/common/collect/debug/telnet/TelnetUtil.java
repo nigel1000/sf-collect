@@ -1,6 +1,7 @@
 package com.common.collect.debug.telnet;
 
 import com.common.collect.container.trace.TraceIdUtil;
+import com.common.collect.util.ThreadUtil;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.net.telnet.TelnetClient;
@@ -45,7 +46,7 @@ public class TelnetUtil {
         executor.execute(TraceIdUtil.wrap(() -> {
             try {
                 // readLine 是阻塞方法 3秒后若没有主动退出就强制退出
-                Thread.sleep(3000);
+                ThreadUtil.sleep(3000);
                 command(telnet, "exit");
             } catch (Exception e) {
                 e.printStackTrace();

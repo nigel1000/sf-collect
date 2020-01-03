@@ -11,7 +11,7 @@ import com.alibaba.dubbo.rpc.service.GenericService;
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.debug.telnet.TelnetUtil;
 import com.common.collect.util.EmptyUtil;
-import com.common.collect.util.SplitUtil;
+import com.common.collect.util.StringUtil;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.I0Itec.zkclient.ZkClient;
@@ -84,7 +84,7 @@ public class DubboUtil {
             if (!version.equals(result.getParameter("version"))) {
                 continue;
             }
-            if (!SplitUtil.split2StringByComma(result.getParameter("methods")).contains(methodName)) {
+            if (!StringUtil.split2StringByComma(result.getParameter("methods")).contains(methodName)) {
                 throw UnifiedException.gen(" 此服务接口没有此方法 ");
             }
             return result;

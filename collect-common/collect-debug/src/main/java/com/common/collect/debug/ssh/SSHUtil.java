@@ -4,6 +4,7 @@ import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.trace.TraceIdUtil;
 import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.FileUtil;
+import com.common.collect.util.ThreadUtil;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
@@ -70,7 +71,7 @@ public class SSHUtil {
             Future<String> readFuture = executor.submit(TraceIdUtil.wrap(() -> {
                 byte[] result = outStream.toByteArray();
                 while (result == null || result.length == 0) {
-                    Thread.sleep(500);
+                    ThreadUtil.sleep(500);
                     result = outStream.toByteArray();
                 }
                 String ret = new String(outStream.toByteArray(), StandardCharsets.UTF_8);
@@ -82,7 +83,7 @@ public class SSHUtil {
             executor.execute(TraceIdUtil.wrap(() -> {
                 try {
                     // 5秒后若没有主动退出就强制退出
-                    Thread.sleep(5000);
+                    ThreadUtil.sleep(5000);
                     outStream.write("!@#$%^&*()exit!@#$%^&*()".getBytes(StandardCharsets.UTF_8));
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -100,7 +101,7 @@ public class SSHUtil {
         executor.execute(TraceIdUtil.wrap(() -> {
             try {
                 // 5秒后若没有主动退出就强制退出
-                Thread.sleep(10000);
+                ThreadUtil.sleep(10000);
                 channel.disconnect();
                 session.disconnect();
             } catch (Exception ex) {

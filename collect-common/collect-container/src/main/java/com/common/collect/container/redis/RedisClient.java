@@ -4,6 +4,7 @@ import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.JsonUtil;
 import com.common.collect.util.CtrlUtil;
 import com.common.collect.util.EmptyUtil;
+import com.common.collect.util.ThreadUtil;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import redis.clients.jedis.Jedis;
@@ -266,11 +267,7 @@ public class RedisClient {
                     release(lockMutexKey);
                 }
             } else {
-                try {
-                    Thread.sleep(retryWaitTime);
-                } catch (InterruptedException e) {
-                    log.info("sleep 失败", e);
-                }
+                ThreadUtil.sleep(retryWaitTime);
                 ValueWrapper<T> cache = getValueWrapper(key);
                 if (cache != null) {
                     logGet(key);

@@ -2,6 +2,7 @@ package collect.debug;
 
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.debug.ssh.SSHUtil;
+import com.common.collect.util.ThreadUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.FileInputStream;
@@ -61,7 +62,7 @@ public class SSHUtilTest {
 
         boolean needHold = true;
         while (needHold) {
-            Thread.sleep(1000 * 60 * 50);
+            ThreadUtil.sleep(1000 * 60 * 50);
             needHold = false;
         }
     }

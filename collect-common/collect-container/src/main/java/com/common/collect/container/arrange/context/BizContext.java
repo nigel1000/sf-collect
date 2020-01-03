@@ -7,7 +7,6 @@ import com.common.collect.container.arrange.model.BizDefineArrangeModel;
 import com.common.collect.container.arrange.model.BizDefineModel;
 import com.common.collect.container.arrange.model.FunctionDefineModel;
 import com.common.collect.util.EmptyUtil;
-import com.common.collect.util.SplitUtil;
 import com.common.collect.util.StringUtil;
 import com.common.collect.util.ThreadLocalUtil;
 import com.google.common.collect.Lists;
@@ -156,7 +155,7 @@ public class BizContext {
         if (functionChain.getInputTypeEnum().equals(BizFunctionChain.InputTypeEnum.auto) ||
                 functionChain.getInputTypeEnum().equals(BizFunctionChain.InputTypeEnum.assign)) {
             for (String input : arrangeModel.getInputMappings()) {
-                List<String> inOutput = SplitUtil.split(input, Constants.input_split, (t) -> t);
+                List<String> inOutput = StringUtil.split(input, Constants.input_split, (t) -> t);
                 if (inOutput.size() != 2) {
                     throw UnifiedException.gen(StringUtil.format("{} 的 input_mapping(lastOut->currentIn):{} 不合法", functionChain.bizKeyRoutePath(), input));
                 }
