@@ -7,10 +7,6 @@ public interface IMetaConfig {
 
     String getBizType();
 
-    default String getBizName() {
-        return "";
-    }
-
     String getTableName();
 
 }

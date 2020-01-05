@@ -18,7 +18,6 @@ public interface FlowLogMapper extends BaseMapper<FlowLog> {
             "`id`," +
             "`biz_id`," +
             "`biz_type`," +
-            "`biz_type_name`," +
             "`before_value`," +
             "`update_value`," +
             "`after_value`," +
@@ -34,7 +33,6 @@ public interface FlowLogMapper extends BaseMapper<FlowLog> {
             "null," +
             "#{flowLog.bizId}," +
             "#{flowLog.bizType}," +
-            "#{flowLog.bizTypeName}," +
             "#{flowLog.beforeValue}," +
             "#{flowLog.updateValue}," +
             "#{flowLog.afterValue}," +
@@ -45,7 +43,7 @@ public interface FlowLogMapper extends BaseMapper<FlowLog> {
             "now()," +
             "now()" +
             ")")
-    Integer record(@Param("flowLog") FlowLog flowLog, @Param("metaConfig") IMetaConfig metaConfig);
+    Integer record(@Param("metaConfig") IMetaConfig metaConfig, @Param("flowLog") FlowLog flowLog);
 
 
 }

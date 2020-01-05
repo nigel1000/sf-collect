@@ -10,7 +10,6 @@
         `id`,
         `biz_id`,
         `biz_type`,
-        `biz_type_name`,
         `before_value`,
         `update_value`,
         `after_value`,
@@ -44,7 +43,6 @@
         <if test="item.id !=null">`id` = #{item.id},</if>
         <if test="item.bizId !=null">`biz_id` = #{item.bizId},</if>
         <if test="item.bizType !=null">`biz_type` = #{item.bizType},</if>
-        <if test="item.bizTypeName !=null">`biz_type_name` = #{item.bizTypeName},</if>
         <if test="item.beforeValue !=null">`before_value` = #{item.beforeValue},</if>
         <if test="item.updateValue !=null">`update_value` = #{item.updateValue},</if>
         <if test="item.afterValue !=null">`after_value` = #{item.afterValue},</if>

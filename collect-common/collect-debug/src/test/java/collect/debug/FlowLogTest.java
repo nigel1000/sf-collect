@@ -3,7 +3,7 @@ package collect.debug;
 import com.common.collect.container.TransactionHelper;
 import com.common.collect.container.mybatis.MybatisContext;
 import com.common.collect.model.flowlog.FlowLog;
-import com.common.collect.model.flowlog.FlowLogService;
+import com.common.collect.model.flowlog.FlowLogManager;
 import com.common.collect.model.flowlog.IMetaConfig;
 import com.common.collect.model.mapper.FlowLogMapper;
 import lombok.Getter;
@@ -21,28 +21,25 @@ public class FlowLogTest {
     public static void main(String[] args) {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("context-spring.xml");
 
-        FlowLogService flowLogService = (FlowLogService) applicationContext.getBean("flowLogService");
+        FlowLogManager flowLogManager = (FlowLogManager) applicationContext.getBean("flowLogManager");
         FlowLogMapper flowLogMapper = (FlowLogMapper) applicationContext.getBean("flowLogMapper");
 
         TransactionHelper transactionHelper = (TransactionHelper) applicationContext.getBean("transactionHelper");
         transactionHelper.aroundBiz(() -> {
             // 获取执行 sql
-            FlowLog flowLog = FlowLog.gen("bizId", "null", "test", "test");
+            FlowLog flowLog = FlowLog.of(FlowLogConfig.DEMO);
+            flowLog.setBizId("bizId");
+            flowLog.setUpdateValue("null");
+            flowLog.setOperatorId("test");
+            flowLog.setOperatorName("test");
             log.info("flowLog -> {}", flowLog);
 
             MybatisContext.setEnableSqlRecord(true);
-            flowLogService.record(flowLog, FlowLogConfig.DEMO);
+            flowLogManager.record(FlowLogConfig.DEMO, flowLog);
             log.info("sql -> {}", MybatisContext.getSqlRecord(true));
             log.info("load -> return:{},id:{}", flowLogMapper.load(flowLog.getId()), flowLog.getId());
             log.info("delete -> return:{},id:{}", flowLogMapper.delete(flowLog.getId()), flowLog.getId());
 
-            flowLog.setId(null);
-
-            MybatisContext.setEnableSqlRecord(true);
-            flowLogService.create(flowLog, FlowLogConfig.DEMO);
-            log.info("sql -> {}", MybatisContext.getSqlRecord(true));
-            log.info("load -> return:{},id:{}", flowLogMapper.load(flowLog.getId()), flowLog.getId());
-            log.info("delete -> return:{},id:{}", flowLogMapper.delete(flowLog.getId()), flowLog.getId());
         });
     }
 

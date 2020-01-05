@@ -22,7 +22,7 @@ public class CatchExcpTest {
 
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("context-spring.xml");
         DemoService demoService = applicationContext.getBean(DemoService.class);
-        FlowLog flowLog = FlowLog.gen(IdUtil.uuidHex(), "11", "22", "22", "value");
+        FlowLog flowLog = FlowLog.builder().bizId(IdUtil.uuidHex()).bizType("1").build();
 
         TraceIdUtil.initTraceId(null);
         Response<Integer> bizExcp = demoService.responseBizExcp(1, flowLog);
