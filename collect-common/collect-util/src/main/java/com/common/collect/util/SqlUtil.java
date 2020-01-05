@@ -165,7 +165,10 @@ public class SqlUtil {
     }
 
     // order by
-    public SqlUtil orderBy(@NonNull String orderBy) {
+    public SqlUtil orderBy(String orderBy) {
+        if(EmptyUtil.isBlank(orderBy)){
+            return this;
+        }
         sb.append("order by ");
         sb.append(orderBy);
         sb.append(" ");
