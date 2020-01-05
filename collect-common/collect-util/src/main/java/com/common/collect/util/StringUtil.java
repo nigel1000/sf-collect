@@ -87,7 +87,7 @@ public class StringUtil {
     }
 
     public static String format(String pattern, Object... args) {
-        if (EmptyUtil.isEmpty(pattern) || args == null || args.length == 0) {
+        if (pattern == null || args == null || args.length == 0) {
             return pattern;
         }
         FormattingTuple formattingTuple = MessageFormatter.arrayFormat(pattern, args);

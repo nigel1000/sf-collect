@@ -1,10 +1,8 @@
 package com.common.collect.debug.spring;
 
-import com.common.collect.api.Response;
-import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.JsonUtil;
 import com.common.collect.container.redis.RedisClient;
-import com.common.collect.container.redis.ValueWrapper;
+import com.common.collect.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -38,16 +36,16 @@ public class RedisController {
 
     // /back/door/redis/operate?type=del&key=redis&uuid=c26b094cc27346379266147682c41fc0
     @RequestMapping("/operate")
-    public Response<Object> generator(@RequestParam("type") String type,
-                                      @RequestParam(value = "key", required = true) String key,
-                                      @RequestParam(value = "field", required = false) String field,
-                                      @RequestParam(value = "value", required = false) String value,
-                                      @RequestParam(value = "clazz", required = false) String clazz,
-                                      @RequestParam(value = "expire", required = false) Integer expire,
-                                      @RequestParam(value = "uuid") String uuid) {
+    public Object generator(@RequestParam("type") String type,
+                            @RequestParam(value = "key", required = true) String key,
+                            @RequestParam(value = "field", required = false) String field,
+                            @RequestParam(value = "value", required = false) String value,
+                            @RequestParam(value = "clazz", required = false) String clazz,
+                            @RequestParam(value = "expire", required = false) Integer expire,
+                            @RequestParam(value = "uuid") String uuid) {
 
         if (!uuid.equals(redis_key)) {
-            throw UnifiedException.gen("无权限访问此链接");
+            return "无权限访问此链接";
         }
 
         Object obj = value;
@@ -61,27 +59,22 @@ public class RedisController {
                         obj = JsonUtil.json2bean(value, cls);
                     }
                 } catch (Exception ex) {
-                    throw UnifiedException.gen("set 操作失败", ex);
+                    return StringUtil.format("", ex);
                 }
             }
         }
 
         if ("del".equals(type)) {
             redisClient.remove(key);
+            return "del 操作成功";
         } else if ("get".equals(type)) {
-            ValueWrapper<Object> wrapper =  redisClient.getValueWrapper(key);
-            if(wrapper == null){
-                return Response.ok(null);
-            }else {
-                return Response.ok(wrapper.getTarget());
-            }
+            return redisClient.getValueWrapper(key);
         } else if ("set".equals(type)) {
             redisClient.set(key, obj, Long.valueOf(expire), Long.valueOf(expire));
+            return "set 操作成功";
         } else {
-            return Response.ok("操作类型不存在");
+            return "操作类型不存在";
         }
-
-        return Response.ok("操作成功");
     }
 
 
