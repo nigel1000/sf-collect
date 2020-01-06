@@ -65,6 +65,10 @@ public class SqlUtil {
     }
 
     // and
+    public SqlUtil whereSqlAnd(String sql) {
+        return where(sql, "=");
+    }
+
     public SqlUtil whereEqAnd(@NonNull String field, Object value) {
         return where("=", "and", field, value);
     }
@@ -115,6 +119,10 @@ public class SqlUtil {
     }
 
     // or
+    public SqlUtil whereSqlOr(String sql) {
+        return where(sql, "or");
+    }
+
     public SqlUtil whereEqOr(@NonNull String field, Object value) {
         return where("=", "or", field, value);
     }
@@ -192,6 +200,16 @@ public class SqlUtil {
     }
 
     // set
+    private void startSet() {
+        if (!hasSet) {
+            hasSet = true;
+            sb.append("set");
+        } else {
+            sb.append(",");
+        }
+        sb.append(" ");
+    }
+
     public SqlUtil set(@NonNull String field,
                        Object value) {
         if (value == null) {
@@ -215,16 +233,6 @@ public class SqlUtil {
         return this;
     }
 
-    private void startSet() {
-        if (!hasSet) {
-            hasSet = true;
-            sb.append("set");
-        } else {
-            sb.append(",");
-        }
-        sb.append(" ");
-    }
-
     private void startWhere(@NonNull String relate) {
         if (!hasWhere) {
             hasWhere = true;
@@ -233,6 +241,16 @@ public class SqlUtil {
             sb.append(relate);
         }
         sb.append(" ");
+    }
+
+    public SqlUtil where(String sql, @NonNull String relate) {
+        if (sql == null) {
+            return this;
+        }
+        startWhere(relate);
+        sb.append(sql);
+        sb.append(" ");
+        return this;
     }
 
     // relate and or
