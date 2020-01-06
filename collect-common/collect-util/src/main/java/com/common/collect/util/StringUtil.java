@@ -93,12 +93,19 @@ public class StringUtil {
         FormattingTuple formattingTuple = MessageFormatter.arrayFormat(pattern, args);
         String ret = formattingTuple.getMessage();
         if (formattingTuple.getThrowable() != null) {
-            ret = ret + System.getProperty("line.separator");
-            StringWriter stringWriter = new StringWriter();
-            formattingTuple.getThrowable().printStackTrace(new PrintWriter(stringWriter));
-            ret = ret + stringWriter.toString();
+            ret = ret + System.getProperty("line.separator") + fromException(formattingTuple.getThrowable());
         }
         return ret;
     }
+
+    public static String fromException(Throwable ex) {
+        if (ex == null) {
+            return "";
+        }
+        StringWriter stringWriter = new StringWriter();
+        ex.printStackTrace(new PrintWriter(stringWriter));
+        return stringWriter.toString();
+    }
+
 
 }
