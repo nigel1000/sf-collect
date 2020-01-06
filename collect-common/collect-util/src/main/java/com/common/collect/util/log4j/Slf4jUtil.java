@@ -7,6 +7,7 @@ import org.slf4j.impl.StaticLoggerBinder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,8 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Slf4jUtil {
 
     private final static String currentLog4jName = StaticLoggerBinder.getSingleton().getLoggerFactoryClassStr();
-    private final static Map<String, Object> loggerMap = new ConcurrentHashMap<>();
-    private final static Map<String, String> loggerLevelMap = new ConcurrentHashMap<>();
+    private final static Map<String, Object> loggerMap = new HashMap<>();
+    private final static Map<String, String> loggerLevelMap = new HashMap<>();
     private final static String LOG4J12 = "org.slf4j.impl.Log4jLoggerFactory";
     private final static String LOG4J2 = "org.apache.logging.slf4j.Log4jLoggerFactory";
     private final static String SIMPLE = "org.slf4j.impl.SimpleLoggerFactory";

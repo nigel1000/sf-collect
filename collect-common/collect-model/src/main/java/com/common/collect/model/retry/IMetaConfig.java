@@ -7,9 +7,9 @@ public interface IMetaConfig {
 
     String getBizType();
 
-    String getMsgType();
+    String getAlertType();
 
-    String getMsgKey();
+    String getAlertTarget();
 
     String getTableName();
 }

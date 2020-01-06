@@ -1,17 +1,25 @@
 package com.common.collect.model.retry;
 
 import com.common.collect.api.enums.YesNoEnum;
+import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.JsonUtil;
+import com.common.collect.util.EmptyUtil;
 import com.google.common.base.Throwables;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Optional;
 
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 public class RetryRecord implements Serializable {
-
 
     private Long id;
 
@@ -21,22 +29,12 @@ public class RetryRecord implements Serializable {
     private String bizType;
 
     /**
-     * 消息类型 rabbitmq kafka
-     */
-    private String msgType;
-
-    /**
-     * 消息名称: rabbitmq queue 主题名称 kafka topic
-     */
-    private String msgKey;
-
-    /**
      * 业务 Id
      */
     private String bizId;
 
     /**
-     * 譬如tag，key，集群ip，port等 供你确认是否是被需要重试的消息
+     * 譬如tag，key，集群ip，port等
      */
     private String extra;
 
@@ -56,53 +54,54 @@ public class RetryRecord implements Serializable {
     private Integer maxTryTimes;
 
     /**
+     * 通知方式
+     */
+    private String alertType;
+
+    /**
+     * 通知目标
+     */
+    private String alertTarget;
+
+    /**
      * 消费时的错误信息
      */
-    private String initErrorMessage;
+    private String firstErrorMessage;
 
     /**
      * 最后一次重试的错误信息
      */
-    private String endErrorMessage;
+    private String lastErrorMessage;
 
     /**
      * 状态 0：失败 1：成功
      */
-    private Integer status;
+    private Integer state;
 
     private Date createdAt;
 
     private Date updatedAt;
 
-    private RetryRecord() {
+    public static RetryRecord of(@NonNull IMetaConfig metaConfig) {
+        return RetryRecord.builder().bizType(metaConfig.getBizType()).build();
     }
 
-    public static RetryRecord gen(Object body, Exception ex) {
-        return gen(null, body, null, ex);
-    }
-
-    public static RetryRecord gen(String bizId, Object body, Exception ex) {
-        return gen(bizId, body, null, ex);
-    }
-
-    public static RetryRecord gen(String bizId, Object body, Integer maxTryTimes, Exception ex) {
-        RetryRecord retryRecord = new RetryRecord();
-        String temp = JsonUtil.bean2json(body);
-        retryRecord.body = temp.length() > 2000 ? temp.substring(0, 2000) : temp;
-        retryRecord.status = YesNoEnum.NO.getCode();
-        retryRecord.tryTimes = 0;
-        retryRecord.maxTryTimes = Optional.ofNullable(maxTryTimes).orElse(3);
-        retryRecord.bizId = Optional.ofNullable(bizId).orElse("");
-        retryRecord.initErrorMessage = subErrorMessage(ex);
-        return retryRecord;
-    }
-
-    public static String subErrorMessage(Exception ex) {
-        if (ex == null) {
-            return null;
+    public RetryRecord validAdd() {
+        if (EmptyUtil.isBlank(this.bizType)) {
+            throw UnifiedException.gen("bizType 不合理");
         }
-        String temp = Throwables.getStackTraceAsString(ex);
-        return temp.length() > 1000 ? temp.substring(0, 1000) : temp;
+        if (tryTimes == null) {
+            tryTimes = 0;
+        }
+        if (maxTryTimes == null) {
+            maxTryTimes = 3;
+        }
+        if (state == null) {
+            state = YesNoEnum.NO.getCode();
+        }
+        if (bizId == null) {
+            bizId = "";
+        }
+        return this;
     }
-
 }

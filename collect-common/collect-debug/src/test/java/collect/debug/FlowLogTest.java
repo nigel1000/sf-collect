@@ -45,7 +45,7 @@ public class FlowLogTest {
 
     enum FlowLogConfig implements IMetaConfig {
 
-        DEMO("运营后台", "商品编辑");
+        DEMO("1", "商品编辑");
 
         @Getter
         private String bizType;

@@ -5,7 +5,7 @@ import com.common.collect.container.TransactionHelper;
 import com.common.collect.model.retry.AbstractRetryProcess;
 import com.common.collect.model.retry.IMetaConfig;
 import com.common.collect.model.retry.RetryRecord;
-import com.common.collect.model.retry.RetryRecordService;
+import com.common.collect.model.retry.RetryRecordManager;
 import com.common.collect.util.EmptyUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -24,24 +24,17 @@ public class RetryRecordTest {
     public static void main(String[] args) {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("context-spring.xml");
 
-        RetryRecordService retryRecordService = (RetryRecordService) applicationContext.getBean("retryRecordService");
+        RetryRecordManager retryRecordManager = (RetryRecordManager) applicationContext.getBean("retryRecordManager");
 
         TransactionHelper transactionHelper = (TransactionHelper) applicationContext.getBean("transactionHelper");
         transactionHelper.aroundBiz(() -> {
-            retryRecordService.record(RetryRecord.gen("测试", null), RetryRecordConfig.DEMO);
-
-            List<RetryRecord> retryRecordList = retryRecordService.loadNeedRetryRecord(RetryRecordConfig.DEMO);
+            retryRecordManager.record(RetryRecordConfig.DEMO, "1", "body", 3, UnifiedException.gen("exception"));
+            List<RetryRecord> retryRecordList = retryRecordManager.loadNeedRetryRecord(RetryRecordConfig.DEMO, 0);
             log.info("loadNeedRetryRecord -> return:{}", retryRecordList);
             AbstractRetryProcess retryProcess = new AbstractRetryProcess() {
                 @Override
-                public void init() {
-                    this.setMetaConfig(RetryRecordConfig.DEMO);
-                    this.setRetryRecordService(retryRecordService);
-                }
-
-                @Override
-                public void failExecute(RetryRecord retryRecord) {
-                    log.error("fail bizExecute retryRecord:{}", retryRecord.getId());
+                public IMetaConfig metaConfig() {
+                    return RetryRecordConfig.DEMO;
                 }
 
                 @Override
@@ -49,12 +42,11 @@ public class RetryRecordTest {
                     return false;
                 }
             };
-            retryProcess.init();
-
+            int count = 1;
             while (EmptyUtil.isNotEmpty(retryRecordList)) {
                 retryProcess.handleRetry();
-                retryRecordList = retryRecordService.loadNeedRetryRecord(RetryRecordConfig.DEMO);
-                log.info("loadNeedRetryRecord -> return:{}", retryRecordList);
+                retryRecordList = retryRecordManager.loadNeedRetryRecord(RetryRecordConfig.DEMO, 0);
+                log.info("retryProcess.handleRetry times:{}", count++);
             }
 
             throw UnifiedException.gen("回滚测试数据");
@@ -63,19 +55,26 @@ public class RetryRecordTest {
 
     enum RetryRecordConfig implements IMetaConfig {
 
-        DEMO("商品变更", "kafka", "topic.gooods");
+        DEMO("1", "商品变更");
 
         @Getter
         private String bizType;
         @Getter
-        private String msgType;
-        @Getter
-        private String msgKey;
+        private String bizName;
 
-        RetryRecordConfig(String bizType, String msgType, String msgKey) {
+        RetryRecordConfig(String bizType, String bizName) {
             this.bizType = bizType;
-            this.msgType = msgType;
-            this.msgKey = msgKey;
+            this.bizName = bizName;
+        }
+
+        @Override
+        public String getAlertType() {
+            return "log";
+        }
+
+        @Override
+        public String getAlertTarget() {
+            return "alter target";
         }
 
         @Override
