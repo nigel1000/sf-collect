@@ -166,7 +166,7 @@ public class SqlUtil {
 
     // order by
     public SqlUtil orderBy(String orderBy) {
-        if(EmptyUtil.isBlank(orderBy)){
+        if (EmptyUtil.isBlank(orderBy)) {
             return this;
         }
         sb.append("order by ");
@@ -197,6 +197,25 @@ public class SqlUtil {
         if (value == null) {
             return this;
         }
+        startSet();
+        sb.append(field);
+        sb.append(" = ");
+        addSqlArg(value);
+        sb.append("? ");
+        return this;
+    }
+
+    public SqlUtil set(String sql) {
+        if (sql == null) {
+            return this;
+        }
+        startSet();
+        sb.append(sql);
+        sb.append(" ");
+        return this;
+    }
+
+    private void startSet() {
         if (!hasSet) {
             hasSet = true;
             sb.append("set");
@@ -204,11 +223,6 @@ public class SqlUtil {
             sb.append(",");
         }
         sb.append(" ");
-        sb.append(field);
-        sb.append(" = ");
-        addSqlArg(value);
-        sb.append("? ");
-        return this;
     }
 
     private void startWhere(@NonNull String relate) {
