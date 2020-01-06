@@ -232,6 +232,7 @@ public class SqlUtil {
         } else {
             sb.append(relate);
         }
+        sb.append(" ");
     }
 
     // relate and or
@@ -244,7 +245,6 @@ public class SqlUtil {
             return this;
         }
         startWhere(relate);
-        sb.append(" ");
         sb.append(field);
         sb.append(" ");
         sb.append(compare);
@@ -261,7 +261,6 @@ public class SqlUtil {
         for (int i = 0; i < size + 1; i++) {
             if (i == 0) {
                 startWhere(relate);
-                sb.append(" ");
                 sb.append(field);
                 sb.append(" ");
                 sb.append(compare);
