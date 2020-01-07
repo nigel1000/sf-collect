@@ -57,7 +57,7 @@ public class ElasticClient {
             }
         }
 
-        List<String> hosts = StringUtil.split2StringByComma(host.trim());
+        List<String> hosts = StringUtil.split2List(host.trim(), ",");
         HttpHost[] httpHosts = new HttpHost[hosts.size()];
         int count = 0;
         for (String h : hosts) {

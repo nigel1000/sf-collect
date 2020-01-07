@@ -47,7 +47,7 @@ public class ArrangeController {
         Map<String, FunctionDefineModel> functionDefineModelMap = new LinkedHashMap<>();
         if ("get".equals(type)) {
             if (EmptyUtil.isNotEmpty(bizKeys)) {
-                for (String bizKey : StringUtil.split(bizKeys, ",", (t) -> t)) {
+                for (String bizKey : StringUtil.split2List(bizKeys, ",")) {
                     BizContext bizContext = BizContext.getBizContextByKey(bizKey);
                     if (bizContext != null) {
                         bizContextMap.put(bizKey, bizContext);
@@ -59,7 +59,7 @@ public class ArrangeController {
                 }
             }
             if (EmptyUtil.isNotEmpty(functionKeys)) {
-                for (String functionKey : StringUtil.split(functionKeys, ",", (t) -> t)) {
+                for (String functionKey : StringUtil.split2List(functionKeys, ",")) {
                     functionDefineModelMap.put(functionKey, ConfigContext.getFunctionByKey(functionKey));
                 }
             }

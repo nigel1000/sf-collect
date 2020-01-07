@@ -8,8 +8,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
-import java.util.function.Function;
 
 /**
  * Created by hznijianfeng on 2019/3/26.
@@ -17,61 +17,39 @@ import java.util.function.Function;
 
 public class StringUtil {
 
-    public static final String COMMA_SPECIAL = ",";
-
     // split
-    public static String[] split2Array(String key, @NonNull String special) {
-        if (EmptyUtil.isBlank(key)) {
-            return new String[]{};
+    public static List<String> split2List(String str, @NonNull String separator) {
+        if (EmptyUtil.isEmpty(str)) {
+            return new ArrayList<>();
         }
-        // 去空 去空格
-        String[] keys = key.split(ConvertUtil.escapeRegex(special));
-        int index = 0;
-        for (int i = 0; i < keys.length; i++) {
-            String temp = keys[i];
-            if (EmptyUtil.isBlank(temp)) {
-                continue;
-            }
-            keys[index] = temp;
-            index++;
-        }
-        return Arrays.copyOfRange(keys, 0, index);
-    }
-
-    public static <T> List<T> split(String key, @NonNull String special, Function<String, T> valueFunc) {
-        return FunctionUtil.valueList(Arrays.asList(split2Array(key, special)), valueFunc);
-    }
-
-    public static List<Long> split2LongByComma(String key) {
-        return split(key, COMMA_SPECIAL, Long::valueOf);
-    }
-
-    public static List<String> split2StringByComma(String key) {
-        return split(key, COMMA_SPECIAL, s -> s);
+        String[] strArray = str.split(ConvertUtil.escapeRegex(separator));
+        return Arrays.asList(strArray);
     }
 
     // join
-    public static <T> String joinByComma(List<T> list) {
-        return join(list, COMMA_SPECIAL);
-    }
-
-    public static <T> String join(List<T> keys, @NonNull String special) {
-        if (keys == null) {
+    public static String join(Collection<?> array, @NonNull String separator) {
+        if (EmptyUtil.isEmpty(array)) {
             return "";
         }
-        StringBuilder sb = new StringBuilder();
-        for (T key : keys) {
-            // 去空
-            if (key != null && !"".equals(key.toString())) {
-                sb.append(key).append(special);
+        return join(array.toArray(), separator);
+    }
+
+    public static String join(Object[] array, @NonNull String separator) {
+        int startIndex = 0;
+        int endIndex = array.length;
+        if (EmptyUtil.isEmpty(array)) {
+            return "";
+        }
+        final StringBuilder buf = new StringBuilder();
+        for (int i = startIndex; i < endIndex; i++) {
+            if (i > startIndex) {
+                buf.append(separator);
+            }
+            if (array[i] != null) {
+                buf.append(array[i]);
             }
         }
-        String result = sb.toString();
-        if (result.length() == 0) {
-            return result;
-        } else {
-            return result.substring(0, result.length() - special.length());
-        }
+        return buf.toString();
     }
 
     public static List<String> chars(final CharSequence cs) {
@@ -106,6 +84,5 @@ public class StringUtil {
         ex.printStackTrace(new PrintWriter(stringWriter));
         return stringWriter.toString();
     }
-
 
 }

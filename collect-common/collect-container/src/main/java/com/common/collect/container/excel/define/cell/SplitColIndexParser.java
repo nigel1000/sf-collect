@@ -4,6 +4,7 @@ import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.excel.base.ExcelConstants;
 import com.common.collect.container.excel.define.IColIndexParser;
 import com.common.collect.util.EmptyUtil;
+import com.common.collect.util.FunctionUtil;
 import com.common.collect.util.StringUtil;
 import com.google.common.collect.Lists;
 
@@ -18,8 +19,8 @@ public class SplitColIndexParser implements IColIndexParser {
     public List<Integer> parseColIndex(String colIndex) {
 
         List<Integer> result = Lists.newArrayList();
-        for (String rangeIndex : StringUtil.split2Array(colIndex.trim(), ",")) {
-            List<Integer> indexs = StringUtil.split(rangeIndex.trim(), ":", Integer::valueOf);
+        for (String rangeIndex : StringUtil.split2List(colIndex.trim(), ",")) {
+            List<Integer> indexs = FunctionUtil.valueList(StringUtil.split2List(rangeIndex.trim(), ":"), Integer::valueOf);
             if (indexs.size() == 1) {
                 result.add(indexs.get(0));
             } else if (indexs.size() == 2 && indexs.get(1) >= indexs.get(0)) {

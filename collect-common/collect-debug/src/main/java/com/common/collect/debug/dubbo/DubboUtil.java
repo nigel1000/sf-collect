@@ -84,7 +84,7 @@ public class DubboUtil {
             if (!version.equals(result.getParameter("version"))) {
                 continue;
             }
-            if (!StringUtil.split2StringByComma(result.getParameter("methods")).contains(methodName)) {
+            if (!StringUtil.split2List(result.getParameter("methods"), ",").contains(methodName)) {
                 throw UnifiedException.gen(" 此服务接口没有此方法 ");
             }
             return result;

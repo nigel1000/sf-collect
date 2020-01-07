@@ -73,7 +73,7 @@ public class MybatisController {
         globalParam.setDbPwd(password);
         globalParam.setDbDriver(driver);
         globalParam.setAuthor(author);
-        globalParam.setTableNames(StringUtil.split2StringByComma(tableName));
+        globalParam.setTableNames(StringUtil.split2List(tableName, ","));
         globalParam.validSelf();
 
         String domainPackagePath = "com.common.collect.web.meta";

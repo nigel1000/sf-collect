@@ -155,7 +155,7 @@ public class BizContext {
         if (functionChain.getInputTypeEnum().equals(BizFunctionChain.InputTypeEnum.auto) ||
                 functionChain.getInputTypeEnum().equals(BizFunctionChain.InputTypeEnum.assign)) {
             for (String input : arrangeModel.getInputMappings()) {
-                List<String> inOutput = StringUtil.split(input, Constants.input_split, (t) -> t);
+                List<String> inOutput = StringUtil.split2List(input, Constants.input_split);
                 if (inOutput.size() != 2) {
                     throw UnifiedException.gen(StringUtil.format("{} 的 input_mapping(lastOut->currentIn):{} 不合法", functionChain.bizKeyRoutePath(), input));
                 }
