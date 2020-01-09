@@ -3,8 +3,8 @@ package com.common.collect.debug.ssh;
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.trace.TraceIdUtil;
 import com.common.collect.util.EmptyUtil;
+import com.common.collect.util.ExceptionUtil;
 import com.common.collect.util.FileUtil;
-import com.common.collect.util.ThreadUtil;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
@@ -33,6 +33,12 @@ public class SSHUtil {
 
     public static byte[] PRIVATE_KEY = null;
     public static byte[] PUBLIC_KEY = null;
+    //默认session通道存活时间（我这里定义的是5分钟）
+    private static Integer SESSION_TIMEOUT = 300000;
+    //默认connect通道存活时间
+    private static Integer CONNECT_TIMEOUT = 1000;
+    //默认端口号
+    private static Integer DEFAULT_PORT = 22;
 
     static {
         try {
@@ -42,13 +48,6 @@ public class SSHUtil {
             log.info("找不到秘钥文件", ex);
         }
     }
-
-    //默认session通道存活时间（我这里定义的是5分钟）
-    private static Integer SESSION_TIMEOUT = 300000;
-    //默认connect通道存活时间
-    private static Integer CONNECT_TIMEOUT = 1000;
-    //默认端口号
-    private static Integer DEFAULT_PORT = 22;
 
     public static String execCommand(@NonNull SSHInfo sshInfo) {
         log.info("sshInfo:[{}]", sshInfo);
@@ -71,7 +70,7 @@ public class SSHUtil {
             Future<String> readFuture = executor.submit(TraceIdUtil.wrap(() -> {
                 byte[] result = outStream.toByteArray();
                 while (result == null || result.length == 0) {
-                    ThreadUtil.sleep(500);
+                    ExceptionUtil.eatException(() -> Thread.sleep(500), false);
                     result = outStream.toByteArray();
                 }
                 String ret = new String(outStream.toByteArray(), StandardCharsets.UTF_8);
@@ -83,7 +82,7 @@ public class SSHUtil {
             executor.execute(TraceIdUtil.wrap(() -> {
                 try {
                     // 5秒后若没有主动退出就强制退出
-                    ThreadUtil.sleep(5000);
+                    ExceptionUtil.eatException(() -> Thread.sleep(5000), false);
                     outStream.write("!@#$%^&*()exit!@#$%^&*()".getBytes(StandardCharsets.UTF_8));
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -101,7 +100,7 @@ public class SSHUtil {
         executor.execute(TraceIdUtil.wrap(() -> {
             try {
                 // 5秒后若没有主动退出就强制退出
-                ThreadUtil.sleep(10000);
+                ExceptionUtil.eatException(() -> Thread.sleep(10000), false);
                 channel.disconnect();
                 session.disconnect();
             } catch (Exception ex) {
@@ -239,7 +238,8 @@ public class SSHUtil {
                 }
 
                 @Override
-                public void showMessage(String s) {}
+                public void showMessage(String s) {
+                }
             });
             // 设置session通道最大开启时间 默认5分钟 可调用close()方法关闭该通道
             session.connect(SESSION_TIMEOUT);

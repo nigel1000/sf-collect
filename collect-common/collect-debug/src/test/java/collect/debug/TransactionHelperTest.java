@@ -2,7 +2,7 @@ package collect.debug;
 
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.TransactionHelper;
-import com.common.collect.util.ThreadUtil;
+import com.common.collect.util.ExceptionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -31,7 +31,7 @@ public class TransactionHelperTest {
             log.info("commit transaction end");
         });
 
-        ThreadUtil.sleep(1000);
+        ExceptionUtil.eatException(() -> Thread.sleep(1000), false);
 
         try {
             transactionHelper.aroundBiz(() -> {
@@ -67,8 +67,8 @@ public class TransactionHelperTest {
             log.info("taskName5 end");
         }, false, true);
 
+        ExceptionUtil.eatException(() -> Thread.sleep(3000), false);
 
-        ThreadUtil.sleep(3000);
         System.exit(-1);
     }
 

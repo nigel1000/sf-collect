@@ -24,20 +24,14 @@ import java.util.jar.JarFile;
 public class ClassUtil {
 
     public static Class<?> getClass(String clazz) {
-        try {
-            return Class.forName(clazz);
-        } catch (Exception e) {
-            throw UnifiedException.gen(StringUtil.format(" {} 无法找到类定义", clazz), e);
-        }
+        return ExceptionUtil.reThrowException(() -> Class.forName(clazz),
+                StringUtil.format(" {} 无法找到类定义", clazz));
     }
 
     @SuppressWarnings("unchecked")
     public static <T> T newInstance(Class<?> clazz) {
-        try {
-            return (T) clazz.newInstance();
-        } catch (Exception e) {
-            throw UnifiedException.gen(StringUtil.format(" {} 无法初始化", clazz.getName()), e);
-        }
+        return ExceptionUtil.reThrowException(() -> (T) clazz.newInstance(),
+                StringUtil.format(" {} 无法初始化", clazz.getName()));
     }
 
     @SuppressWarnings("unchecked")
@@ -46,48 +40,37 @@ public class ClassUtil {
     }
 
     public static Method getMethod(Class<?> clazz, String methodName, Class<?>... args) {
-        try {
-            return clazz.getDeclaredMethod(methodName, args);
-        } catch (Exception e) {
-            throw UnifiedException.gen(StringUtil.format("class:{},method:{},找不到", clazz.getName(), methodName), e);
-        }
+        return ExceptionUtil.reThrowException(() -> clazz.getDeclaredMethod(methodName, args),
+                StringUtil.format("class:{},method:{},找不到", clazz.getName(), methodName));
     }
 
     @SuppressWarnings("unchecked")
     public static <T> T invoke(Object target, Method method, Object... args) {
-        try {
-            return (T) method.invoke(target, args);
-        } catch (Exception e) {
-            throw UnifiedException.gen(StringUtil.format(" class:{},method:{} 调用方法失败", target.getClass().getName(), method.getName()), e);
-        }
+        return ExceptionUtil.reThrowException(() -> (T) method.invoke(target, args),
+                StringUtil.format(" class:{},method:{} 调用方法失败", target.getClass().getName(), method.getName()));
     }
 
     public static Field getField(Class<?> clazz, String name) {
-        try {
-            Field field = clazz.getDeclaredField(name);
-            field.setAccessible(true);
-            return field;
-        } catch (Exception e) {
-            throw UnifiedException.gen(StringUtil.format(" class:{},field:{} 获取属性值失败", clazz.getName(), name), e);
-        }
+        return ExceptionUtil.reThrowException(() -> {
+                    Field field = clazz.getDeclaredField(name);
+                    field.setAccessible(true);
+                    return field;
+                },
+                StringUtil.format(" class:{},field:{} 获取属性值失败", clazz.getName(), name));
     }
 
     @SuppressWarnings("unchecked")
     public static <T> T getFieldValue(Object target, String name) {
-        try {
-            return (T) getField(target.getClass(), name).get(target);
-        } catch (Exception e) {
-            throw UnifiedException.gen(StringUtil.format(" class:{},field:{} 获取属性值失败", target.getClass().getName(), name), e);
-        }
+        return ExceptionUtil.reThrowException(() -> (T) getField(target.getClass(), name).get(target),
+                StringUtil.format(" class:{},field:{} 获取属性值失败", target.getClass().getName(), name));
     }
 
     public static void setFieldValue(Object target, String name, Object value) {
-        try {
-            Field field = getField(target.getClass(), name);
-            field.set(target, value);
-        } catch (Exception e) {
-            throw UnifiedException.gen(StringUtil.format(" class:{},field:{} 设置属性值失败", target.getClass().getName(), name), e);
-        }
+        ExceptionUtil.reThrowException(() -> {
+                    Field field = getField(target.getClass(), name);
+                    field.set(target, value);
+                },
+                StringUtil.format(" class:{},field:{} 设置属性值失败", target.getClass().getName(), name));
     }
 
     public static Object returnBaseDataType(Class<?> returnType) {

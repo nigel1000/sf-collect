@@ -1,7 +1,7 @@
 package collect.util;
 
+import com.common.collect.util.ExceptionUtil;
 import com.common.collect.util.ThreadLocalUtil;
-import com.common.collect.util.ThreadUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
@@ -22,13 +22,14 @@ public class ThreadLocalUtilTest {
             final int value = i;
             final int sleep = new Random(i).nextInt(1000);
             Thread t = new Thread(() -> {
-                ThreadUtil.sleep(sleep);
+                ExceptionUtil.NoReturn noReturn = () -> Thread.sleep(sleep);
+                ExceptionUtil.eatException(noReturn, false);
                 log.info("thread:{},pullClear:{}", value, ThreadLocalUtil.pullClear(key));
-                ThreadUtil.sleep(sleep);
+                ExceptionUtil.eatException(noReturn, false);
                 log.info("thread:{},push:{}", value, ThreadLocalUtil.push(key, Arrays.asList(value, value)));
-                ThreadUtil.sleep(sleep);
+                ExceptionUtil.eatException(noReturn, false);
                 log.info("thread:{},pullClear:{}", value, ThreadLocalUtil.pullClear(key));
-                ThreadUtil.sleep(sleep);
+                ExceptionUtil.eatException(noReturn, false);
                 log.info("thread:{},pull:{}", value, ThreadLocalUtil.pull(key));
             });
             t.start();
