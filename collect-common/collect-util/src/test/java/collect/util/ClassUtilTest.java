@@ -15,8 +15,16 @@ public class ClassUtilTest {
 
     public static void main(String[] args) {
 
+        System.out.println(ClassUtil.getSuperClassGenericType(CallableTest.class, 0));
         System.out.println(ClassUtil.getSuperClassGenericType(CallableTest.class, 1));
-        System.out.println(ClassUtil.getSuperInterfaceGenericType(CallableTest.class, 0));
+
+        System.out.println(ClassUtil.getSuperInterfaceGenericType(CallableTest.class, Callable.class,0));
+
+        System.out.println(ClassUtil.getSuperInterfaceGenericType(CallableTest.class, Supplier.class,0));
+
+        System.out.println(ClassUtil.getSuperInterfaceGenericType(CallableTest.class, Function.class, 0));
+        System.out.println(ClassUtil.getSuperInterfaceGenericType(CallableTest.class, Function.class,1));
+
 
     }
 
