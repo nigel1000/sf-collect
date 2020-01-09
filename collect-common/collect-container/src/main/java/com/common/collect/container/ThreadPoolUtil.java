@@ -2,7 +2,7 @@ package com.common.collect.container;
 
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.trace.TraceIdUtil;
-import com.common.collect.util.StringUtil;
+import com.common.collect.util.ExceptionUtil;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
@@ -94,7 +94,7 @@ public class ThreadPoolUtil {
 
     public static class LogUncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
         public void uncaughtException(Thread t, Throwable e) {
-            log.error("线程名:{},异常信息:{}", t.getName(), StringUtil.fromException(e));
+            log.error("线程名:{},异常信息:{}", t.getName(), ExceptionUtil.getStackTraceAsString(e));
         }
     }
 

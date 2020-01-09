@@ -1,6 +1,5 @@
 package collect.util;
 
-import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,8 +26,6 @@ public class StringUtilTest {
         log.info("{}", StringUtil.format("{}---{}---{}", "$^", "aa$bb", "!@#$%^&*()_", new RuntimeException("测试")));
 
         log.info("{}", StringUtil.chars("!@#$%^&*()_"));
-
-        log.info("{}", StringUtil.fromException(UnifiedException.gen("测试")));
 
     }
 

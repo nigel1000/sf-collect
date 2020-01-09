@@ -2,7 +2,7 @@ package com.common.collect.model.retry;
 
 import com.common.collect.model.mapper.RetryRecordMapper;
 import com.common.collect.util.EmptyUtil;
-import com.common.collect.util.StringUtil;
+import com.common.collect.util.ExceptionUtil;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -36,7 +36,7 @@ public class RetryRecordManager {
             retryRecord.setAlertType(metaConfig.getAlertType());
             retryRecord.setAlertTarget(metaConfig.getAlertTarget());
         }
-        retryRecord.setFirstErrorMessage(StringUtil.fromException(ex));
+        retryRecord.setFirstErrorMessage(ExceptionUtil.getStackTraceAsString(ex));
         return this.record(metaConfig, retryRecord);
     }
 
@@ -49,7 +49,7 @@ public class RetryRecordManager {
     }
 
     public boolean failExp(Long id, Exception ex, IMetaConfig metaConfig) {
-        return retryRecordMapper.failExp(id, StringUtil.fromException(ex), metaConfig) == 1;
+        return retryRecordMapper.failExp(id, ExceptionUtil.getStackTraceAsString(ex), metaConfig) == 1;
     }
 
     public boolean success(Long id, IMetaConfig metaConfig) {

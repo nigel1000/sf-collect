@@ -4,8 +4,6 @@ import lombok.NonNull;
 import org.slf4j.helpers.FormattingTuple;
 import org.slf4j.helpers.MessageFormatter;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -71,18 +69,9 @@ public class StringUtil {
         FormattingTuple formattingTuple = MessageFormatter.arrayFormat(pattern, args);
         String ret = formattingTuple.getMessage();
         if (formattingTuple.getThrowable() != null) {
-            ret = ret + System.getProperty("line.separator") + fromException(formattingTuple.getThrowable());
+            ret = ret + System.getProperty("line.separator") + ExceptionUtil.getStackTraceAsString(formattingTuple.getThrowable());
         }
         return ret;
-    }
-
-    public static String fromException(Throwable ex) {
-        if (ex == null) {
-            return "";
-        }
-        StringWriter stringWriter = new StringWriter();
-        ex.printStackTrace(new PrintWriter(stringWriter));
-        return stringWriter.toString();
     }
 
 }
