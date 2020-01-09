@@ -25,6 +25,7 @@ public class ClassUtilTest {
         System.out.println(ClassUtil.getSuperInterfaceGenericType(CallableTest.class, Function.class, 0));
         System.out.println(ClassUtil.getSuperInterfaceGenericType(CallableTest.class, Function.class,1));
 
+        System.out.println(ClassUtil.getClazzFromPackage("com.common.collect.util"));
 
     }
 

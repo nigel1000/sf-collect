@@ -158,8 +158,8 @@ public class ClassUtil {
      * 获得包下面的所有的class
      * List包含所有class的实例
      */
-    public static List<Class<?>> getClazzFromPackage(String packageName) {
-        List<Class<?>> clazzs = new ArrayList<>();
+    public static List<Class<?>> getClazzFromPackage(@NonNull String packageName) {
+        List<Class<?>> clazzList = new ArrayList<>();
         // 包名对应的路径名称
         String packageDirName = packageName.replace('.', '/');
         Enumeration<URL> dirs;
@@ -177,27 +177,27 @@ public class ClassUtil {
                     String filePath = URLDecoder.decode(url.getFile(), "UTF-8");// 获取包的物理路径
                     File file = new File(filePath);
                     if (!file.isDirectory()) {
-                        clazzs.add(Thread.currentThread().getContextClassLoader().loadClass(packageName));
+                        clazzList.add(Thread.currentThread().getContextClassLoader().loadClass(packageName));
                     } else {
-                        findClassesByFile(packageName, filePath, true, clazzs);
+                        findClassesByFile(packageName, filePath, true, clazzList);
                     }
                 } else if ("jar".equals(protocol)) {// 如果是jar包文件
                     JarFile jar = ((JarURLConnection) url.openConnection()).getJarFile();
-                    findClassesByJar(packageName, jar, clazzs);
+                    findClassesByJar(packageName, jar, clazzList);
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
             throw UnifiedException.gen("getClazzFromPackage failed", e);
         }
-        return CollectionUtil.removeDuplicate(clazzs);
+        return CollectionUtil.removeDuplicate(clazzList);
     }
 
     /**
      * 在package对应的路径下找到所有的class
      * recursive 是否循环搜索子包
      */
-    private static void findClassesByFile(String packageName, String filePath, final boolean recursive,
-                                          List<Class<?>> classes) {
+    private static void findClassesByFile(@NonNull String packageName, @NonNull String filePath, final boolean recursive,
+                                          @NonNull List<Class<?>> classes) {
         File dir = new File(filePath);
         if (!dir.exists() || !dir.isDirectory()) {
             return;
@@ -219,7 +219,7 @@ public class ClassUtil {
                 try {
                     classes.add(Thread.currentThread().getContextClassLoader().loadClass(packageName + "." + className));
                 } catch (ClassNotFoundException e) {
-                    throw UnifiedException.gen("findClassesByFile failed", e);
+                    throw UnifiedException.gen(StringUtil.format("findClassesByFile failed. packageName:{},className:{}", packageName, className), e);
                 }
             }
         }
@@ -228,8 +228,8 @@ public class ClassUtil {
     /**
      * 扫描包路径下的所有class文件
      */
-    private static void findClassesByJar(String pkgName, JarFile jar, List<Class<?>> classes) {
-        String pkgDir = pkgName.replace(".", "/");
+    private static void findClassesByJar(@NonNull String packageName, @NonNull JarFile jar, @NonNull List<Class<?>> classes) {
+        String pkgDir = packageName.replace(".", "/");
 
         Enumeration<JarEntry> entry = jar.entries();
         JarEntry jarEntry;
@@ -249,9 +249,9 @@ public class ClassUtil {
             // 去掉后面的".class", 将路径转为package格式
             String className = name.substring(0, name.length() - 6);
             try {
-                classes.add(Thread.currentThread().getContextClassLoader().loadClass(pkgName + "." + className));
+                classes.add(Thread.currentThread().getContextClassLoader().loadClass(packageName + "." + className));
             } catch (ClassNotFoundException e) {
-                throw UnifiedException.gen("findClassesByJar failed", e);
+                throw UnifiedException.gen(StringUtil.format("findClassesByJar failed. packageName:{},className:{}", packageName, className), e);
             }
         }
     }
