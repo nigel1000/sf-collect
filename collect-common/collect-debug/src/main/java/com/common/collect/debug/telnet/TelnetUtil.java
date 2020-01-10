@@ -46,7 +46,7 @@ public class TelnetUtil {
         executor.execute(TraceIdUtil.wrap(() -> {
             try {
                 // readLine 是阻塞方法 3秒后若没有主动退出就强制退出
-                ExceptionUtil.eatException(() -> Thread.sleep(3000), false);
+                ExceptionUtil.eatException(() -> Thread.sleep(3000), null);
                 command(telnet, "exit");
             } catch (Exception e) {
                 e.printStackTrace();

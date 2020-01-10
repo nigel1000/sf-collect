@@ -23,13 +23,13 @@ public class ThreadLocalUtilTest {
             final int sleep = new Random(i).nextInt(1000);
             Thread t = new Thread(() -> {
                 ExceptionUtil.NoReturn noReturn = () -> Thread.sleep(sleep);
-                ExceptionUtil.eatException(noReturn, false);
+                ExceptionUtil.eatException(noReturn, null);
                 log.info("thread:{},pullClear:{}", value, ThreadLocalUtil.pullClear(key));
-                ExceptionUtil.eatException(noReturn, false);
+                ExceptionUtil.eatException(noReturn, null);
                 log.info("thread:{},push:{}", value, ThreadLocalUtil.push(key, Arrays.asList(value, value)));
-                ExceptionUtil.eatException(noReturn, false);
+                ExceptionUtil.eatException(noReturn, null);
                 log.info("thread:{},pullClear:{}", value, ThreadLocalUtil.pullClear(key));
-                ExceptionUtil.eatException(noReturn, false);
+                ExceptionUtil.eatException(noReturn, null);
                 log.info("thread:{},pull:{}", value, ThreadLocalUtil.pull(key));
             });
             t.start();

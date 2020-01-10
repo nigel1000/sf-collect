@@ -31,7 +31,7 @@ public class TransactionHelperTest {
             log.info("commit transaction end");
         });
 
-        ExceptionUtil.eatException(() -> Thread.sleep(1000), false);
+        ExceptionUtil.eatException(() -> Thread.sleep(1000), null);
 
         try {
             transactionHelper.aroundBiz(() -> {
@@ -67,7 +67,7 @@ public class TransactionHelperTest {
             log.info("taskName5 end");
         }, false, true);
 
-        ExceptionUtil.eatException(() -> Thread.sleep(3000), false);
+        ExceptionUtil.eatException(() -> Thread.sleep(3000), null);
 
         System.exit(-1);
     }

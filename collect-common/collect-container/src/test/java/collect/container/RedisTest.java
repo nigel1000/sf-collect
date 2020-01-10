@@ -46,14 +46,14 @@ public class RedisTest {
         redisClient.set(prefix, new RedisConfig(), RedisClient.ONE_SECOND, RedisClient.ONE_SECOND);
         wrapper = redisClient.getValueWrapper(prefix);
         log.info("get obj:{}", wrapper);
-        ExceptionUtil.eatException(() -> Thread.sleep(1500), false);
+        ExceptionUtil.eatException(() -> Thread.sleep(1500), null);
         wrapper = redisClient.getValueWrapper(prefix);
         log.info("get obj after expire:{}", wrapper);
 
         redisClient.set(prefix, null, RedisClient.ONE_SECOND, RedisClient.ONE_SECOND);
         wrapper = redisClient.getValueWrapper(prefix);
         log.info("get null:{}", wrapper);
-        ExceptionUtil.eatException(() -> Thread.sleep(1500), false);
+        ExceptionUtil.eatException(() -> Thread.sleep(1500), null);
         wrapper = redisClient.getValueWrapper(prefix);
         log.info("get null after expire:{}", wrapper);
 
@@ -69,7 +69,7 @@ public class RedisTest {
         redisClient.getSet(prefix, supplier, RedisClient.ONE_SECOND, RedisClient.ONE_SECOND);
         wrapper = redisClient.getValueWrapper(prefix);
         log.info("getSet:{}", wrapper);
-        ExceptionUtil.eatException(() -> Thread.sleep(1500), false);
+        ExceptionUtil.eatException(() -> Thread.sleep(1500), null);
         log.info("getSet after expire:{}", wrapper);
 
         log.info("batchGetSet ######################################################");
@@ -106,7 +106,7 @@ public class RedisTest {
             wrapper = redisClient.getValueWrapper(prefix + key);
             log.info("batchGetSet, key:{}, value:{}", prefix + key, wrapper);
         }
-        ExceptionUtil.eatException(() -> Thread.sleep(3000), false);
+        ExceptionUtil.eatException(() -> Thread.sleep(3000), null);
         for (Integer key : Arrays.asList(1, 2, 3, 4, 5, 6)) {
             wrapper = redisClient.getValueWrapper(prefix + key);
             log.info("batchGetSet after expire, key:{}, value:{}", prefix + key, wrapper);
@@ -135,7 +135,7 @@ public class RedisTest {
                 }
             });
         }
-        ExceptionUtil.eatException(() -> Thread.sleep(2000), false);
+        ExceptionUtil.eatException(() -> Thread.sleep(2000), null);
 
         log.info("lockMutexGetSet ######################################################");
         for (int i = 0; i < 10; i++) {
@@ -145,7 +145,7 @@ public class RedisTest {
                             prefix,
                             () -> {
                                 log.info("go into from db start");
-                                ExceptionUtil.eatException(() -> Thread.sleep(40), false);
+                                ExceptionUtil.eatException(() -> Thread.sleep(40), null);
                                 log.info("go into from db end");
                                 return new RedisConfig();
                             },
@@ -158,7 +158,7 @@ public class RedisTest {
                 }
             });
         }
-        ExceptionUtil.eatException(() -> Thread.sleep(3000), false);
+        ExceptionUtil.eatException(() -> Thread.sleep(3000), null);
 
         System.exit(0);
     }

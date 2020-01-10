@@ -62,7 +62,7 @@ public class SSHUtilTest {
 
         boolean needHold = true;
         while (needHold) {
-            ExceptionUtil.eatException(() -> Thread.sleep(1000 * 60 * 50), false);
+            ExceptionUtil.eatException(() -> Thread.sleep(1000 * 60 * 50), null);
             needHold = false;
         }
     }

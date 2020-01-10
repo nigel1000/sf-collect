@@ -267,7 +267,7 @@ public class RedisClient {
                     release(lockMutexKey);
                 }
             } else {
-                ExceptionUtil.eatException(() -> Thread.sleep(retryWaitTime), false);
+                ExceptionUtil.eatException(() -> Thread.sleep(retryWaitTime), null);
                 ValueWrapper<T> cache = getValueWrapper(key);
                 if (cache != null) {
                     logGet(key);

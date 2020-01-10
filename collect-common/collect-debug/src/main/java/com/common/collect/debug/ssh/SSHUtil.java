@@ -70,7 +70,7 @@ public class SSHUtil {
             Future<String> readFuture = executor.submit(TraceIdUtil.wrap(() -> {
                 byte[] result = outStream.toByteArray();
                 while (result == null || result.length == 0) {
-                    ExceptionUtil.eatException(() -> Thread.sleep(500), false);
+                    ExceptionUtil.eatException(() -> Thread.sleep(500), null);
                     result = outStream.toByteArray();
                 }
                 String ret = new String(outStream.toByteArray(), StandardCharsets.UTF_8);
@@ -82,7 +82,7 @@ public class SSHUtil {
             executor.execute(TraceIdUtil.wrap(() -> {
                 try {
                     // 5秒后若没有主动退出就强制退出
-                    ExceptionUtil.eatException(() -> Thread.sleep(5000), false);
+                    ExceptionUtil.eatException(() -> Thread.sleep(5000), null);
                     outStream.write("!@#$%^&*()exit!@#$%^&*()".getBytes(StandardCharsets.UTF_8));
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -100,7 +100,7 @@ public class SSHUtil {
         executor.execute(TraceIdUtil.wrap(() -> {
             try {
                 // 5秒后若没有主动退出就强制退出
-                ExceptionUtil.eatException(() -> Thread.sleep(10000), false);
+                ExceptionUtil.eatException(() -> Thread.sleep(10000), null);
                 channel.disconnect();
                 session.disconnect();
             } catch (Exception ex) {

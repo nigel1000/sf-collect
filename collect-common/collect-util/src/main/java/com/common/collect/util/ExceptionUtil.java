@@ -31,12 +31,12 @@ public class ExceptionUtil {
         }
     }
 
-    public static void eatException(@NonNull NoReturn supplier, boolean needLog) {
+    public static void eatException(@NonNull NoReturn supplier, String logContent) {
         try {
             supplier.get();
         } catch (Exception ex) {
-            if (needLog) {
-                log.error(getStackTraceAsString(ex));
+            if (logContent != null) {
+                log.error(logContent, ex);
             }
         }
     }
@@ -49,12 +49,12 @@ public class ExceptionUtil {
         }
     }
 
-    public static <T> T eatException(@NonNull HasReturn<T> supplier, boolean needLog) {
+    public static <T> T eatException(@NonNull HasReturn<T> supplier, String logContent) {
         try {
             return supplier.get();
         } catch (Exception ex) {
-            if (needLog) {
-                log.error(getStackTraceAsString(ex));
+            if (logContent != null) {
+                log.error(logContent, ex);
             }
             return null;
         }
