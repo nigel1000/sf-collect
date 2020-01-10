@@ -6,6 +6,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 /**
  * ****************************************************************************
@@ -147,6 +148,13 @@ public final class AliasMethod {
         while (!large.isEmpty()) {
             probability[large.removeLast()] = 1.0;
         }
+    }
+
+    // 权重
+    public static AliasMethod fromWeights(List<Double> weights) {
+        Double sumWeight = weights.stream().mapToDouble(e -> e).sum();
+        List<Double> probabilities = weights.stream().map(weight -> weight / sumWeight).collect(Collectors.toList());
+        return new AliasMethod(probabilities, ThreadLocalRandom.current());
     }
 
     /**
