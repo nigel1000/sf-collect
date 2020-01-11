@@ -71,7 +71,7 @@ public class IDocClient {
             return cls.getSimpleName();
         }
         if (cls == Date.class ||
-                cls == Date.class ||
+                cls == Map.class ||
                 cls == String.class) {
             return cls.getSimpleName();
         }
