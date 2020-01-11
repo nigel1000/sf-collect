@@ -14,7 +14,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.*;
 
 /**
@@ -52,19 +54,8 @@ public class IDocClient {
                 methodContext.addRequest(request);
             }
             // 解析返回
-            Type returnType = method.getGenericReturnType();
             Class retCls = method.getReturnType();
-            Map<String, Class> returnTypeMap = new LinkedHashMap<>();
-            if (returnType instanceof ParameterizedType) {
-                // 获取返回值实际参数类型
-                retCls = (Class) ((ParameterizedType) returnType).getRawType();
-                // 获取返回值泛型参数类型 数组 --- 如： Map<K,V>
-                Type[] actualTypes = ((ParameterizedType) returnType).getActualTypeArguments();
-                TypeVariable[] typeVariables = retCls.getTypeParameters();
-                for (int i = 0; i < actualTypes.length; i++) {
-                    returnTypeMap.put(typeVariables[i].getTypeName(), (Class) actualTypes[i]);
-                }
-            }
+            Map<String, Class> returnTypeMap = ClassUtil.getMethodReturnGenericType(method);
             Map<String, IDocMethodContext.IDocFieldResponse> responses = new LinkedHashMap<>();
             getResponseFromClass(retCls, returnTypeMap, responses);
             methodContext.setResponse(responses);
@@ -151,8 +142,7 @@ public class IDocClient {
             request.setName(field.getName());
             Class fieldCls = field.getType();
             if (fieldCls == List.class) {
-                ParameterizedType genericType = (ParameterizedType) field.getGenericType();
-                Class<?> actualType = (Class<?>) genericType.getActualTypeArguments()[0];
+                Class<?> actualType = ClassUtil.getFieldGenericType(field, 0);
                 request.setArrayType(typeMapping(actualType));
                 if (isDirectHandleType(actualType)) {
                     requests.put(request.getName(), request);
@@ -190,8 +180,7 @@ public class IDocClient {
             response.setName(field.getName());
             Class fieldCls = field.getType();
             if (fieldCls == List.class) {
-                ParameterizedType genericType = (ParameterizedType) field.getGenericType();
-                Class<?> actualType = (Class<?>) genericType.getActualTypeArguments()[0];
+                Class<?> actualType = ClassUtil.getFieldGenericType(field, 0);
                 response.setArrayType(typeMapping(actualType));
                 if (isDirectHandleType(actualType)) {
                     responses.put(response.getName(), response);

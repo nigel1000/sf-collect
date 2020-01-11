@@ -5,16 +5,11 @@ import lombok.NonNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -170,6 +165,27 @@ public class ClassUtil {
             }
         }
         throw UnifiedException.gen(StringUtil.format(" clazz:{} 不存在接口 interface:{} 或者 此接口不是泛型接口 ", clazz.getName(), superInterface.getName()));
+    }
+
+    public static Class getFieldGenericType(@NonNull Field field, int index) {
+        Type type = field.getGenericType();
+        return getGenericType(type, index);
+    }
+
+
+    // K -> String V -> Long
+    public static Map<String, Class> getMethodReturnGenericType(@NonNull Method method) {
+        Type returnType = method.getGenericReturnType();
+        Map<String, Class> returnTypeMap = new HashMap<>();
+        if (returnType instanceof ParameterizedType) {
+            // 获取返回值泛型参数类型 数组 --- 如： Map<K,V>
+            Type[] actualTypes = ((ParameterizedType) returnType).getActualTypeArguments();
+            TypeVariable[] typeVariables = method.getReturnType().getTypeParameters();
+            for (int i = 0; i < actualTypes.length; i++) {
+                returnTypeMap.put(typeVariables[i].getTypeName(), (Class) actualTypes[i]);
+            }
+        }
+        return returnTypeMap;
     }
 
 
