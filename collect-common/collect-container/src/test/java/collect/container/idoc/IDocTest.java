@@ -73,19 +73,19 @@ public class IDocTest {
             for (IDocMethodContext context : contexts) {
 //                log.info("createIDoc finish parse method,methodContext:{}",
 //                        JsonUtil.bean2jsonPretty(context));
-                ExceptionUtil.eatException(() -> Thread.sleep(5), "");
-                addLine("文档链接：http://localhost:8181/doc/id/" + context.getId() + "  ");
-                addLine("文档名称：" + context.getName() + "  ");
-                addLine("文档作者：" + context.getAuthor() + "  ");
-                addLine("文档对应代码：" + context.getClassName() + "#" + context.getMethodName() + "  ");
-                addLine("访问地址：" + context.getRequestUrl() + "  ");
-                addLine("访问方式：" + context.getRequestMethod() + "  ");
                 addHtmlHead();
-                addLine("</br>访问入参：</br>");
+                ExceptionUtil.eatException(() -> Thread.sleep(5), "");
+                addLine("文档链接：http://localhost:8181/doc/id/" + context.getId() + "<br>");
+                addLine("文档名称：" + context.getName() + "<br>");
+                addLine("文档作者：" + context.getAuthor() + "<br>");
+                addLine("文档对应代码：" + context.getClassName() + "#" + context.getMethodName() + "<br>");
+                addLine("访问地址：" + context.getRequestUrl() + "<br>");
+                addLine("访问方式：" + context.getRequestMethod() + "<br>");
+                addLine("<br>访问入参：<br>");
                 addLine("<table border=\"1\" width=\"1000\" cellspacing=\"0\" cellpadding=\"5px\" align=\"left\">");
                 print(context.getRequest(), 0);
                 addLine("</table>");
-                addLine("</br>访问返回：</br>");
+                addLine("<br>访问返回：<br>");
                 addLine("<table border=\"1\" width=\"1000\" cellspacing=\"0\" cellpadding=\"5px\" align=\"left\">");
                 print(context.getResponse(), 0);
                 addLine("</table>");
