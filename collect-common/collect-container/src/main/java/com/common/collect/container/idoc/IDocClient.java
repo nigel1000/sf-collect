@@ -25,6 +25,7 @@ import java.util.*;
 @Data
 public class IDocClient {
 
+
     public static List<IDocMethodContext> createIDoc(@NonNull Class<?> cls) {
         List<IDocMethodContext> contexts = new ArrayList<>();
         for (Method method : ClassUtil.getMethods(cls)) {
@@ -84,9 +85,9 @@ public class IDocClient {
             return cls.getSimpleName();
         }
         if (cls == List.class) {
-            return "array";
+            return "Array";
         }
-        return "object";
+        return "Object";
     }
 
     private static IDocMethodContext.IDocFieldRequest handleParameter(
@@ -149,6 +150,20 @@ public class IDocClient {
             }
             request.setName(field.getName());
             Class fieldCls = field.getType();
+            if (fieldCls == List.class) {
+                ParameterizedType genericType = (ParameterizedType) field.getGenericType();
+                Class<?> actualType = (Class<?>) genericType.getActualTypeArguments()[0];
+                request.setArrayType(typeMapping(actualType));
+                if (isDirectHandleType(actualType)) {
+                    requests.put(request.getName(), request);
+                } else {
+                    Map<String, IDocMethodContext.IDocFieldRequest> next = new LinkedHashMap<>();
+                    getRequestFromClass(actualType, next);
+                    request.setValue(next);
+                    requests.put(request.getName(), request);
+                }
+                continue;
+            }
             if (isDirectHandleType(fieldCls)) {
                 requests.put(request.getName(), request);
                 continue;
@@ -174,6 +189,21 @@ public class IDocClient {
             }
             response.setName(field.getName());
             Class fieldCls = field.getType();
+            if (fieldCls == List.class) {
+                ParameterizedType genericType = (ParameterizedType) field.getGenericType();
+                Class<?> actualType = (Class<?>) genericType.getActualTypeArguments()[0];
+                response.setArrayType(typeMapping(actualType));
+                if (isDirectHandleType(actualType)) {
+                    responses.put(response.getName(), response);
+                } else {
+                    Map<String, IDocMethodContext.IDocFieldResponse> next = new LinkedHashMap<>();
+                    getResponseFromClass(actualType, returnTypeMap, next);
+                    response.setValue(next);
+                    responses.put(response.getName(), response);
+                }
+                continue;
+            }
+            // 如果是泛型属性
             if (fieldCls == Object.class) {
                 Class clazz = returnTypeMap.get(field.getGenericType().getTypeName());
                 if (clazz != null) {
@@ -196,7 +226,6 @@ public class IDocClient {
         return ClassUtil.isPrimitive(cls) ||
                 cls == Object.class ||
                 cls == Date.class ||
-                cls == List.class ||
                 cls == Map.class ||
                 cls == String.class;
     }

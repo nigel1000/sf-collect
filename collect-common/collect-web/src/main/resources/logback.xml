@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<configuration>
+    <property name="GLOBAL_LOG_PATTERN"
+              value="[%C:%L] - %p [%t] [%X{traceId}] : %msg%n"/>
+
+    <!-- 控制台日志，同时会打印在catalina日志中 -->
+    <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${GLOBAL_LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+
+    <root level="debug">
+        <appender-ref ref="consoleAppender"/>
+    </root>
+
+</configuration>

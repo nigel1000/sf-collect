@@ -15,6 +15,7 @@
         <module>collect-debug</module>
         <module>collect-container</module>
         <module>collect-model</module>
+        <module>collect-web</module>
     </modules>
     <!--变量管理-->
     <properties>

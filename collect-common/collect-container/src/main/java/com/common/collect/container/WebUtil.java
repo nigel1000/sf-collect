@@ -6,6 +6,7 @@ import lombok.NonNull;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 
 /**
  * Created by hznijianfeng on 2019/3/21.
@@ -14,9 +15,9 @@ import java.io.OutputStream;
 public class WebUtil {
 
     // 导出文件
-    public static void exportHttpServletResponse(@NonNull HttpServletResponse response,
-                                                 @NonNull byte[] data,
-                                                 @NonNull String fileName) {
+    public static void exportFile(@NonNull HttpServletResponse response,
+                                  @NonNull byte[] data,
+                                  @NonNull String fileName) {
         try {
             // 将输出流写出到servlet
             response.setContentLength(data.length);
@@ -28,6 +29,19 @@ public class WebUtil {
             // 刷新servlet输出流
             servletOutPutStream.flush();
             servletOutPutStream.close();
+        } catch (Exception ex) {
+            throw UnifiedException.gen("导出 HttpServletResponse 异常", ex);
+        }
+    }
+
+    public static void exportHtml(@NonNull HttpServletResponse response,
+                                  @NonNull String content) {
+        try {
+            response.setCharacterEncoding("utf-8");
+            response.setContentType("text/html; charset=utf-8");
+            PrintWriter out = response.getWriter();
+            out.write(content);
+            out.flush();
         } catch (Exception ex) {
             throw UnifiedException.gen("导出 HttpServletResponse 异常", ex);
         }
