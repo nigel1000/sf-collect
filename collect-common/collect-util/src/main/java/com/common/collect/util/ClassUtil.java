@@ -39,15 +39,33 @@ public class ClassUtil {
         return (T) newInstance(getClass(clazz));
     }
 
+
+    public static Method[] getMethods(Class<?> clazz) {
+        return ExceptionUtil.reThrowException(() -> clazz.getDeclaredMethods(),
+                StringUtil.format("class:{},获取方法失败", clazz.getName()));
+    }
+
+
     public static Method getMethod(Class<?> clazz, String methodName, Class<?>... args) {
         return ExceptionUtil.reThrowException(() -> clazz.getDeclaredMethod(methodName, args),
-                StringUtil.format("class:{},method:{},找不到", clazz.getName(), methodName));
+                StringUtil.format("class:{},method:{},获取方法失败", clazz.getName(), methodName));
     }
 
     @SuppressWarnings("unchecked")
     public static <T> T invoke(Object target, Method method, Object... args) {
         return ExceptionUtil.reThrowException(() -> (T) method.invoke(target, args),
                 StringUtil.format(" class:{},method:{} 调用方法失败", target.getClass().getName(), method.getName()));
+    }
+
+    public static Field[] getFields(Class<?> clazz) {
+        return ExceptionUtil.reThrowException(() -> {
+                    Field[] fields = clazz.getDeclaredFields();
+                    for (Field field : fields) {
+                        field.setAccessible(true);
+                    }
+                    return fields;
+                },
+                StringUtil.format(" class:{} 获取属性值失败", clazz.getName()));
     }
 
     public static Field getField(Class<?> clazz, String name) {
@@ -73,7 +91,25 @@ public class ClassUtil {
                 StringUtil.format(" class:{},field:{} 设置属性值失败", target.getClass().getName(), name));
     }
 
-    public static Object returnBaseDataType(Class<?> returnType) {
+    public static boolean isPrimitive(Class cls) {
+        boolean isPrimitive = cls.isPrimitive();
+        if (isPrimitive) {
+            return true;
+        }
+        if (cls == Long.class ||
+                cls == Integer.class ||
+                cls == Byte.class ||
+                cls == Short.class ||
+                cls == Float.class ||
+                cls == Double.class ||
+                cls == Character.class ||
+                cls == Boolean.class) {
+            return true;
+        }
+        return false;
+    }
+
+    public static Object returnBaseDataType(Class returnType) {
         if (returnType != null && returnType.isPrimitive()) {
             if (Boolean.TYPE == returnType) {
                 return false;
