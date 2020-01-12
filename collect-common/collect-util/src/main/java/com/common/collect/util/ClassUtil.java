@@ -276,10 +276,7 @@ public class ClassUtil {
                 // 非指定包路径， 非class文件
                 continue;
             }
-
-            // 去掉后面的".class", 将路径转为package格式
-            String className = name.substring(0, name.length() - 6);
-            classes.add(getClass(packageName + "." + className));
+            classes.add(getClass(name.replace("/", ".")));
         }
     }
 
