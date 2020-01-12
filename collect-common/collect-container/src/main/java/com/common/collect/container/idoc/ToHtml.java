@@ -33,13 +33,6 @@ public class ToHtml {
         return sb.toString();
     }
 
-    private static String fromString(Object str) {
-        if (str == null) {
-            return "";
-        }
-        return str.toString();
-    }
-
     private static void map2Html(Map<String, IDocMethodContext.IDocFieldObj> map, int level) {
         if (map == null) {
             return;
@@ -68,8 +61,8 @@ public class ToHtml {
                 i.add(1);
             }
             String out = blank;
-            out += String.format("<td>%s</td>", fromString(v.getName())) +
-                    String.format("<td>%s</td>", fromString(v.getNameDesc()));
+            out += String.format("<td>%s</td>", IDocUtil.fromString(v.getName())) +
+                    String.format("<td>%s</td>", IDocUtil.fromString(v.getNameDesc()));
             if (v.getArrayType() != null) {
                 out += String.format("<td>%s</td>", v.getType() + "-" + v.getArrayType());
             } else {
@@ -78,7 +71,7 @@ public class ToHtml {
             if (v.getValue() instanceof Map) {
                 addLine("<tr align=\"left\">");
                 out += String.format("<td>%s</td>", "") +
-                        String.format("<td>%s</td>", fromString(v.getDesc()));
+                        String.format("<td>%s</td>", IDocUtil.fromString(v.getDesc()));
                 if (IDocMethodContext.Type.request == v.getTypeEnum()) {
                     out += String.format("<td>%s</td>", v.isRequired() + "");
                 }
@@ -90,8 +83,8 @@ public class ToHtml {
                 addLine("</tr>");
             } else {
                 addLine("<tr align=\"left\">");
-                out += String.format("<td>%s</td>", fromString(v.getValue())) +
-                        String.format("<td>%s</td>", fromString(v.getDesc()));
+                out += String.format("<td>%s</td>", IDocUtil.fromString(v.getValue())) +
+                        String.format("<td>%s</td>", IDocUtil.fromString(v.getDesc()));
                 if (IDocMethodContext.Type.request == v.getTypeEnum()) {
                     out += String.format("<td>%s</td>", v.isRequired() + "");
                 }

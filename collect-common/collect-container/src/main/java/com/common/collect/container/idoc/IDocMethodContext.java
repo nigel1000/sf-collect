@@ -1,16 +1,14 @@
 package com.common.collect.container.idoc;
 
-import com.common.collect.container.JsonUtil;
-import com.common.collect.util.ClassUtil;
 import com.common.collect.util.EmptyUtil;
-import com.common.collect.util.IdUtil;
 import com.common.collect.util.StringUtil;
 import lombok.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Created by nijianfeng on 2020/1/11.
@@ -101,71 +99,17 @@ public class IDocMethodContext implements Serializable {
 
 
         public void setArrayType(@NonNull Class arrayType) {
-            this.arrayType = typeMapping(arrayType);
+            this.arrayType = IDocUtil.typeMapping(arrayType);
             this.arrayTypeCls = arrayType;
-            Object defValue = typeDefaultValue(arrayType);
+            Object defValue = IDocUtil.typeDefaultValue(arrayType);
             if (this.value == null && defValue != null) {
-                this.setValue(JsonUtil.bean2json(Arrays.asList(typeDefaultValue(arrayType), typeDefaultValue(arrayType))));
+                this.setValue(Arrays.asList(IDocUtil.typeDefaultValue(arrayType), IDocUtil.typeDefaultValue(arrayType)));
             }
-        }
-
-        public static String typeMapping(@NonNull Class cls) {
-            if (ClassUtil.isPrimitive(cls)) {
-                return cls.getSimpleName();
-            }
-            if (cls == Date.class ||
-                    cls == Map.class ||
-                    cls == BigDecimal.class ||
-                    cls == String.class) {
-                return cls.getSimpleName();
-            }
-            if (cls == List.class ||
-                    cls.isArray()) {
-                return "Array";
-            }
-            return "Object";
-        }
-
-        public static Object typeDefaultValue(@NonNull Class cls) {
-            if (cls == Long.class || cls == long.class) {
-                return Long.valueOf("20033221");
-            }
-            if (cls == Integer.class || cls == int.class) {
-                return Integer.valueOf("4335");
-            }
-            if (cls == Float.class || cls == float.class) {
-                return Float.valueOf("23.3");
-            }
-            if (cls == Double.class || cls == double.class) {
-                return Double.valueOf("43.35");
-            }
-            if (cls == Boolean.TYPE || cls == boolean.class) {
-                return Boolean.TRUE;
-            }
-            if (cls == Byte.TYPE || cls == byte.class) {
-                return Byte.valueOf("2");
-            }
-            if (cls == Short.TYPE || cls == short.class) {
-                return Short.valueOf("122");
-            }
-            if (cls == Character.TYPE || cls == char.class) {
-                return 'c';
-            }
-            if (cls == BigDecimal.class) {
-                return new BigDecimal("23.43222");
-            }
-            if (cls == Date.class) {
-                return String.valueOf(System.currentTimeMillis());
-            }
-            if (cls == String.class) {
-                return IdUtil.uuidHex().substring(0, 5);
-            }
-            return null;
         }
 
         public static IDocFieldObj of(IDocField iDocField, @NonNull Class type, @NonNull Type typeEnum) {
             IDocFieldObj docFieldObj = new IDocFieldObj();
-            docFieldObj.setValue(typeDefaultValue(type));
+            docFieldObj.setValue(IDocUtil.typeDefaultValue(type));
             if (iDocField != null) {
                 docFieldObj.setNameDesc(iDocField.nameDesc());
                 docFieldObj.setDesc(iDocField.desc());
@@ -176,7 +120,7 @@ public class IDocMethodContext implements Serializable {
                     docFieldObj.setRequired(iDocField.required());
                 }
             }
-            docFieldObj.setType(typeMapping(type));
+            docFieldObj.setType(IDocUtil.typeMapping(type));
             docFieldObj.setTypeCls(type);
             docFieldObj.setTypeEnum(typeEnum);
             return docFieldObj;
