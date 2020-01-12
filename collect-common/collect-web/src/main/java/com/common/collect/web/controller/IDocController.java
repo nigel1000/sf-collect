@@ -3,6 +3,7 @@ package com.common.collect.web.controller;
 import com.common.collect.container.WebUtil;
 import com.common.collect.container.idoc.IDocClient;
 import com.common.collect.container.idoc.IDocMethodContext;
+import com.common.collect.container.idoc.ToHtml;
 import com.common.collect.util.AlgorithmUtil;
 import com.common.collect.util.ClassUtil;
 import com.common.collect.util.StringUtil;
@@ -35,7 +36,7 @@ public class IDocController {
             for (IDocMethodContext context : contexts) {
                 sb.append("<br>");
                 String show = context.getId() + "-" + context.getName();
-                String content = AlgorithmUtil.uRLEncoderUtf8(new IDocMethodContext.ToHtml().toHtml(context));
+                String content = AlgorithmUtil.uRLEncoderUtf8(ToHtml.toHtml(context));
                 sb.append(StringUtil.format("<a href=/api/idoc/show?content={}>{}</a>", content, show));
             }
         }
