@@ -174,15 +174,15 @@ public class ClassUtil {
 
 
     // K -> String V -> Long
-    public static Map<String, Class> getMethodReturnGenericType(@NonNull Method method) {
+    public static Map<String, Type> getMethodReturnGenericType(@NonNull Method method) {
         Type returnType = method.getGenericReturnType();
-        Map<String, Class> returnTypeMap = new HashMap<>();
+        Map<String, Type> returnTypeMap = new HashMap<>();
         if (returnType instanceof ParameterizedType) {
             // 获取返回值泛型参数类型 数组 --- 如： Map<K,V>
             Type[] actualTypes = ((ParameterizedType) returnType).getActualTypeArguments();
             TypeVariable[] typeVariables = method.getReturnType().getTypeParameters();
             for (int i = 0; i < actualTypes.length; i++) {
-                returnTypeMap.put(typeVariables[i].getTypeName(), (Class) actualTypes[i]);
+                returnTypeMap.put(typeVariables[i].getTypeName(), actualTypes[i]);
             }
         }
         return returnTypeMap;

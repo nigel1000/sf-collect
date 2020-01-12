@@ -14,9 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
+import java.lang.reflect.*;
 import java.util.*;
 
 /**
@@ -51,11 +49,14 @@ public class IDocClient {
                     continue;
                 }
                 IDocFieldObj request = handleParameter(parameter, parameterNames[i]);
+                if (request == null) {
+                    continue;
+                }
                 methodContext.addRequest(request);
             }
             // 解析返回
             Class retCls = method.getReturnType();
-            Map<String, Class> returnTypeMap = ClassUtil.getMethodReturnGenericType(method);
+            Map<String, Type> returnTypeMap = ClassUtil.getMethodReturnGenericType(method);
             Map<String, IDocFieldObj> responses = new LinkedHashMap<>();
             getIDocFieldObjFromClass(retCls, responses, IDocFieldType.response, returnTypeMap);
             methodContext.addResponse(responses);
@@ -126,19 +127,39 @@ public class IDocClient {
     }
 
     private static void getIDocFieldObjFromClass(
-            @NonNull Class paramCls,
+            @NonNull Class cls,
             @NonNull Map<String, IDocFieldObj> iDocFieldObjMap,
             @NonNull IDocFieldType iDocFieldType,
-            @NonNull Map<String, Class> returnTypeMap) {
-        Field[] fields = ClassUtil.getFields(paramCls);
+            @NonNull Map<String, Type> returnTypeMap) {
+        Field[] fields = ClassUtil.getFields(cls);
         for (Field field : fields) {
             // IDocField
             IDocField iDocField = field.getAnnotation(IDocField.class);
-            IDocFieldObj iDocFieldObj = IDocFieldObj.of(iDocField, field.getType(), iDocFieldType);
-            iDocFieldObj.setName(field.getName());
             Class fieldCls = field.getType();
+            Class<?> actualType = null;
+            // 如果是泛型属性
+            if (iDocFieldType == IDocFieldType.response && fieldCls == Object.class) {
+                Type type = returnTypeMap.get(field.getGenericType().getTypeName());
+                if (type != null) {
+                    if (type instanceof ParameterizedType) {
+                        if (((ParameterizedType) type).getRawType() == List.class) {
+                            fieldCls = List.class;
+                            actualType = (Class) ((ParameterizedType) type).getActualTypeArguments()[0];
+                        } else {
+                            continue;
+                        }
+                    } else {
+                        fieldCls = (Class) type;
+                    }
+                }
+            }
+
+            IDocFieldObj iDocFieldObj = IDocFieldObj.of(iDocField, fieldCls, iDocFieldType);
+            iDocFieldObj.setName(field.getName());
             if (fieldCls == List.class) {
-                Class<?> actualType = ClassUtil.getFieldGenericType(field, 0);
+                if (actualType == null) {
+                    actualType = ClassUtil.getFieldGenericType(field, 0);
+                }
                 iDocFieldObj.setArrayType(actualType);
                 if (isDirectHandleType(actualType)) {
                     iDocFieldObjMap.put(iDocFieldObj.getName(), iDocFieldObj);
@@ -149,13 +170,6 @@ public class IDocClient {
                     iDocFieldObjMap.put(iDocFieldObj.getName(), iDocFieldObj);
                 }
                 continue;
-            }
-            // 如果是泛型属性
-            if (iDocFieldType == IDocFieldType.response && fieldCls == Object.class) {
-                Class clazz = returnTypeMap.get(field.getGenericType().getTypeName());
-                if (clazz != null) {
-                    fieldCls = clazz;
-                }
             }
             if (isDirectHandleType(fieldCls)) {
                 iDocFieldObjMap.put(iDocFieldObj.getName(), iDocFieldObj);

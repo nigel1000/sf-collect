@@ -33,6 +33,11 @@
             <groupId>com.common.collect</groupId>
             <artifactId>collect-container</artifactId>
         </dependency>
+        <!-- 扩展依赖 -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

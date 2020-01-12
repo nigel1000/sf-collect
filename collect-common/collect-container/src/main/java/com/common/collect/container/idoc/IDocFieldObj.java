@@ -29,8 +29,13 @@ public class IDocFieldObj implements Serializable {
     private IDocFieldType iDocFieldType;
 
 
+    public boolean isArrayType() {
+        return IDocFieldValueType.Array.name().equals(this.type) &&
+                IDocFieldValueType.Object.name().equals(this.arrayType);
+    }
+
     public void setArrayType(@NonNull Class arrayType) {
-        this.arrayType = IDocUtil.typeMapping(arrayType);
+        this.arrayType = IDocUtil.typeMapping(arrayType).name();
         this.arrayTypeCls = arrayType;
         Object defValue = IDocUtil.typeDefaultValue(arrayType);
         if (this.value == null && defValue != null) {
@@ -51,7 +56,7 @@ public class IDocFieldObj implements Serializable {
                 docFieldObj.setRequired(iDocField.required());
             }
         }
-        docFieldObj.setType(IDocUtil.typeMapping(type));
+        docFieldObj.setType(IDocUtil.typeMapping(type).name());
         docFieldObj.setTypeCls(type);
         docFieldObj.setIDocFieldType(iDocFieldType);
         return docFieldObj;

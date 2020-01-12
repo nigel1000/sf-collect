@@ -1,9 +1,9 @@
 package com.common.collect.web.controller;
 
+import com.common.collect.api.Response;
 import com.common.collect.container.WebUtil;
-import com.common.collect.container.idoc.IDocClient;
-import com.common.collect.container.idoc.IDocMethodContext;
-import com.common.collect.container.idoc.ToHtml;
+import com.common.collect.container.idoc.*;
+import com.common.collect.container.mybatis.generator.domain.param.DomainParam;
 import com.common.collect.util.AlgorithmUtil;
 import com.common.collect.util.ClassUtil;
 import com.common.collect.util.StringUtil;
@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,7 +21,7 @@ import java.util.List;
 @Controller
 public class IDocController {
 
-    // http://localhost:8181/api/idoc/list?pkg=com.common.collect.web.idoc.IDocDemo
+    // http://localhost:8181/api/idoc/list?pkg=com.common.collect.web.controller.IDocController
     @RequestMapping(value = "/api/idoc/list", method = {RequestMethod.GET})
     public void list(HttpServletResponse response, String pkg) {
         List<Class<?>> classList = ClassUtil.getClazzFromPackage(pkg);
@@ -49,6 +50,14 @@ public class IDocController {
     @RequestMapping(value = "/api/idoc/show", method = {RequestMethod.GET})
     public void show(HttpServletResponse response, String content) {
         WebUtil.exportHtml(response, AlgorithmUtil.uRLDecoderUtf8(content));
+    }
+
+    @IDocMethod(id = "5", name = "测试接口", author = "hznijianfeng")
+    @RequestMapping(value = "/api/idoc/demo", method = {RequestMethod.GET, RequestMethod.POST})
+    public Response<List<DomainParam>> demo(
+            @IDocField(nameDesc = "显示内容", desc = "随你怎么填") String content,
+            DomainParam domainParam) {
+        return Response.ok(new ArrayList<>());
     }
 
 

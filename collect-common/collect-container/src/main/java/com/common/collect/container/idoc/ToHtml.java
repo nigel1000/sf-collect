@@ -1,10 +1,10 @@
 package com.common.collect.container.idoc;
 
+import com.common.collect.container.JsonUtil;
+import com.common.collect.util.EmptyUtil;
 import lombok.NonNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ToHtml {
 
@@ -19,18 +19,55 @@ public class ToHtml {
         addLine("文档对应代码：" + context.getClassName() + "#" + context.getMethodName() + "<br>");
         addLine("访问地址：" + context.getRequestUrl() + "<br>");
         addLine("访问方式：" + context.getRequestMethod() + "<br>");
-        addLine("<p>");
-        addLine("<table border=\"1\" width=\"1000\" cellspacing=\"0\" cellpadding=\"5px\" align=\"left\">");
-        addLine("<caption align=\"left\">访问入参</caption>");
+
+        addLine("访问入参");
+        addLine("<table border=\"1\" width=\"1000\" cellspacing=\"0\" cellpadding=\"5px\">");
         map2Html(context.getRequest(), 0);
         addLine("</table>");
-        addLine("<p>");
-        addLine("<table border=\"1\" width=\"1000\" cellspacing=\"0\" cellpadding=\"5px\" align=\"left\">");
-        addLine("<caption align=\"left\">访问返回</caption>");
+
+
+        addLine("<div>");
+        addLine("<pre>");
+        Map<String, Object> bean = new LinkedHashMap<>();
+        map2Json(context.getRequest(), bean);
+        addLine(JsonUtil.bean2jsonPretty(bean));
+        addLine("</pre>");
+        addLine("</div>");
+
+        addLine("访问返回");
+        addLine("<table border=\"1\" width=\"1000\" cellspacing=\"0\" cellpadding=\"5px\" >");
         map2Html(context.getResponse(), 0);
         addLine("</table>");
+
+        addLine("<div>");
+        addLine("<pre>");
+        bean = new LinkedHashMap<>();
+        map2Json(context.getResponse(), bean);
+        addLine(JsonUtil.bean2jsonPretty(bean));
+        addLine("</pre>");
+        addLine("</div>");
+
         addHtmlTail();
         return sb.toString();
+    }
+
+    private static void map2Json(Map<String, IDocFieldObj> docFieldObjMap, @NonNull Map<String, Object> bean) {
+        if (EmptyUtil.isEmpty(docFieldObjMap)) {
+            return;
+        }
+        docFieldObjMap.forEach((k, v) -> {
+            if (v.getValue() instanceof Map) {
+                Map<String, Object> sub = new LinkedHashMap<>();
+                map2Json((Map<String, IDocFieldObj>) v.getValue(), sub);
+                if (v.isArrayType()) {
+                    bean.put(k, Arrays.asList(sub, sub));
+                } else {
+                    bean.put(k, sub);
+                }
+            } else {
+                bean.put(k, v.getValue());
+            }
+        });
     }
 
     private static void map2Html(Map<String, IDocFieldObj> map, int level) {
