@@ -46,6 +46,8 @@ public class IDocTest {
         for (Class<?> cls : classList) {
             List<IDocMethodContext> contexts = IDocClient.createIDoc(cls);
             for (IDocMethodContext context : contexts) {
+                context.sortMap(context.getRequest());
+                context.sortMap(context.getResponse());
                 log.info("createIDoc finish parse method,methodContext:{}",
                         JsonUtil.bean2jsonPretty(context));
                 FileUtil.createFile(path + context.getId() + ".md", false, context.toHtml().getBytes(), true);
@@ -61,8 +63,8 @@ public class IDocTest {
                 @IDocField(nameDesc = "bean 名称", desc = "注意事项", value = "configDao")
                 @RequestParam(value = "beanName")
                         String beanName,
-                String methodName,
                 @RequestBody IDocObject object1,
+                String methodName,
                 IDocObject object2) {
             return Response.ok();
         }
@@ -71,12 +73,12 @@ public class IDocTest {
 
     @Data
     public static class IDocObject {
-        @IDocField(nameDesc = "名称", desc = "小于十个字符")
-        private String name;
-        private String key;
         @IDocField(value = "{name:11)")
         private IDocObjectSub sub;
         private List<IDocObjectSub> subs;
+        @IDocField(nameDesc = "名称", desc = "小于十个字符")
+        private String name;
+        private String key;
         @IDocField(value = "[1,2,4]")
         private List<Long> longs;
         private List<Long> defLongs;

@@ -12,6 +12,7 @@ public class ToHtml {
 
     public static synchronized String toHtml(@NonNull IDocMethodContext context) {
         sb = new StringBuilder();
+
         addHtmlHead();
         addLine("文档链接：http://localhost:8181/doc/id/" + context.getId() + "<br>");
         addLine("文档名称：" + context.getName() + "<br>");

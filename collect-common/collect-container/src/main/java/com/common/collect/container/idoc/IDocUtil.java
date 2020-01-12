@@ -27,19 +27,19 @@ public class IDocUtil {
         if (cls == Double.class || cls == double.class) {
             return IDocFieldValueType.Number;
         }
-        if (cls == Boolean.TYPE || cls == boolean.class) {
+        if (cls == Boolean.class || cls == boolean.class) {
             return IDocFieldValueType.Boolean;
         }
-        if (cls == Byte.TYPE || cls == byte.class) {
+        if (cls == Byte.class || cls == byte.class) {
             return IDocFieldValueType.Number;
         }
-        if (cls == Short.TYPE || cls == short.class) {
+        if (cls == Short.class || cls == short.class) {
             return IDocFieldValueType.Number;
         }
         if (cls == BigDecimal.class) {
             return IDocFieldValueType.Number;
         }
-        if (cls == Character.TYPE || cls == char.class) {
+        if (cls == Character.class || cls == char.class) {
             return IDocFieldValueType.String;
         }
         if (cls == String.class) {
@@ -68,16 +68,16 @@ public class IDocUtil {
         if (cls == Double.class || cls == double.class) {
             return Double.valueOf("43.35");
         }
-        if (cls == Boolean.TYPE || cls == boolean.class) {
+        if (cls == Boolean.class || cls == boolean.class) {
             return Boolean.TRUE;
         }
-        if (cls == Byte.TYPE || cls == byte.class) {
+        if (cls == Byte.class || cls == byte.class) {
             return Byte.valueOf("2");
         }
-        if (cls == Short.TYPE || cls == short.class) {
+        if (cls == Short.class || cls == short.class) {
             return Short.valueOf("122");
         }
-        if (cls == Character.TYPE || cls == char.class) {
+        if (cls == Character.class || cls == char.class) {
             return 'c';
         }
         if (cls == BigDecimal.class) {

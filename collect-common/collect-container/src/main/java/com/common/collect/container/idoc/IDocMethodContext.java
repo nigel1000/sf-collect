@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by nijianfeng on 2020/1/11.
@@ -71,6 +72,35 @@ public class IDocMethodContext implements Serializable {
 
     public String toHtml() {
         return ToHtml.toHtml(this);
+    }
+
+    public void sortMap(Map<String, IDocFieldObj> map) {
+        if (EmptyUtil.isEmpty(map)) {
+            return;
+        }
+        Map<String, IDocFieldObj> baseMap = new LinkedHashMap<>();
+        Map<String, IDocFieldObj> objMap = new LinkedHashMap<>();
+        Map<String, IDocFieldObj> arrayObjMap = new LinkedHashMap<>();
+        map.forEach((k, v) -> {
+            if (Objects.equals(v.getType(), IDocFieldValueType.Object.name())) {
+                if (v.getValue() instanceof Map) {
+                    sortMap((Map<String, IDocFieldObj>) v.getValue());
+                }
+                objMap.put(k, v);
+            } else if (Objects.equals(v.getType(), IDocFieldValueType.Array.name()) &&
+                    Objects.equals(v.getArrayType(), IDocFieldValueType.Object.name())) {
+                if (v.getValue() instanceof Map) {
+                    sortMap((Map<String, IDocFieldObj>) v.getValue());
+                }
+                arrayObjMap.put(k, v);
+            } else {
+                baseMap.put(k, v);
+            }
+        });
+        map.clear();
+        map.putAll(baseMap);
+        map.putAll(objMap);
+        map.putAll(arrayObjMap);
     }
 
 

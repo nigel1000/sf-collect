@@ -67,21 +67,6 @@ public class IDocClient {
         return contexts;
     }
 
-    private static String typeMapping(@NonNull Class cls) {
-        if (ClassUtil.isPrimitive(cls)) {
-            return cls.getSimpleName();
-        }
-        if (cls == Date.class ||
-                cls == Map.class ||
-                cls == String.class) {
-            return cls.getSimpleName();
-        }
-        if (cls == List.class) {
-            return "Array";
-        }
-        return "Object";
-    }
-
     private static IDocFieldObj handleParameter(
             @NonNull Parameter parameter, @NonNull String parameterName) {
         // IDocField
