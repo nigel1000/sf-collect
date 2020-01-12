@@ -91,19 +91,23 @@ public class IDocClient {
             }
             return request;
         }
-        // 基本类型
         Class paramCls = parameter.getType();
+        if (paramCls == List.class || paramCls.isArray()) {
+            request.setName(parameterName);
+            handleArrayType(paramCls, parameter.getParameterizedType(), request);
+            return request;
+        }
+        // 基本类型
         if (isDirectHandleType(paramCls)) {
             request.setName(parameterName);
             return request;
         }
-        // RequestBody
+        // RequestBody 简单 vo 对象
         Map<String, IDocFieldObj> requests = new LinkedHashMap<>();
         RequestBody requestBody = parameter.getAnnotation(RequestBody.class);
         if (requestBody != null) {
             request.setRequired(requestBody.required());
         }
-        // 简单 vo 对象
         request.setName(parameterName);
         getIDocFieldObjFromClass(paramCls, requests, IDocFieldType.request, new LinkedHashMap<>());
         request.setValue(requests);
@@ -111,11 +115,51 @@ public class IDocClient {
 
     }
 
+    public static Class handleArrayType(@NonNull Class cls, Type type, IDocFieldObj docFieldObj) {
+        if (cls != List.class && !cls.isArray()) {
+            return null;
+        }
+        int arrayCount = 0;
+        Class actualArrayCls = null;
+        if (cls == List.class) {
+            for (int i = 0; i < 100; i++) {
+                if (type instanceof ParameterizedType) {
+                    arrayCount++;
+                    type = ((ParameterizedType) type).getActualTypeArguments()[0];
+                } else {
+                    actualArrayCls = (Class) type;
+                    break;
+                }
+            }
+            if (actualArrayCls != null && actualArrayCls.isArray()) {
+                for (int i = 0; i < 100; i++) {
+                    if (actualArrayCls.getComponentType() == null) {
+                        break;
+                    }
+                    actualArrayCls = actualArrayCls.getComponentType();
+                    arrayCount++;
+                }
+            }
+        }
+        if (cls.isArray()) {
+            actualArrayCls = cls;
+            for (int i = 0; i < 100; i++) {
+                if (actualArrayCls.getComponentType() == null) {
+                    break;
+                }
+                actualArrayCls = actualArrayCls.getComponentType();
+                arrayCount++;
+            }
+        }
+        docFieldObj.setArrayType(actualArrayCls, arrayCount);
+        return actualArrayCls;
+    }
+
     private static void getIDocFieldObjFromClass(
             @NonNull Class cls,
             @NonNull Map<String, IDocFieldObj> iDocFieldObjMap,
             @NonNull IDocFieldType iDocFieldType,
-            @NonNull Map<String, Type> returnTypeMap) {
+            @NonNull Map<String, Type> genericTypeMap) {
         Field[] fields = ClassUtil.getFields(cls);
         for (Field field : fields) {
             if (Modifier.isStatic(field.getModifiers())) {
@@ -124,21 +168,16 @@ public class IDocClient {
             // IDocField
             IDocField iDocField = field.getAnnotation(IDocField.class);
             Class fieldCls = field.getType();
-            Class<?> actualType = null;
-            // 如果是泛型属性
-            if (iDocFieldType == IDocFieldType.response && fieldCls == Object.class) {
-                Type type = returnTypeMap.get(field.getGenericType().getTypeName());
-                if (type != null) {
-                    if (type instanceof ParameterizedType) {
-                        // 只支持一层的List Response<List<Long>> ，不支持 Response<List<List<Long>>>
-                        if (((ParameterizedType) type).getRawType() == List.class) {
-                            fieldCls = List.class;
-                            actualType = (Class) ((ParameterizedType) type).getActualTypeArguments()[0];
-                        } else {
-                            continue;
-                        }
+            Type fieldType = field.getGenericType();
+            // 等于Object的时候可能是泛型属性
+            if (fieldCls == Object.class) {
+                Type genericType = genericTypeMap.get(field.getGenericType().getTypeName());
+                if (genericType != null) {
+                    fieldType = genericType;
+                    if (genericType instanceof ParameterizedType) {
+                        fieldCls = (Class) ((ParameterizedType) genericType).getRawType();
                     } else {
-                        fieldCls = (Class) type;
+                        fieldCls = (Class) genericType;
                     }
                 }
             }
@@ -146,18 +185,12 @@ public class IDocClient {
             IDocFieldObj iDocFieldObj = IDocFieldObj.of(iDocField, fieldCls, iDocFieldType);
             iDocFieldObj.setName(field.getName());
             if (fieldCls == List.class || fieldCls.isArray()) {
-                if (fieldCls == List.class && actualType == null) {
-                    actualType = ClassUtil.getFieldGenericType(field, 0);
-                }
-                if (fieldCls.isArray()) {
-                    actualType = fieldCls.getComponentType();
-                }
-                iDocFieldObj.setArrayType(actualType);
-                if (isDirectHandleType(actualType)) {
+                Class actualArrayCls = handleArrayType(fieldCls, fieldType, iDocFieldObj);
+                if (isDirectHandleType(actualArrayCls)) {
                     iDocFieldObjMap.put(iDocFieldObj.getName(), iDocFieldObj);
                 } else {
                     Map<String, IDocFieldObj> next = new LinkedHashMap<>();
-                    getIDocFieldObjFromClass(actualType, next, iDocFieldType, returnTypeMap);
+                    getIDocFieldObjFromClass(actualArrayCls, next, iDocFieldType, genericTypeMap);
                     iDocFieldObj.setValue(next);
                     iDocFieldObjMap.put(iDocFieldObj.getName(), iDocFieldObj);
                 }
@@ -168,13 +201,13 @@ public class IDocClient {
                 continue;
             }
             Map<String, IDocFieldObj> next = new LinkedHashMap<>();
-            getIDocFieldObjFromClass(fieldCls, next, iDocFieldType, returnTypeMap);
+            getIDocFieldObjFromClass(fieldCls, next, iDocFieldType, genericTypeMap);
             iDocFieldObj.setValue(next);
             iDocFieldObjMap.put(iDocFieldObj.getName(), iDocFieldObj);
         }
     }
 
-    private static boolean isDirectHandleType(Class cls) {
+    private static boolean isDirectHandleType(@NonNull Class cls) {
         return ClassUtil.isPrimitive(cls) ||
                 cls == Object.class ||
                 cls == Boolean.class ||

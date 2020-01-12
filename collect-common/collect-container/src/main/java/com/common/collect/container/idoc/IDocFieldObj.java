@@ -4,7 +4,6 @@ import com.common.collect.util.EmptyUtil;
 import lombok.*;
 
 import java.io.Serializable;
-import java.util.Arrays;
 
 @Data
 @Builder
@@ -19,6 +18,7 @@ public class IDocFieldObj implements Serializable {
     private Class typeCls;
     private String arrayType;
     private Class arrayTypeCls;
+    private Integer arrayTypeCount;
     // 默认值
     private Object value = null;
     // 描述
@@ -34,12 +34,13 @@ public class IDocFieldObj implements Serializable {
                 IDocFieldValueType.Object.name().equals(this.arrayType);
     }
 
-    public void setArrayType(@NonNull Class arrayType) {
+    public void setArrayType(@NonNull Class arrayType, Integer arrayCount) {
         this.arrayType = IDocUtil.typeMapping(arrayType).name();
         this.arrayTypeCls = arrayType;
+        this.arrayTypeCount = arrayCount;
         Object defValue = IDocUtil.typeDefaultValue(arrayType);
         if (this.value == null && defValue != null) {
-            this.setValue(Arrays.asList(IDocUtil.typeDefaultValue(arrayType), IDocUtil.typeDefaultValue(arrayType)));
+            this.setValue(IDocUtil.arrayCountList(IDocUtil.typeDefaultValue(arrayType), arrayCount));
         }
     }
 

@@ -6,6 +6,7 @@ import com.common.collect.util.IdUtil;
 import lombok.NonNull;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -100,6 +101,14 @@ public class IDocUtil {
             return JsonUtil.bean2json(str);
         }
         return str.toString();
+    }
+
+    public static Object arrayCountList(Object value, int count) {
+        Object obj = Arrays.asList(value, value);
+        for (int i = 0; i < count - 1; i++) {
+            obj = Arrays.asList(obj, obj);
+        }
+        return obj;
     }
 
 }

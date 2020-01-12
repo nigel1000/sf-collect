@@ -4,7 +4,10 @@ import com.common.collect.container.JsonUtil;
 import com.common.collect.util.EmptyUtil;
 import lombok.NonNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ToHtml {
 
@@ -61,7 +64,7 @@ public class ToHtml {
                 Map<String, Object> sub = new LinkedHashMap<>();
                 map2Json((Map<String, IDocFieldObj>) v.getValue(), sub);
                 if (v.isArrayType()) {
-                    bean.put(k, Arrays.asList(sub, sub));
+                    bean.put(k, IDocUtil.arrayCountList(sub, v.getArrayTypeCount()));
                 } else {
                     bean.put(k, sub);
                 }
