@@ -10,10 +10,10 @@ public class IDocObject {
     @IDocField(nameDesc = "名称", desc = "小于十个字符")
     private String name;
     private String key;
-    @IDocField(value = "{name:11)")
+    @IDocField
     private IDocObjectSub iDocObjectSub;
     private List<IDocObjectSub> iDocObjectSubs;
-    @IDocField(value = "[1,2,4]")
+    @IDocField
     private List<Long> longs;
 
 }

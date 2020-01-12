@@ -1,6 +1,7 @@
 package collect.container.idoc;
 
 import com.common.collect.api.Response;
+import com.common.collect.container.JsonUtil;
 import com.common.collect.container.idoc.IDocClient;
 import com.common.collect.container.idoc.IDocField;
 import com.common.collect.container.idoc.IDocMethod;
@@ -45,8 +46,8 @@ public class IDocTest {
         for (Class<?> cls : classList) {
             List<IDocMethodContext> contexts = IDocClient.createIDoc(cls);
             for (IDocMethodContext context : contexts) {
-//                log.info("createIDoc finish parse method,methodContext:{}",
-//                        JsonUtil.bean2jsonPretty(context));
+                log.info("createIDoc finish parse method,methodContext:{}",
+                        JsonUtil.bean2jsonPretty(context));
                 String html = new IDocMethodContext.ToHtml().toHtml(context);
                 FileUtil.createFile(path + context.getId() + ".md", false, html.getBytes(), true);
             }
@@ -75,10 +76,11 @@ public class IDocTest {
         private String name;
         private String key;
         @IDocField(value = "{name:11)")
-        private IDocObjectSub iDocObjectSub;
-        private List<IDocObjectSub> iDocObjectSubs;
+        private IDocObjectSub sub;
+        private List<IDocObjectSub> subs;
         @IDocField(value = "[1,2,4]")
         private List<Long> longs;
+        private List<Long> defLongs;
 
     }
 
