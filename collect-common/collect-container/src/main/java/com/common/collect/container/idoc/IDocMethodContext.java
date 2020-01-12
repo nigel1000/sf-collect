@@ -38,6 +38,17 @@ public class IDocMethodContext implements Serializable {
         return this;
     }
 
+    public IDocMethodContext addRequest(Map<String, IDocFieldObj> value) {
+        if (EmptyUtil.isEmpty(value)) {
+            return this;
+        }
+        if (request == null) {
+            request = new LinkedHashMap<>();
+        }
+        request.putAll(value);
+        return this;
+    }
+
     public IDocMethodContext addResponse(Map<String, IDocFieldObj> response) {
         if (EmptyUtil.isEmpty(response)) {
             return this;

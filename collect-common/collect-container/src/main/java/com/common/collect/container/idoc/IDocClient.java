@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.*;
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -52,7 +53,11 @@ public class IDocClient {
                 if (request == null) {
                     continue;
                 }
-                methodContext.addRequest(request);
+                if (request.getValue() instanceof Map) {
+                    methodContext.addRequest((Map<String, IDocFieldObj>) request.getValue());
+                } else {
+                    methodContext.addRequest(request);
+                }
             }
             // 解析返回
             Class retCls = method.getReturnType();
@@ -97,12 +102,7 @@ public class IDocClient {
         RequestBody requestBody = parameter.getAnnotation(RequestBody.class);
         if (requestBody != null) {
             request.setRequired(requestBody.required());
-            request.setName(parameterName);
-            getIDocFieldObjFromClass(paramCls, requests, IDocFieldType.request, new LinkedHashMap<>());
-            request.setValue(requests);
-            return request;
         }
-
         // 简单 vo 对象
         request.setName(parameterName);
         getIDocFieldObjFromClass(paramCls, requests, IDocFieldType.request, new LinkedHashMap<>());
@@ -130,6 +130,7 @@ public class IDocClient {
                 Type type = returnTypeMap.get(field.getGenericType().getTypeName());
                 if (type != null) {
                     if (type instanceof ParameterizedType) {
+                        // 只支持一层的List Response<List<Long>> ，不支持 Response<List<List<Long>>>
                         if (((ParameterizedType) type).getRawType() == List.class) {
                             fieldCls = List.class;
                             actualType = (Class) ((ParameterizedType) type).getActualTypeArguments()[0];
@@ -144,9 +145,12 @@ public class IDocClient {
 
             IDocFieldObj iDocFieldObj = IDocFieldObj.of(iDocField, fieldCls, iDocFieldType);
             iDocFieldObj.setName(field.getName());
-            if (fieldCls == List.class) {
-                if (actualType == null) {
+            if (fieldCls == List.class || fieldCls.isArray()) {
+                if (fieldCls == List.class && actualType == null) {
                     actualType = ClassUtil.getFieldGenericType(field, 0);
+                }
+                if (fieldCls.isArray()) {
+                    actualType = fieldCls.getComponentType();
                 }
                 iDocFieldObj.setArrayType(actualType);
                 if (isDirectHandleType(actualType)) {
@@ -173,9 +177,18 @@ public class IDocClient {
     private static boolean isDirectHandleType(Class cls) {
         return ClassUtil.isPrimitive(cls) ||
                 cls == Object.class ||
-                cls == Date.class ||
-                cls == Map.class ||
-                cls == String.class;
+                cls == Boolean.class ||
+                cls == Long.class ||
+                cls == Integer.class ||
+                cls == Float.class ||
+                cls == Double.class ||
+                cls == Byte.class ||
+                cls == Short.class ||
+                cls == BigDecimal.class ||
+                cls == Character.class ||
+                cls == Character.class ||
+                cls == String.class ||
+                cls == Date.class;
     }
 
 
