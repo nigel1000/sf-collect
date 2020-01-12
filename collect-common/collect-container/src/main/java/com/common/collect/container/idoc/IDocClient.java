@@ -53,7 +53,7 @@ public class IDocClient {
                 if (request == null) {
                     continue;
                 }
-                if (request.getValue() instanceof Map) {
+                if (request.getValue() instanceof Map && !request.isArrayType()) {
                     methodContext.addRequest((Map<String, IDocFieldObj>) request.getValue());
                 } else {
                     methodContext.addRequest(request);
@@ -92,13 +92,12 @@ public class IDocClient {
             return request;
         }
         Class paramCls = parameter.getType();
+        Class actualArrayCls = paramCls;
         if (paramCls == List.class || paramCls.isArray()) {
-            request.setName(parameterName);
-            handleArrayType(paramCls, parameter.getParameterizedType(), request);
-            return request;
+            actualArrayCls = handleArrayType(paramCls, parameter.getParameterizedType(), request);
         }
         // 基本类型
-        if (isDirectHandleType(paramCls)) {
+        if (isDirectHandleType(actualArrayCls)) {
             request.setName(parameterName);
             return request;
         }
@@ -109,7 +108,7 @@ public class IDocClient {
             request.setRequired(requestBody.required());
         }
         request.setName(parameterName);
-        getIDocFieldObjFromClass(paramCls, requests, IDocFieldType.request, new LinkedHashMap<>());
+        getIDocFieldObjFromClass(actualArrayCls, requests, IDocFieldType.request, new LinkedHashMap<>());
         request.setValue(requests);
         return request;
 
