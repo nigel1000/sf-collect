@@ -74,6 +74,15 @@ public class AlgorithmUtilTest {
         log.info(StringUtil.format("url 解密数据:{}", AlgorithmUtil.uRLDecoderUtf8(afterEncode)));
     }
 
+    public static void hexStr(String content) {
+        log.info("");
+        log.info("########## url hexStr ###########");
+        String hexStr = AlgorithmUtil.byteToHexStr(content.getBytes());
+        log.info(StringUtil.format("url 原始数据:{}", content));
+        log.info(StringUtil.format("url 原始数据2HexStr:{}", hexStr));
+        log.info(StringUtil.format("url HexStr2原始数据:{}", new String(AlgorithmUtil.byteFromHexStr(hexStr))));
+    }
+
 
     public static void main(String[] args) {
         String content = "22dafsd中国232";
@@ -92,6 +101,17 @@ public class AlgorithmUtilTest {
         log.info("");
         urlEncode(url);
 
+        hexStr(content);
+
+//        important();
+    }
+
+    public static void important() {
+        String db = "aaaa";
+        String key = "afsefsrgrwg11111";
+        // 解密
+        byte[] aesDecrypt = AlgorithmUtil.aesDecrypt(AlgorithmUtil.byteFromHexStr(db), key.getBytes(StandardCharsets.UTF_8));
+        log.info(StringUtil.format("aes 解密数据:{}", new String(aesDecrypt, StandardCharsets.UTF_8)));
     }
 
 }
