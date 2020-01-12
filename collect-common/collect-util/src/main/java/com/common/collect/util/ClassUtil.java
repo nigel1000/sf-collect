@@ -251,11 +251,7 @@ public class ClassUtil {
                 findClassesByFile(packageName + "." + file.getName(), file.getAbsolutePath(), recursive, classes);
             } else {
                 String className = file.getName().substring(0, file.getName().length() - 6);
-                try {
-                    classes.add(Thread.currentThread().getContextClassLoader().loadClass(packageName + "." + className));
-                } catch (ClassNotFoundException e) {
-                    throw UnifiedException.gen(StringUtil.format("findClassesByFile failed. packageName:{},className:{}", packageName, className), e);
-                }
+                classes.add(getClass(packageName + "." + className));
             }
         }
     }
@@ -283,11 +279,7 @@ public class ClassUtil {
 
             // 去掉后面的".class", 将路径转为package格式
             String className = name.substring(0, name.length() - 6);
-            try {
-                classes.add(Thread.currentThread().getContextClassLoader().loadClass(packageName + "." + className));
-            } catch (ClassNotFoundException e) {
-                throw UnifiedException.gen(StringUtil.format("findClassesByJar failed. packageName:{},className:{}", packageName, className), e);
-            }
+            classes.add(getClass(packageName + "." + className));
         }
     }
 
