@@ -2,9 +2,11 @@ package com.common.collect.web.controller;
 
 import com.common.collect.api.Response;
 import com.common.collect.container.WebUtil;
-import com.common.collect.container.idoc.*;
+import com.common.collect.container.idoc.IDocClient;
+import com.common.collect.container.idoc.IDocField;
+import com.common.collect.container.idoc.IDocMethod;
+import com.common.collect.container.idoc.IDocMethodContext;
 import com.common.collect.container.mybatis.generator.domain.param.DomainParam;
-import com.common.collect.util.AlgorithmUtil;
 import com.common.collect.util.ClassUtil;
 import com.common.collect.util.StringUtil;
 import org.springframework.stereotype.Controller;
@@ -37,8 +39,7 @@ public class IDocController {
             for (IDocMethodContext context : contexts) {
                 sb.append("<br>");
                 String show = context.getId() + "-" + context.getName();
-                String content = AlgorithmUtil.uRLEncoderUtf8(ToHtml.toHtml(context));
-                sb.append(StringUtil.format("<a href=/api/idoc/show?content={}>{}</a>", content, show));
+                sb.append(StringUtil.format("<a href=/api/idoc/show?pkg={}&id={}>{}</a>", pkg, context.getId(), show));
             }
         }
         sb.append("</body>\n");
@@ -48,8 +49,17 @@ public class IDocController {
 
     // http://localhost:8181/api/idoc/show
     @RequestMapping(value = "/api/idoc/show", method = {RequestMethod.GET})
-    public void show(HttpServletResponse response, String content) {
-        WebUtil.exportHtml(response, AlgorithmUtil.uRLDecoderUtf8(content));
+    public void show(HttpServletResponse response, String pkg, String id) {
+        List<Class<?>> classList = ClassUtil.getClazzFromPackage(pkg);
+        for (Class<?> cls : classList) {
+            List<IDocMethodContext> contexts = IDocClient.createIDoc(cls);
+            for (IDocMethodContext context : contexts) {
+                if (context.getId().equals(id)) {
+                    WebUtil.exportHtml(response, context.toHtml());
+                }
+            }
+        }
+
     }
 
     @IDocMethod(id = "5", name = "测试接口", author = "hznijianfeng")

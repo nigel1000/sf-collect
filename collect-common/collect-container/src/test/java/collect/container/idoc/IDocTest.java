@@ -2,7 +2,10 @@ package collect.container.idoc;
 
 import com.common.collect.api.Response;
 import com.common.collect.container.JsonUtil;
-import com.common.collect.container.idoc.*;
+import com.common.collect.container.idoc.IDocClient;
+import com.common.collect.container.idoc.IDocField;
+import com.common.collect.container.idoc.IDocMethod;
+import com.common.collect.container.idoc.IDocMethodContext;
 import com.common.collect.util.ClassUtil;
 import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.FileUtil;
@@ -45,8 +48,7 @@ public class IDocTest {
             for (IDocMethodContext context : contexts) {
                 log.info("createIDoc finish parse method,methodContext:{}",
                         JsonUtil.bean2jsonPretty(context));
-                String html = ToHtml.toHtml(context);
-                FileUtil.createFile(path + context.getId() + ".md", false, html.getBytes(), true);
+                FileUtil.createFile(path + context.getId() + ".md", false, context.toHtml().getBytes(), true);
             }
         }
     }

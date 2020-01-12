@@ -69,4 +69,9 @@ public class IDocMethodContext implements Serializable {
         return context;
     }
 
+    public String toHtml() {
+        return ToHtml.toHtml(this);
+    }
+
+
 }

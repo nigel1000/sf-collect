@@ -133,6 +133,9 @@ public class IDocClient {
             @NonNull Map<String, Type> returnTypeMap) {
         Field[] fields = ClassUtil.getFields(cls);
         for (Field field : fields) {
+            if (Modifier.isStatic(field.getModifiers())) {
+                continue;
+            }
             // IDocField
             IDocField iDocField = field.getAnnotation(IDocField.class);
             Class fieldCls = field.getType();
