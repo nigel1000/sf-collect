@@ -276,7 +276,7 @@ public class ClassUtil {
                 // 非指定包路径， 非class文件
                 continue;
             }
-            classes.add(getClass(name.replace("/", ".")));
+            classes.add(getClass(name.replace("/", ".").substring(0, name.length() - 6)));
         }
     }
 
