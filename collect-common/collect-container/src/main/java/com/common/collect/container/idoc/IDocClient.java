@@ -50,14 +50,14 @@ public class IDocClient {
                         parameter.getType() == MultipartFile.class) {
                     continue;
                 }
-                IDocMethodContext.IDocFieldObj request = handleParameter(parameter, parameterNames[i]);
+                IDocFieldObj request = handleParameter(parameter, parameterNames[i]);
                 methodContext.addRequest(request);
             }
             // 解析返回
             Class retCls = method.getReturnType();
             Map<String, Class> returnTypeMap = ClassUtil.getMethodReturnGenericType(method);
-            Map<String, IDocMethodContext.IDocFieldObj> responses = new LinkedHashMap<>();
-            getIDocFieldObjFromClass(retCls, responses, IDocMethodContext.Type.response, returnTypeMap);
+            Map<String, IDocFieldObj> responses = new LinkedHashMap<>();
+            getIDocFieldObjFromClass(retCls, responses, IDocFieldType.response, returnTypeMap);
             methodContext.addResponse(responses);
             log.info("createIDoc finish parse method,className:{}, methodName:{}",
                     methodContext.getClassName(), methodContext.getMethodName());
@@ -81,11 +81,11 @@ public class IDocClient {
         return "Object";
     }
 
-    private static IDocMethodContext.IDocFieldObj handleParameter(
+    private static IDocFieldObj handleParameter(
             @NonNull Parameter parameter, @NonNull String parameterName) {
         // IDocField
         IDocField iDocField = parameter.getAnnotation(IDocField.class);
-        IDocMethodContext.IDocFieldObj request = IDocMethodContext.IDocFieldObj.of(iDocField, parameter.getType(), IDocMethodContext.Type.request);
+        IDocFieldObj request = IDocFieldObj.of(iDocField, parameter.getType(), IDocFieldType.request);
         // RequestParam
         RequestParam requestParam = parameter.getAnnotation(RequestParam.class);
         if (requestParam != null) {
@@ -107,19 +107,19 @@ public class IDocClient {
             return request;
         }
         // RequestBody
-        Map<String, IDocMethodContext.IDocFieldObj> requests = new LinkedHashMap<>();
+        Map<String, IDocFieldObj> requests = new LinkedHashMap<>();
         RequestBody requestBody = parameter.getAnnotation(RequestBody.class);
         if (requestBody != null) {
             request.setRequired(requestBody.required());
             request.setName(parameterName);
-            getIDocFieldObjFromClass(paramCls, requests, IDocMethodContext.Type.request, new LinkedHashMap<>());
+            getIDocFieldObjFromClass(paramCls, requests, IDocFieldType.request, new LinkedHashMap<>());
             request.setValue(requests);
             return request;
         }
 
         // 简单 vo 对象
         request.setName(parameterName);
-        getIDocFieldObjFromClass(paramCls, requests, IDocMethodContext.Type.request, new LinkedHashMap<>());
+        getIDocFieldObjFromClass(paramCls, requests, IDocFieldType.request, new LinkedHashMap<>());
         request.setValue(requests);
         return request;
 
@@ -127,14 +127,14 @@ public class IDocClient {
 
     private static void getIDocFieldObjFromClass(
             @NonNull Class paramCls,
-            @NonNull Map<String, IDocMethodContext.IDocFieldObj> iDocFieldObjMap,
-            @NonNull IDocMethodContext.Type typeEnum,
+            @NonNull Map<String, IDocFieldObj> iDocFieldObjMap,
+            @NonNull IDocFieldType iDocFieldType,
             @NonNull Map<String, Class> returnTypeMap) {
         Field[] fields = ClassUtil.getFields(paramCls);
         for (Field field : fields) {
             // IDocField
             IDocField iDocField = field.getAnnotation(IDocField.class);
-            IDocMethodContext.IDocFieldObj iDocFieldObj = IDocMethodContext.IDocFieldObj.of(iDocField, field.getType(), typeEnum);
+            IDocFieldObj iDocFieldObj = IDocFieldObj.of(iDocField, field.getType(), iDocFieldType);
             iDocFieldObj.setName(field.getName());
             Class fieldCls = field.getType();
             if (fieldCls == List.class) {
@@ -143,15 +143,15 @@ public class IDocClient {
                 if (isDirectHandleType(actualType)) {
                     iDocFieldObjMap.put(iDocFieldObj.getName(), iDocFieldObj);
                 } else {
-                    Map<String, IDocMethodContext.IDocFieldObj> next = new LinkedHashMap<>();
-                    getIDocFieldObjFromClass(actualType, next, typeEnum, returnTypeMap);
+                    Map<String, IDocFieldObj> next = new LinkedHashMap<>();
+                    getIDocFieldObjFromClass(actualType, next, iDocFieldType, returnTypeMap);
                     iDocFieldObj.setValue(next);
                     iDocFieldObjMap.put(iDocFieldObj.getName(), iDocFieldObj);
                 }
                 continue;
             }
             // 如果是泛型属性
-            if (typeEnum == IDocMethodContext.Type.response && fieldCls == Object.class) {
+            if (iDocFieldType == IDocFieldType.response && fieldCls == Object.class) {
                 Class clazz = returnTypeMap.get(field.getGenericType().getTypeName());
                 if (clazz != null) {
                     fieldCls = clazz;
@@ -161,8 +161,8 @@ public class IDocClient {
                 iDocFieldObjMap.put(iDocFieldObj.getName(), iDocFieldObj);
                 continue;
             }
-            Map<String, IDocMethodContext.IDocFieldObj> next = new LinkedHashMap<>();
-            getIDocFieldObjFromClass(fieldCls, next, typeEnum, returnTypeMap);
+            Map<String, IDocFieldObj> next = new LinkedHashMap<>();
+            getIDocFieldObjFromClass(fieldCls, next, iDocFieldType, returnTypeMap);
             iDocFieldObj.setValue(next);
             iDocFieldObjMap.put(iDocFieldObj.getName(), iDocFieldObj);
         }

@@ -33,7 +33,7 @@ public class ToHtml {
         return sb.toString();
     }
 
-    private static void map2Html(Map<String, IDocMethodContext.IDocFieldObj> map, int level) {
+    private static void map2Html(Map<String, IDocFieldObj> map, int level) {
         if (map == null) {
             return;
         }
@@ -53,7 +53,7 @@ public class ToHtml {
                         String.format("<td>%s</td>", "类型") +
                         String.format("<td>%s</td>", "默认值") +
                         String.format("<td>%s</td>", "描述");
-                if (IDocMethodContext.Type.request == v.getTypeEnum()) {
+                if (IDocFieldType.request == v.getIDocFieldType()) {
                     out += String.format("<td>%s</td>", "是否必填");
                 }
                 addLine(out);
@@ -72,20 +72,20 @@ public class ToHtml {
                 addLine("<tr align=\"left\">");
                 out += String.format("<td>%s</td>", "") +
                         String.format("<td>%s</td>", IDocUtil.fromString(v.getDesc()));
-                if (IDocMethodContext.Type.request == v.getTypeEnum()) {
+                if (IDocFieldType.request == v.getIDocFieldType()) {
                     out += String.format("<td>%s</td>", v.isRequired() + "");
                 }
                 addLine(out);
                 addLine("</tr>");
                 int next = level + 1;
                 addLine("<tr align=\"left\">");
-                map2Html((Map<String, IDocMethodContext.IDocFieldObj>) v.getValue(), next);
+                map2Html((Map<String, IDocFieldObj>) v.getValue(), next);
                 addLine("</tr>");
             } else {
                 addLine("<tr align=\"left\">");
                 out += String.format("<td>%s</td>", IDocUtil.fromString(v.getValue())) +
                         String.format("<td>%s</td>", IDocUtil.fromString(v.getDesc()));
-                if (IDocMethodContext.Type.request == v.getTypeEnum()) {
+                if (IDocFieldType.request == v.getIDocFieldType()) {
                     out += String.format("<td>%s</td>", v.isRequired() + "");
                 }
                 addLine(out);
