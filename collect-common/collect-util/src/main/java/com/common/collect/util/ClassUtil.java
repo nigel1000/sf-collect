@@ -240,7 +240,7 @@ public class ClassUtil {
         // 在给定的目录下找到所有的文件，并且进行条件过滤
         File[] dirFiles = dir.listFiles((file) -> {
             boolean acceptDir = recursive && file.isDirectory();// 接受dir目录
-            boolean acceptClass = file.getName().endsWith("class");// 接受class文件
+            boolean acceptClass = file.getName().endsWith(".class");// 接受class文件
             return acceptDir || acceptClass;
         });
         if (dirFiles == null) {
@@ -266,7 +266,6 @@ public class ClassUtil {
         JarEntry jarEntry;
         while (entry.hasMoreElements()) {
             jarEntry = entry.nextElement();
-
             String name = jarEntry.getName();
             if (name.charAt(0) == '/') {
                 name = name.substring(1);
