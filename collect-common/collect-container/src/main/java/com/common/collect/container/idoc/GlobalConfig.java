@@ -6,6 +6,6 @@ package com.common.collect.container.idoc;
 public class GlobalConfig {
 
     // 是否重新创建
-    public static Boolean reCreate = true;
+    public static Boolean reCreate;
 
 }

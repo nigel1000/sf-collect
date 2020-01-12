@@ -55,7 +55,7 @@ public class IDocTest {
 
     public static class Controller {
 
-        @IDocMethod(id = "1", name = "测试接口", author = "hznijianfeng")
+        @IDocMethod(id = "1", name = "测试接口", author = "hznijianfeng", reCreate = true)
         @RequestMapping(value = "/back/door/bean/invoke", method = {RequestMethod.GET, RequestMethod.POST})
         public Response<IDocObject> idoc(
                 @IDocField(nameDesc = "bean 名称", desc = "注意事项", value = "configDao")

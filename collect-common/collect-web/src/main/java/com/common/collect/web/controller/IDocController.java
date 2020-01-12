@@ -62,7 +62,7 @@ public class IDocController {
 
     }
 
-    @IDocMethod(id = "5", name = "测试接口", author = "hznijianfeng")
+    @IDocMethod(id = "5", name = "测试接口", author = "hznijianfeng", reCreate = true)
     @RequestMapping(value = "/api/idoc/demo", method = {RequestMethod.GET, RequestMethod.POST})
     public Response<List<DomainParam>> demo(
             @IDocField(nameDesc = "显示内容", desc = "随你怎么填") String content,
