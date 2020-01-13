@@ -67,10 +67,12 @@ public class IDocClient {
                 }
             }
             // 解析返回
-            Class retCls = method.getReturnType();
+            IDocFieldObjFromClassContext context = new IDocFieldObjFromClassContext();
             Map<String, Type> returnTypeMap = ClassUtil.getMethodReturnGenericType(method);
+            context.setGenericTypeMap(returnTypeMap);
+            Class retCls = method.getReturnType();
             Map<String, IDocFieldObj> responses = new LinkedHashMap<>();
-            getIDocFieldObjFromClass(retCls, responses, IDocFieldType.response, returnTypeMap, new IDocFieldObjFromClassContext());
+            getIDocFieldObjFromClass(retCls, responses, IDocFieldType.response, context);
             methodContext.addResponse(responses);
             log.info("createIDoc finish parse method,className:{}, methodName:{}",
                     methodContext.getClassName(), methodContext.getMethodName());
@@ -116,7 +118,7 @@ public class IDocClient {
 //            request.setRequired(requestBody.required());
 //        }
         request.setName(parameterName);
-        getIDocFieldObjFromClass(actualArrayCls, requests, IDocFieldType.request, new LinkedHashMap<>(), new IDocFieldObjFromClassContext());
+        getIDocFieldObjFromClass(actualArrayCls, requests, IDocFieldType.request, new IDocFieldObjFromClassContext());
         request.setValue(requests);
         return request;
 
@@ -159,9 +161,8 @@ public class IDocClient {
             @NonNull Class cls,
             @NonNull Map<String, IDocFieldObj> iDocFieldObjMap,
             @NonNull IDocFieldType iDocFieldType,
-            @NonNull Map<String, Type> genericTypeMap,
             @NonNull IDocFieldObjFromClassContext context) {
-        context.validTrace(cls);
+        context.enter(cls);
         Field[] fields = ClassUtil.getFields(cls);
         for (Field field : fields) {
             if (Modifier.isStatic(field.getModifiers())) {
@@ -173,7 +174,7 @@ public class IDocClient {
             Type fieldType = field.getGenericType();
             // 等于Object的时候可能是泛型属性
             if (fieldCls == Object.class) {
-                Type genericType = genericTypeMap.get(field.getGenericType().getTypeName());
+                Type genericType = context.getGenericTypeMap().get(field.getGenericType().getTypeName());
                 if (genericType != null) {
                     fieldType = genericType;
                     if (genericType instanceof ParameterizedType) {
@@ -186,27 +187,20 @@ public class IDocClient {
 
             IDocFieldObj iDocFieldObj = IDocFieldObj.of(iDocField, fieldCls, iDocFieldType);
             iDocFieldObj.setName(field.getName());
+            Class actualArrayCls = fieldCls;
             if (fieldCls == List.class || fieldCls.isArray()) {
-                Class actualArrayCls = handleArrayType(fieldCls, fieldType, iDocFieldObj);
-                if (isDirectHandleType(actualArrayCls)) {
-                    iDocFieldObjMap.put(iDocFieldObj.getName(), iDocFieldObj);
-                } else {
-                    Map<String, IDocFieldObj> next = new LinkedHashMap<>();
-                    getIDocFieldObjFromClass(actualArrayCls, next, iDocFieldType, genericTypeMap, context);
-                    iDocFieldObj.setValue(next);
-                    iDocFieldObjMap.put(iDocFieldObj.getName(), iDocFieldObj);
-                }
-                continue;
+                actualArrayCls = handleArrayType(fieldCls, fieldType, iDocFieldObj);
             }
-            if (isDirectHandleType(fieldCls)) {
+            if (isDirectHandleType(actualArrayCls)) {
                 iDocFieldObjMap.put(iDocFieldObj.getName(), iDocFieldObj);
                 continue;
             }
             Map<String, IDocFieldObj> next = new LinkedHashMap<>();
-            getIDocFieldObjFromClass(fieldCls, next, iDocFieldType, genericTypeMap, context);
+            getIDocFieldObjFromClass(actualArrayCls, next, iDocFieldType, context);
             iDocFieldObj.setValue(next);
             iDocFieldObjMap.put(iDocFieldObj.getName(), iDocFieldObj);
         }
+        context.exit();
     }
 
     private static boolean isDirectHandleType(@NonNull Class cls) {
