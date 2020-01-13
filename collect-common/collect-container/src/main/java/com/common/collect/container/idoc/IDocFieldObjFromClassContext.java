@@ -16,8 +16,13 @@ import java.util.Map;
 @Data
 public class IDocFieldObjFromClassContext {
 
+    private IDocFieldType docFieldType;
     private List<String> traceCurrentClass = new ArrayList<>();
     private Map<String, Type> genericTypeMap = new LinkedHashMap<>();
+
+    public IDocFieldObjFromClassContext(IDocFieldType docFieldType){
+        this.docFieldType = docFieldType;
+    }
 
     public void enter(@NonNull Class cls) {
         if (traceCurrentClass == null) {

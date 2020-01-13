@@ -67,12 +67,12 @@ public class IDocClient {
                 }
             }
             // 解析返回
-            IDocFieldObjFromClassContext context = new IDocFieldObjFromClassContext();
+            IDocFieldObjFromClassContext context = new IDocFieldObjFromClassContext(IDocFieldType.response);
             Map<String, Type> returnTypeMap = ClassUtil.getMethodReturnGenericType(method);
             context.setGenericTypeMap(returnTypeMap);
             Class retCls = method.getReturnType();
             Map<String, IDocFieldObj> responses = new LinkedHashMap<>();
-            getIDocFieldObjFromClass(retCls, responses, IDocFieldType.response, context);
+            getIDocFieldObjFromClass(retCls, responses, context);
             methodContext.addResponse(responses);
             log.info("createIDoc finish parse method,className:{}, methodName:{}",
                     methodContext.getClassName(), methodContext.getMethodName());
@@ -118,7 +118,7 @@ public class IDocClient {
 //            request.setRequired(requestBody.required());
 //        }
         request.setName(parameterName);
-        getIDocFieldObjFromClass(actualArrayCls, requests, IDocFieldType.request, new IDocFieldObjFromClassContext());
+        getIDocFieldObjFromClass(actualArrayCls, requests, new IDocFieldObjFromClassContext(IDocFieldType.request));
         request.setValue(requests);
         return request;
 
@@ -160,7 +160,6 @@ public class IDocClient {
     private static void getIDocFieldObjFromClass(
             @NonNull Class cls,
             @NonNull Map<String, IDocFieldObj> iDocFieldObjMap,
-            @NonNull IDocFieldType iDocFieldType,
             @NonNull IDocFieldObjFromClassContext context) {
         context.enter(cls);
         Field[] fields = ClassUtil.getFields(cls);
@@ -185,7 +184,7 @@ public class IDocClient {
                 }
             }
 
-            IDocFieldObj iDocFieldObj = IDocFieldObj.of(iDocField, fieldCls, iDocFieldType);
+            IDocFieldObj iDocFieldObj = IDocFieldObj.of(iDocField, fieldCls, context.getDocFieldType());
             iDocFieldObj.setName(field.getName());
             Class actualArrayCls = fieldCls;
             if (fieldCls == List.class || fieldCls.isArray()) {
@@ -196,7 +195,7 @@ public class IDocClient {
                 continue;
             }
             Map<String, IDocFieldObj> next = new LinkedHashMap<>();
-            getIDocFieldObjFromClass(actualArrayCls, next, iDocFieldType, context);
+            getIDocFieldObjFromClass(actualArrayCls, next, context);
             iDocFieldObj.setValue(next);
             iDocFieldObjMap.put(iDocFieldObj.getName(), iDocFieldObj);
         }
