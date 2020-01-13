@@ -24,7 +24,7 @@ public class IDocFieldObjFromClassContext {
         if (traceCurrentClass.contains(traceName)) {
             List<String> log = new ArrayList<>(traceCurrentClass);
             log.add(traceName);
-            throw UnifiedException.gen(JsonUtil.bean2json(log));
+            throw UnifiedException.gen("循环依赖：" + JsonUtil.bean2json(log));
         }
         traceCurrentClass.add(traceName);
     }
