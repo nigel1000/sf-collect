@@ -1,6 +1,5 @@
 package com.common.collect.container.idoc;
 
-
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.JsonUtil;
 import com.common.collect.util.EmptyUtil;
@@ -20,7 +19,7 @@ public class IDocFieldObjFromClassContext {
     private List<String> traceCurrentClass = new ArrayList<>();
     private Map<String, Type> genericTypeMap = new LinkedHashMap<>();
 
-    public IDocFieldObjFromClassContext(IDocFieldType docFieldType){
+    public IDocFieldObjFromClassContext(IDocFieldType docFieldType) {
         this.docFieldType = docFieldType;
     }
 
