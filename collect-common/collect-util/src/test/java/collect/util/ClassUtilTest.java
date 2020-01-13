@@ -4,6 +4,7 @@ import com.common.collect.util.ClassUtil;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -30,7 +31,7 @@ public class ClassUtilTest {
     }
 
     private static class CallableTest
-            extends HashMap<Double, BigDecimal>
+            extends HashMap<List<Double>, BigDecimal>
             implements Runnable, Callable<Object>, Supplier<Integer>, Function<Double, Float> {
         @Override
         public Object call() {

@@ -5,11 +5,19 @@ import lombok.NonNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -135,43 +143,47 @@ public class ClassUtil {
     }
 
     // 获取泛型类型
-    public static Class getGenericType(@NonNull Type type, int index) {
-        if (!(type instanceof ParameterizedType)) {
-            throw UnifiedException.gen(StringUtil.format(" type:{} 不是泛型类型", type.getTypeName()));
-        } else {
-            Type[] params = ((ParameterizedType) type).getActualTypeArguments();
-            if (index < params.length && index >= 0) {
-                if (!(params[index] instanceof Class)) {
-                    throw UnifiedException.gen(StringUtil.format(" type:{},index:{} 没有设置具体的类型", type.getTypeName(), index));
-                } else {
-                    return (Class) params[index];
-                }
-            } else {
-                throw UnifiedException.gen(StringUtil.format(" type:{},index:{} 超出了下标", type.getTypeName(), index));
+    public static Class getGenericTypeClass(Type parameterizedType, int index) {
+        if (parameterizedType == null) {
+            return null;
+        } else if (parameterizedType instanceof Class) {
+            return (Class) parameterizedType;
+        } else if (parameterizedType instanceof ParameterizedType) {
+            Type type = getGenericType((ParameterizedType) parameterizedType, index);
+            if (type instanceof Class) {
+                return (Class) type;
+            } else if (type instanceof ParameterizedType) {
+                return (Class) ((ParameterizedType) type).getRawType();
             }
+            return null;
+        } else {
+            return null;
         }
+    }
+
+    public static Type getGenericType(ParameterizedType parameterizedType, int index) {
+        return parameterizedType.getActualTypeArguments()[index];
     }
 
     public static Class getSuperClassGenericType(@NonNull Class clazz, int index) {
         Type type = clazz.getGenericSuperclass();
-        return getGenericType(type, index);
+        return getGenericTypeClass(type, index);
     }
 
     public static Class getSuperInterfaceGenericType(@NonNull Class clazz, @NonNull Class superInterface, int index) {
         Type[] types = clazz.getGenericInterfaces();
         for (Type type : types) {
             if (type instanceof ParameterizedType && ((ParameterizedType) type).getRawType() == superInterface) {
-                return getGenericType(type, index);
+                return getGenericTypeClass(type, index);
             }
         }
-        throw UnifiedException.gen(StringUtil.format(" clazz:{} 不存在接口 interface:{} 或者 此接口不是泛型接口 ", clazz.getName(), superInterface.getName()));
+        return null;
     }
 
     public static Class getFieldGenericType(@NonNull Field field, int index) {
         Type type = field.getGenericType();
-        return getGenericType(type, index);
+        return getGenericTypeClass(type, index);
     }
-
 
     // K -> String V -> Long
     public static Map<String, Type> getMethodReturnGenericType(@NonNull Method method) {

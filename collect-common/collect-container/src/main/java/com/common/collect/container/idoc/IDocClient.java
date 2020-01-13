@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.DefaultParameterNameDiscoverer;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ValueConstants;
@@ -14,9 +13,18 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by hznijianfeng on 2019/5/20.
@@ -25,7 +33,6 @@ import java.util.*;
 @Slf4j
 @Data
 public class IDocClient {
-
 
     public static List<IDocMethodContext> createIDoc(@NonNull Class<?> cls) {
         List<IDocMethodContext> contexts = new ArrayList<>();
@@ -63,7 +70,7 @@ public class IDocClient {
             Class retCls = method.getReturnType();
             Map<String, Type> returnTypeMap = ClassUtil.getMethodReturnGenericType(method);
             Map<String, IDocFieldObj> responses = new LinkedHashMap<>();
-            getIDocFieldObjFromClass(retCls, responses, IDocFieldType.response, returnTypeMap);
+            getIDocFieldObjFromClass(retCls, responses, IDocFieldType.response, returnTypeMap, new IDocFieldObjFromClassContext());
             methodContext.addResponse(responses);
             log.info("createIDoc finish parse method,className:{}, methodName:{}",
                     methodContext.getClassName(), methodContext.getMethodName());
@@ -101,14 +108,15 @@ public class IDocClient {
             request.setName(parameterName);
             return request;
         }
-        // RequestBody 简单 vo 对象
+        // 简单 vo 对象
         Map<String, IDocFieldObj> requests = new LinkedHashMap<>();
-        RequestBody requestBody = parameter.getAnnotation(RequestBody.class);
-        if (requestBody != null) {
-            request.setRequired(requestBody.required());
-        }
+        // RequestBody
+//        RequestBody requestBody = parameter.getAnnotation(RequestBody.class);
+//        if (requestBody != null) {
+//            request.setRequired(requestBody.required());
+//        }
         request.setName(parameterName);
-        getIDocFieldObjFromClass(actualArrayCls, requests, IDocFieldType.request, new LinkedHashMap<>());
+        getIDocFieldObjFromClass(actualArrayCls, requests, IDocFieldType.request, new LinkedHashMap<>(), new IDocFieldObjFromClassContext());
         request.setValue(requests);
         return request;
 
@@ -130,18 +138,11 @@ public class IDocClient {
                     break;
                 }
             }
-            if (actualArrayCls != null && actualArrayCls.isArray()) {
-                for (int i = 0; i < 100; i++) {
-                    if (actualArrayCls.getComponentType() == null) {
-                        break;
-                    }
-                    actualArrayCls = actualArrayCls.getComponentType();
-                    arrayCount++;
-                }
-            }
         }
         if (cls.isArray()) {
             actualArrayCls = cls;
+        }
+        if (actualArrayCls != null && actualArrayCls.isArray()) {
             for (int i = 0; i < 100; i++) {
                 if (actualArrayCls.getComponentType() == null) {
                     break;
@@ -158,7 +159,9 @@ public class IDocClient {
             @NonNull Class cls,
             @NonNull Map<String, IDocFieldObj> iDocFieldObjMap,
             @NonNull IDocFieldType iDocFieldType,
-            @NonNull Map<String, Type> genericTypeMap) {
+            @NonNull Map<String, Type> genericTypeMap,
+            @NonNull IDocFieldObjFromClassContext context) {
+        context.validTrace(cls);
         Field[] fields = ClassUtil.getFields(cls);
         for (Field field : fields) {
             if (Modifier.isStatic(field.getModifiers())) {
@@ -189,7 +192,7 @@ public class IDocClient {
                     iDocFieldObjMap.put(iDocFieldObj.getName(), iDocFieldObj);
                 } else {
                     Map<String, IDocFieldObj> next = new LinkedHashMap<>();
-                    getIDocFieldObjFromClass(actualArrayCls, next, iDocFieldType, genericTypeMap);
+                    getIDocFieldObjFromClass(actualArrayCls, next, iDocFieldType, genericTypeMap, context);
                     iDocFieldObj.setValue(next);
                     iDocFieldObjMap.put(iDocFieldObj.getName(), iDocFieldObj);
                 }
@@ -200,7 +203,7 @@ public class IDocClient {
                 continue;
             }
             Map<String, IDocFieldObj> next = new LinkedHashMap<>();
-            getIDocFieldObjFromClass(fieldCls, next, iDocFieldType, genericTypeMap);
+            getIDocFieldObjFromClass(fieldCls, next, iDocFieldType, genericTypeMap, context);
             iDocFieldObj.setValue(next);
             iDocFieldObjMap.put(iDocFieldObj.getName(), iDocFieldObj);
         }
@@ -209,6 +212,7 @@ public class IDocClient {
     private static boolean isDirectHandleType(@NonNull Class cls) {
         return ClassUtil.isPrimitive(cls) ||
                 cls == Object.class ||
+                cls == Map.class ||
                 cls == Boolean.class ||
                 cls == Long.class ||
                 cls == Integer.class ||
@@ -217,7 +221,6 @@ public class IDocClient {
                 cls == Byte.class ||
                 cls == Short.class ||
                 cls == BigDecimal.class ||
-                cls == Character.class ||
                 cls == Character.class ||
                 cls == String.class ||
                 cls == Date.class;

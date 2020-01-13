@@ -11,47 +11,45 @@ import java.util.Map;
 
 public class ToHtml {
 
-    private static StringBuilder sb;
+    public static String toHtml(@NonNull IDocMethodContext context) {
+        StringBuilder sb = new StringBuilder();
 
-    public static synchronized String toHtml(@NonNull IDocMethodContext context) {
-        sb = new StringBuilder();
+        addHtmlHead(sb);
+        addLine("文档链接：http://localhost:8181/doc/id/" + context.getId() + "<br>", sb);
+        addLine("文档名称：" + context.getName() + "<br>", sb);
+        addLine("文档作者：" + context.getAuthor() + "<br>", sb);
+        addLine("文档对应代码：" + context.getClassName() + "#" + context.getMethodName() + "<br>", sb);
+        addLine("访问地址：" + context.getRequestUrl() + "<br>", sb);
+        addLine("访问方式：" + context.getRequestMethod() + "<br>", sb);
 
-        addHtmlHead();
-        addLine("文档链接：http://localhost:8181/doc/id/" + context.getId() + "<br>");
-        addLine("文档名称：" + context.getName() + "<br>");
-        addLine("文档作者：" + context.getAuthor() + "<br>");
-        addLine("文档对应代码：" + context.getClassName() + "#" + context.getMethodName() + "<br>");
-        addLine("访问地址：" + context.getRequestUrl() + "<br>");
-        addLine("访问方式：" + context.getRequestMethod() + "<br>");
-
-        addLine("访问入参");
-        addLine("<table border=\"1\" width=\"1000\" cellspacing=\"0\" cellpadding=\"5px\">");
-        map2Html(context.getRequest(), 0);
-        addLine("</table>");
+        addLine("访问入参", sb);
+        addLine("<table border=\"1\" width=\"1000\" cellspacing=\"0\" cellpadding=\"5px\">", sb);
+        map2Html(context.getRequest(), 0, sb);
+        addLine("</table>", sb);
 
 
-        addLine("<div>");
-        addLine("<pre>");
+        addLine("<div>", sb);
+        addLine("<pre>", sb);
         Map<String, Object> bean = new LinkedHashMap<>();
         map2Json(context.getRequest(), bean);
-        addLine(JsonUtil.bean2jsonPretty(bean));
-        addLine("</pre>");
-        addLine("</div>");
+        addLine(JsonUtil.bean2jsonPretty(bean), sb);
+        addLine("</pre>", sb);
+        addLine("</div>", sb);
 
-        addLine("访问返回");
-        addLine("<table border=\"1\" width=\"1000\" cellspacing=\"0\" cellpadding=\"5px\" >");
-        map2Html(context.getResponse(), 0);
-        addLine("</table>");
+        addLine("访问返回", sb);
+        addLine("<table border=\"1\" width=\"1000\" cellspacing=\"0\" cellpadding=\"5px\" >", sb);
+        map2Html(context.getResponse(), 0, sb);
+        addLine("</table>", sb);
 
-        addLine("<div>");
-        addLine("<pre>");
+        addLine("<div>", sb);
+        addLine("<pre>", sb);
         bean = new LinkedHashMap<>();
         map2Json(context.getResponse(), bean);
-        addLine(JsonUtil.bean2jsonPretty(bean));
-        addLine("</pre>");
-        addLine("</div>");
+        addLine(JsonUtil.bean2jsonPretty(bean), sb);
+        addLine("</pre>", sb);
+        addLine("</div>", sb);
 
-        addHtmlTail();
+        addHtmlTail(sb);
         return sb.toString();
     }
 
@@ -74,7 +72,7 @@ public class ToHtml {
         });
     }
 
-    private static void map2Html(Map<String, IDocFieldObj> map, int level) {
+    private static void map2Html(Map<String, IDocFieldObj> map, int level, StringBuilder sb) {
         if (map == null) {
             return;
         }
@@ -87,7 +85,7 @@ public class ToHtml {
         String blank = temp;
         map.forEach((k, v) -> {
             if (i.size() == 0) {
-                addLine("<tr align=\"left\">");
+                addLine("<tr align=\"left\">", sb);
                 String out = blank;
                 out += String.format("<td>%s</td>", "名称") +
                         String.format("<td>%s</td>", "名称描述") +
@@ -97,8 +95,8 @@ public class ToHtml {
                 if (IDocFieldType.request == v.getIDocFieldType()) {
                     out += String.format("<td>%s</td>", "是否必填");
                 }
-                addLine(out);
-                addLine("</tr>");
+                addLine(out, sb);
+                addLine("</tr>", sb);
                 i.add(1);
             }
             String out = blank;
@@ -110,32 +108,32 @@ public class ToHtml {
                 out += String.format("<td>%s</td>", v.getType());
             }
             if (v.getValue() instanceof Map) {
-                addLine("<tr align=\"left\">");
+                addLine("<tr align=\"left\">", sb);
                 out += String.format("<td>%s</td>", "") +
                         String.format("<td>%s</td>", IDocUtil.fromString(v.getDesc()));
                 if (IDocFieldType.request == v.getIDocFieldType()) {
                     out += String.format("<td>%s</td>", v.isRequired() + "");
                 }
-                addLine(out);
-                addLine("</tr>");
+                addLine(out, sb);
+                addLine("</tr>", sb);
                 int next = level + 1;
-                addLine("<tr align=\"left\">");
-                map2Html((Map<String, IDocFieldObj>) v.getValue(), next);
-                addLine("</tr>");
+                addLine("<tr align=\"left\">", sb);
+                map2Html((Map<String, IDocFieldObj>) v.getValue(), next, sb);
+                addLine("</tr>", sb);
             } else {
-                addLine("<tr align=\"left\">");
+                addLine("<tr align=\"left\">", sb);
                 out += String.format("<td>%s</td>", IDocUtil.fromString(v.getValue())) +
                         String.format("<td>%s</td>", IDocUtil.fromString(v.getDesc()));
                 if (IDocFieldType.request == v.getIDocFieldType()) {
                     out += String.format("<td>%s</td>", v.isRequired() + "");
                 }
-                addLine(out);
-                addLine("</tr>");
+                addLine(out, sb);
+                addLine("</tr>", sb);
             }
         });
     }
 
-    private static void addLine(String line) {
+    private static void addLine(String line, StringBuilder sb) {
         if (line == null) {
             line = "";
         }
@@ -143,7 +141,7 @@ public class ToHtml {
         sb.append("\n");
     }
 
-    private static void addHtmlHead() {
+    private static void addHtmlHead(StringBuilder sb) {
         sb.append("<!DOCTYPE html>\n");
         sb.append("<head>\n");
         sb.append("<title>接口页面</title>\n");
@@ -152,7 +150,7 @@ public class ToHtml {
         sb.append("<body>\n");
     }
 
-    private static void addHtmlTail() {
+    private static void addHtmlTail(StringBuilder sb) {
         sb.append("</body>\n");
         sb.append("</html>\n");
     }
