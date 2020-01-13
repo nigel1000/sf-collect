@@ -18,7 +18,8 @@ public class DemoController {
     @RequestMapping(value = "/back/door/bean/invoke", method = {RequestMethod.GET, RequestMethod.POST})
     public Response<DocObject> iDocDemo(
             @IDocField(nameDesc = "bean 名称", desc = "注意事项")
-            @RequestParam(value = "beanName", defaultValue = "configDao") String beanName,
+            @RequestParam(value = "beanName", defaultValue = "configDao")
+            String beanName,
             DocObjectSub docObjectSub,
             String methodName) {
         return Response.ok();
@@ -32,13 +33,11 @@ public class DemoController {
 
     @Data
     public static class DocObject {
-
         private Long[] longArray;
         private DocObjectSub[] subArray;
         private List<Long> longList;
         private List<DocObjectSub> subList;
         private String key;
-
     }
 
     @Data
@@ -57,7 +56,6 @@ public class DemoController {
         private Character chatStr;
         private String str;
         private Date date;
-
     }
 
 }

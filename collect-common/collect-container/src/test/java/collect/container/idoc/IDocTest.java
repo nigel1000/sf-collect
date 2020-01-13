@@ -16,7 +16,6 @@ import java.util.List;
 @Slf4j
 public class IDocTest {
 
-
     private static String path;
 
     static {
@@ -30,7 +29,6 @@ public class IDocTest {
     }
 
     public static void main(String[] args) {
-
         List<Class<?>> classList = ClassUtil.getClazzFromPackage("com.common.collect.container.idoc.demo");
         if (EmptyUtil.isEmpty(classList)) {
             return;
