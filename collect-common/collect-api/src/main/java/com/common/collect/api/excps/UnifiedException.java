@@ -13,7 +13,7 @@ import java.util.Map;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class UnifiedException extends RuntimeException {
+public class UnifiedException extends RuntimeException implements IBizException {
 
     private static final long serialVersionUID = 1L;
 
@@ -34,6 +34,28 @@ public class UnifiedException extends RuntimeException {
      * 异常上下文，可以设置一些关键业务参数
      */
     private Map<String, Object> context;
+
+    private UnifiedException(String module, String errorMessage) {
+        this(module, Constants.ERROR, errorMessage);
+    }
+
+    private UnifiedException(String module, String errorMessage, Throwable cause) {
+        this(module, Constants.ERROR, errorMessage, cause);
+    }
+
+    private UnifiedException(String module, int errorCode, String errorMessage) {
+        super(errorMessage);
+        this.errorCode = errorCode;
+        this.errorMessage = errorMessage;
+        this.module = module;
+    }
+
+    private UnifiedException(String module, int errorCode, String errorMessage, Throwable cause) {
+        super(errorMessage, cause);
+        this.errorCode = errorCode;
+        this.errorMessage = errorMessage;
+        this.module = module;
+    }
 
     public static UnifiedException gen(String errorMessage) {
         return gen("default", errorMessage);
@@ -65,28 +87,6 @@ public class UnifiedException extends RuntimeException {
 
     public static UnifiedException gen(String module, int errorCode, String errorMessage, Throwable cause) {
         return new UnifiedException(module, errorCode, errorMessage, cause);
-    }
-
-    private UnifiedException(String module, String errorMessage) {
-        this(module, Constants.ERROR, errorMessage);
-    }
-
-    private UnifiedException(String module, String errorMessage, Throwable cause) {
-        this(module, Constants.ERROR, errorMessage, cause);
-    }
-
-    private UnifiedException(String module, int errorCode, String errorMessage) {
-        super(errorMessage);
-        this.errorCode = errorCode;
-        this.errorMessage = errorMessage;
-        this.module = module;
-    }
-
-    private UnifiedException(String module, int errorCode, String errorMessage, Throwable cause) {
-        super(errorMessage, cause);
-        this.errorCode = errorCode;
-        this.errorMessage = errorMessage;
-        this.module = module;
     }
 
     public UnifiedException addContext(String key, Object value) {

@@ -2,7 +2,7 @@ package com.common.collect.container.aops;
 
 import com.common.collect.api.Constants;
 import com.common.collect.api.Response;
-import com.common.collect.api.excps.UnifiedException;
+import com.common.collect.api.excps.IBizException;
 import com.common.collect.container.AopUtil;
 import com.common.collect.container.trace.TraceIdUtil;
 import com.common.collect.util.ClassUtil;
@@ -49,16 +49,16 @@ public class CatchExcpAspectJ {
         String methodName = point.getSignature().getName();
         Class returnType = ((MethodSignature) point.getSignature()).getReturnType();
         try {
-            if (bizExcp instanceof UnifiedException) {
-                UnifiedException unifiedException = (UnifiedException) bizExcp;
+            if (bizExcp instanceof IBizException) {
+                IBizException bizException = (IBizException) bizExcp;
                 if (bizExcp.getCause() != null) {
-                    log.error("UnifiedException 异常。模块：{}，类名：{}，方法：{}，入参：{}，描述:{}, 上下文:{}",
+                    log.error("{} 异常。模块：{}，类名：{}，方法：{}，入参：{}，描述:{}, 上下文:{}", bizExcp.getClass().getSimpleName(),
                             module, className, methodName,
                             point.getArgs(),
-                            unifiedException.getErrorMessage(), unifiedException.getContext(),
-                            unifiedException);
+                            bizException.getErrorMessage(), bizException.getContext(),
+                            bizException);
                 }
-                return handleUnifiedException(unifiedException, returnType);
+                return handleIBizException(bizException, returnType);
             } else if (bizExcp instanceof Exception) {
                 log.error("Exception 异常。模块：{}，类名：{}，方法：{},入参：{}",
                         module, className, methodName,
@@ -92,7 +92,7 @@ public class CatchExcpAspectJ {
     }
 
     // 业务异常处理
-    private Object handleUnifiedException(UnifiedException ex, Class returnType) {
+    private Object handleIBizException(IBizException ex, Class returnType) {
         if (Response.class == returnType) {
             Response response = Response.fail(ex.getErrorCode(), ex.getErrorMessage());
             response.addContext("traceId", TraceIdUtil.traceId());
