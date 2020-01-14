@@ -2,7 +2,6 @@ package com.common.collect.container.idoc.context;
 
 import com.common.collect.container.idoc.annotations.IDocMethod;
 import com.common.collect.container.idoc.base.GlobalConfig;
-import com.common.collect.container.idoc.base.ToHtml;
 import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.StringUtil;
 import lombok.Data;
@@ -82,10 +81,6 @@ public class IDocMethodContext implements Serializable {
         }
 
         return context;
-    }
-
-    public String toHtml() {
-        return ToHtml.toHtml(this);
     }
 
     public void sortMap(Map<String, IDocFieldObj> map) {

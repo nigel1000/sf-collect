@@ -2,6 +2,7 @@ package com.common.collect.web.controller;
 
 import com.common.collect.container.WebUtil;
 import com.common.collect.container.idoc.IDocClient;
+import com.common.collect.container.idoc.base.ToHtml;
 import com.common.collect.container.idoc.context.IDocMethodContext;
 import com.common.collect.util.ClassUtil;
 import com.common.collect.util.StringUtil;
@@ -50,7 +51,7 @@ public class IDocController {
             List<IDocMethodContext> contexts = IDocClient.createIDoc(cls);
             for (IDocMethodContext context : contexts) {
                 if (context.getId().equals(id)) {
-                    WebUtil.exportHtml(response, context.toHtml());
+                    WebUtil.exportHtml(response, ToHtml.toHtml(context));
                 }
             }
         }
