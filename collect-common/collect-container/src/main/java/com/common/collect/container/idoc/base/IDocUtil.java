@@ -96,7 +96,7 @@ public class IDocUtil {
     public static String fromString(Object str) {
         if (str == null) {
             return "";
-        } else if (str instanceof List) {
+        } else if (typeDefaultValue(str.getClass())== null) {
             return JsonUtil.bean2json(str);
         } else {
             return String.valueOf(str);
