@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by nijianfeng on 2020/1/12.
@@ -93,18 +94,24 @@ public class IDocUtil {
         return null;
     }
 
-    public static String fromString(Object str) {
+    public static String convert2String(Object str) {
+        // null
         if (str == null) {
             return "";
-        } else if (typeDefaultValue(str.getClass())== null) {
+        } else if (str instanceof Map) {
+            // map
+            return "";
+        } else if (typeDefaultValue(str.getClass()) == null) {
+            // list
             return JsonUtil.bean2json(str);
         } else {
+            // typeDefaultValue 返回的
             return String.valueOf(str);
         }
     }
 
-    public static Object arrayCountList(Object value, int count) {
-        Object obj = Arrays.asList(value, value);
+    public static List arrayCountList(Object value, int count) {
+        List obj = Arrays.asList(value, value);
         for (int i = 0; i < count - 1; i++) {
             obj = Arrays.asList(obj, obj);
         }

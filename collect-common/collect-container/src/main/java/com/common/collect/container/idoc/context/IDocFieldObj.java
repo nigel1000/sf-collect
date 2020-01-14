@@ -21,7 +21,7 @@ public class IDocFieldObj implements Serializable {
     private String arrayType;
     private Class arrayTypeCls;
     private Integer arrayTypeCount;
-    // 默认值
+    // 默认值 可能是 map|null|IDocUtil.typeDefaultValue返回的类型
     private Object value = null;
     // 描述
     private String desc;

@@ -109,8 +109,8 @@ public class ToHtml {
                 i.add(1);
             }
             String out = blank;
-            out += String.format("<td>%s</td>", IDocUtil.fromString(v.getName())) +
-                    String.format("<td>%s</td>", IDocUtil.fromString(v.getNameDesc()));
+            out += String.format("<td>%s</td>", IDocUtil.convert2String(v.getName())) +
+                    String.format("<td>%s</td>", IDocUtil.convert2String(v.getNameDesc()));
             if (v.getArrayType() != null) {
                 out += String.format("<td>%s</td>", v.getType() + "-" + v.getArrayType());
             } else {
@@ -119,7 +119,7 @@ public class ToHtml {
             if (v.getValue() instanceof Map) {
                 addLine("<tr align=\"left\">", sb);
                 out += String.format("<td>%s</td>", "") +
-                        String.format("<td>%s</td>", IDocUtil.fromString(v.getDesc()));
+                        String.format("<td>%s</td>", IDocUtil.convert2String(v.getDesc()));
                 if (IDocFieldType.request == v.getIDocFieldType()) {
                     out += String.format("<td>%s</td>", v.isRequired() + "");
                 }
@@ -132,11 +132,11 @@ public class ToHtml {
             } else {
                 addLine("<tr align=\"left\">", sb);
                 if (v.isArrayType() && !v.isArrayObjectType()) {
-                    out += String.format("<td>%s</td>", IDocUtil.fromString(IDocUtil.arrayCountList(v.getValue(), v.getArrayTypeCount())));
+                    out += String.format("<td>%s</td>", IDocUtil.convert2String(IDocUtil.arrayCountList(v.getValue(), v.getArrayTypeCount())));
                 } else {
-                    out += String.format("<td>%s</td>", IDocUtil.fromString(v.getValue()));
+                    out += String.format("<td>%s</td>", IDocUtil.convert2String(v.getValue()));
                 }
-                out += String.format("<td>%s</td>", IDocUtil.fromString(v.getDesc()));
+                out += String.format("<td>%s</td>", IDocUtil.convert2String(v.getDesc()));
                 if (IDocFieldType.request == v.getIDocFieldType()) {
                     out += String.format("<td>%s</td>", v.isRequired() + "");
                 }
