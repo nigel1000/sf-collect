@@ -61,7 +61,9 @@ public class ToHtml {
             return;
         }
         docFieldObjMap.forEach((k, v) -> {
-            if (v.getValue() instanceof Map) {
+            if (v.getValue() == null) {
+                bean.put(k, new LinkedHashMap<>());
+            } else if (v.getValue() instanceof Map) {
                 Map<String, Object> sub = new LinkedHashMap<>();
                 map2Json((Map<String, IDocFieldObj>) v.getValue(), sub);
                 if (v.isArrayType()) {
@@ -70,7 +72,11 @@ public class ToHtml {
                     bean.put(k, sub);
                 }
             } else {
-                bean.put(k, v.getValue());
+                if (v.isArrayType()) {
+                    bean.put(k, IDocUtil.arrayCountList(v.getValue(), v.getArrayTypeCount()));
+                } else {
+                    bean.put(k, v.getValue());
+                }
             }
         });
     }
@@ -125,8 +131,12 @@ public class ToHtml {
                 addLine("</tr>", sb);
             } else {
                 addLine("<tr align=\"left\">", sb);
-                out += String.format("<td>%s</td>", IDocUtil.fromString(v.getValue())) +
-                        String.format("<td>%s</td>", IDocUtil.fromString(v.getDesc()));
+                if (v.isArrayType() && !v.isArrayObjectType()) {
+                    out += String.format("<td>%s</td>", IDocUtil.fromString(IDocUtil.arrayCountList(v.getValue(), v.getArrayTypeCount())));
+                } else {
+                    out += String.format("<td>%s</td>", IDocUtil.fromString(v.getValue()));
+                }
+                out += String.format("<td>%s</td>", IDocUtil.fromString(v.getDesc()));
                 if (IDocFieldType.request == v.getIDocFieldType()) {
                     out += String.format("<td>%s</td>", v.isRequired() + "");
                 }

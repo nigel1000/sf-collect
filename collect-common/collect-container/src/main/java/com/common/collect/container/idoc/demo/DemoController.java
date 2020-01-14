@@ -16,7 +16,7 @@ import java.util.List;
 public class DemoController {
 
     @IDocMethod(id = "1", name = "测试接口", author = "hznijianfeng", reCreate = true)
-    @RequestMapping(value = "/back/door/bean/invoke", method = {RequestMethod.GET, RequestMethod.POST})
+    @RequestMapping(value = "/back/door/bean/iDocDemo", method = {RequestMethod.GET, RequestMethod.POST})
     public Response<DocObject> iDocDemo(
             @IDocField(nameDesc = "bean 名称", desc = "注意事项")
             @RequestParam(value = "beanName", defaultValue = "configDao")
@@ -27,7 +27,7 @@ public class DemoController {
     }
 
     @IDocMethod(id = "2", name = "测试接口", author = "hznijianfeng", reCreate = true)
-    @RequestMapping(value = "/back/door/bean/invoke", method = {RequestMethod.GET, RequestMethod.POST})
+    @RequestMapping(value = "/back/door/bean/arrayCount", method = {RequestMethod.GET, RequestMethod.POST})
     public Response<List<List<String[][]>>> arrayCount(String[][] strArray, List<DocObjectSub[]> subList) {
         return Response.ok();
     }

@@ -8,7 +8,6 @@ import lombok.NonNull;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -91,8 +90,7 @@ public class IDocUtil {
         if (cls == String.class) {
             return IdUtil.uuidHex().substring(0, 5);
         }
-        // 如果是Object，默认是{}
-        return new HashMap<>();
+        return null;
     }
 
     public static String fromString(Object str) {

@@ -3,7 +3,6 @@ package com.common.collect.container.idoc;
 import com.common.collect.container.idoc.annotations.IDocField;
 import com.common.collect.container.idoc.annotations.IDocFieldExclude;
 import com.common.collect.container.idoc.annotations.IDocMethod;
-import com.common.collect.container.idoc.base.IDocUtil;
 import com.common.collect.container.idoc.context.IDocFieldObj;
 import com.common.collect.container.idoc.context.IDocFieldObjFromClassContext;
 import com.common.collect.container.idoc.context.IDocFieldType;
@@ -54,7 +53,7 @@ public class IDocClient {
                 if (request == null) {
                     continue;
                 }
-                if (request.getValue() instanceof Map && !request.isArrayType()) {
+                if (request.isObjectType()) {
                     methodContext.addRequest((Map<String, IDocFieldObj>) request.getValue());
                 } else {
                     methodContext.addRequest(request);
@@ -198,7 +197,6 @@ public class IDocClient {
                 actualArrayCls = handleArrayType(fieldCls, fieldType, iDocFieldObj);
             }
             if (isDirectHandleType(actualArrayCls)) {
-                iDocFieldObj.setValue(IDocUtil.typeDefaultValue(actualArrayCls));
                 iDocFieldObjMap.put(iDocFieldObj.getName(), iDocFieldObj);
                 continue;
             }

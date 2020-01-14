@@ -32,18 +32,23 @@ public class IDocFieldObj implements Serializable {
 
 
     public boolean isArrayType() {
-        return IDocFieldValueType.Array.name().equals(this.type) &&
-                IDocFieldValueType.Object.name().equals(this.arrayType);
+        return IDocFieldValueType.Array.name().equals(this.type);
+    }
+
+    public boolean isArrayObjectType() {
+        return isArrayType() && IDocFieldValueType.Object.name().equals(this.arrayType);
+    }
+
+    public boolean isObjectType() {
+        return IDocFieldValueType.Object.name().equals(this.type);
     }
 
     public void setArrayType(@NonNull Class arrayType, Integer arrayCount) {
         this.arrayType = IDocUtil.typeMapping(arrayType).name();
         this.arrayTypeCls = arrayType;
         this.arrayTypeCount = arrayCount;
-        Object defValue = IDocUtil.typeDefaultValue(arrayType);
-        if (this.value == null && defValue != null) {
-            this.setValue(IDocUtil.arrayCountList(IDocUtil.typeDefaultValue(arrayType), arrayCount));
-        }
+        this.setValue(IDocUtil.typeDefaultValue(arrayType));
+
     }
 
     public static IDocFieldObj of(IDocField iDocField, @NonNull Class type, @NonNull IDocFieldType iDocFieldType) {
