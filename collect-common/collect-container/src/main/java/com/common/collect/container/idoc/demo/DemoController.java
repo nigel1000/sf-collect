@@ -1,8 +1,9 @@
 package com.common.collect.container.idoc.demo;
 
 import com.common.collect.api.Response;
-import com.common.collect.container.idoc.IDocField;
-import com.common.collect.container.idoc.IDocMethod;
+import com.common.collect.container.idoc.annotations.IDocField;
+import com.common.collect.container.idoc.annotations.IDocFieldExclude;
+import com.common.collect.container.idoc.annotations.IDocMethod;
 import lombok.Data;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -19,7 +20,7 @@ public class DemoController {
     public Response<DocObject> iDocDemo(
             @IDocField(nameDesc = "bean 名称", desc = "注意事项")
             @RequestParam(value = "beanName", defaultValue = "configDao")
-            String beanName,
+                    String beanName,
             DocObjectSub docObjectSub,
             String methodName) {
         return Response.ok();
@@ -55,6 +56,8 @@ public class DemoController {
         private BigDecimal bigDecimalNum;
         private Character chatStr;
         private String str;
+        @IDocFieldExclude
+        private Date dateExclude;
         private Date date;
     }
 

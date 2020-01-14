@@ -1,4 +1,4 @@
-package com.common.collect.container.idoc;
+package com.common.collect.container.idoc.base;
 
 /**
  * Created by nijianfeng on 2020/1/11.

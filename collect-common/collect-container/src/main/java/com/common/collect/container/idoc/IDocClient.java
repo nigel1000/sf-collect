@@ -1,5 +1,13 @@
 package com.common.collect.container.idoc;
 
+import com.common.collect.container.idoc.annotations.IDocField;
+import com.common.collect.container.idoc.annotations.IDocFieldExclude;
+import com.common.collect.container.idoc.annotations.IDocMethod;
+import com.common.collect.container.idoc.base.IDocUtil;
+import com.common.collect.container.idoc.context.IDocFieldObj;
+import com.common.collect.container.idoc.context.IDocFieldObjFromClassContext;
+import com.common.collect.container.idoc.context.IDocFieldType;
+import com.common.collect.container.idoc.context.IDocMethodContext;
 import com.common.collect.util.ClassUtil;
 import com.common.collect.util.EmptyUtil;
 import lombok.Data;
@@ -13,18 +21,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by hznijianfeng on 2019/5/20.
@@ -51,11 +50,6 @@ public class IDocClient {
             String[] parameterNames = discover.getParameterNames(method);
             for (int i = 0; i < method.getParameterCount(); i++) {
                 Parameter parameter = parameters[i];
-                if (parameter.getType() == HttpServletRequest.class ||
-                        parameter.getType() == HttpServletResponse.class ||
-                        parameter.getType() == MultipartFile.class) {
-                    continue;
-                }
                 IDocFieldObj request = handleParameter(parameter, parameterNames[i]);
                 if (request == null) {
                     continue;
@@ -83,6 +77,15 @@ public class IDocClient {
 
     private static IDocFieldObj handleParameter(
             @NonNull Parameter parameter, @NonNull String parameterName) {
+        IDocFieldExclude exclude = parameter.getAnnotation(IDocFieldExclude.class);
+        if (exclude != null) {
+            return null;
+        }
+        if (parameter.getType() == HttpServletRequest.class ||
+                parameter.getType() == HttpServletResponse.class ||
+                parameter.getType() == MultipartFile.class) {
+            return null;
+        }
         // IDocField
         IDocField iDocField = parameter.getAnnotation(IDocField.class);
         IDocFieldObj request = IDocFieldObj.of(iDocField, parameter.getType(), IDocFieldType.request);
@@ -167,6 +170,10 @@ public class IDocClient {
             if (Modifier.isStatic(field.getModifiers())) {
                 continue;
             }
+            IDocFieldExclude exclude = field.getAnnotation(IDocFieldExclude.class);
+            if (exclude != null) {
+                continue;
+            }
             // IDocField
             IDocField iDocField = field.getAnnotation(IDocField.class);
             Class fieldCls = field.getType();
@@ -191,6 +198,7 @@ public class IDocClient {
                 actualArrayCls = handleArrayType(fieldCls, fieldType, iDocFieldObj);
             }
             if (isDirectHandleType(actualArrayCls)) {
+                iDocFieldObj.setValue(IDocUtil.typeDefaultValue(actualArrayCls));
                 iDocFieldObjMap.put(iDocFieldObj.getName(), iDocFieldObj);
                 continue;
             }

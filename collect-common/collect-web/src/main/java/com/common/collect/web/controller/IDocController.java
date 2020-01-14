@@ -2,7 +2,7 @@ package com.common.collect.web.controller;
 
 import com.common.collect.container.WebUtil;
 import com.common.collect.container.idoc.IDocClient;
-import com.common.collect.container.idoc.IDocMethodContext;
+import com.common.collect.container.idoc.context.IDocMethodContext;
 import com.common.collect.util.ClassUtil;
 import com.common.collect.util.StringUtil;
 import org.springframework.stereotype.Controller;

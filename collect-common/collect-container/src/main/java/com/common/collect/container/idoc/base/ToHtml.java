@@ -1,6 +1,9 @@
-package com.common.collect.container.idoc;
+package com.common.collect.container.idoc.base;
 
 import com.common.collect.container.JsonUtil;
+import com.common.collect.container.idoc.context.IDocFieldObj;
+import com.common.collect.container.idoc.context.IDocFieldType;
+import com.common.collect.container.idoc.context.IDocMethodContext;
 import com.common.collect.util.EmptyUtil;
 import lombok.NonNull;
 

@@ -1,13 +1,14 @@
-package com.common.collect.container.idoc;
+package com.common.collect.container.idoc.base;
 
 import com.common.collect.container.JsonUtil;
-import com.common.collect.util.DateUtil;
+import com.common.collect.container.idoc.context.IDocFieldValueType;
 import com.common.collect.util.IdUtil;
 import lombok.NonNull;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -85,22 +86,23 @@ public class IDocUtil {
             return new BigDecimal("23.43222");
         }
         if (cls == Date.class) {
-            return DateUtil.format(DateUtil.now(), "yyyy-MM-dd HH:mm:ss");
+            return System.currentTimeMillis();
         }
         if (cls == String.class) {
             return IdUtil.uuidHex().substring(0, 5);
         }
-        return null;
+        // 如果是Object，默认是{}
+        return new HashMap<>();
     }
 
     public static String fromString(Object str) {
         if (str == null) {
             return "";
-        }
-        if (str instanceof List) {
+        } else if (str instanceof List) {
             return JsonUtil.bean2json(str);
+        } else {
+            return String.valueOf(str);
         }
-        return str.toString();
     }
 
     public static Object arrayCountList(Object value, int count) {

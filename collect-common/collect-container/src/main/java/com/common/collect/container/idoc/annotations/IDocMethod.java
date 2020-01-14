@@ -1,4 +1,4 @@
-package com.common.collect.container.idoc;
+package com.common.collect.container.idoc.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
