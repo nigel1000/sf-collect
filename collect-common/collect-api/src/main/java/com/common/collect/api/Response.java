@@ -12,7 +12,7 @@ import java.util.Map;
 public class Response<T> implements Serializable {
 
     private int code;
-    @IDocField(desc = "code in [200-300] 时为 true ")
+    @IDocField(desc = "code=[200-300] 为 true ")
     private boolean success;
 
     @IDocField(desc = "返回数据")
