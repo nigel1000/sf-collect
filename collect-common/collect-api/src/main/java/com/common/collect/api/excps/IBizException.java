@@ -15,7 +15,7 @@ public interface IBizException {
         return Constants.ERROR;
     }
 
-    default String getErrorMessage() {
+    default String getMessage() {
         return Constants.errorFromSystem;
     }
 

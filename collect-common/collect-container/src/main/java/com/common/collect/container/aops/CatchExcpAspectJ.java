@@ -55,7 +55,7 @@ public class CatchExcpAspectJ {
                     log.error("{} 异常。模块：{}，类名：{}，方法：{}，入参：{}，描述:{}, 上下文:{}", bizExcp.getClass().getSimpleName(),
                             module, className, methodName,
                             point.getArgs(),
-                            bizException.getErrorMessage(), bizException.getContext(),
+                            bizExcp.getMessage(), bizException.getContext(),
                             bizException);
                 }
                 return handleIBizException(bizException, returnType);
@@ -94,7 +94,7 @@ public class CatchExcpAspectJ {
     // 业务异常处理
     private Object handleIBizException(IBizException ex, Class returnType) {
         if (Response.class == returnType) {
-            Response response = Response.fail(ex.getErrorCode(), ex.getErrorMessage());
+            Response response = Response.fail(ex.getErrorCode(), ex.getMessage());
             response.addContext("traceId", TraceIdUtil.traceId());
             response.addContext(ex.getContext());
             return response;

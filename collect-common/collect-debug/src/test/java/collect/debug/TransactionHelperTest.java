@@ -48,7 +48,7 @@ public class TransactionHelperTest {
                 throw UnifiedException.gen("回滚");
             });
         } catch (UnifiedException ex) {
-            if (!ex.getErrorMessage().equals("回滚")) {
+            if (!ex.getMessage().equals("回滚")) {
                 throw ex;
             }
         }

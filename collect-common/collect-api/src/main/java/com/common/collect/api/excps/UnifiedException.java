@@ -25,10 +25,6 @@ public class UnifiedException extends RuntimeException implements IBizException 
      * 错误编码
      */
     private int errorCode;
-    /**
-     * 自定义信息回现
-     */
-    private String errorMessage;
 
     /**
      * 异常上下文，可以设置一些关键业务参数
@@ -46,14 +42,12 @@ public class UnifiedException extends RuntimeException implements IBizException 
     private UnifiedException(String module, int errorCode, String errorMessage) {
         super(errorMessage);
         this.errorCode = errorCode;
-        this.errorMessage = errorMessage;
         this.module = module;
     }
 
     private UnifiedException(String module, int errorCode, String errorMessage, Throwable cause) {
         super(errorMessage, cause);
         this.errorCode = errorCode;
-        this.errorMessage = errorMessage;
         this.module = module;
     }
 
@@ -96,7 +90,6 @@ public class UnifiedException extends RuntimeException implements IBizException 
         context.put(key, value);
         return this;
     }
-
 
     public <C> UnifiedException addContext(Map<String, C> add) {
         if (add == null) {

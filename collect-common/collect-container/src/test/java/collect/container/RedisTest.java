@@ -131,7 +131,7 @@ public class RedisTest {
                         return true;
                     });
                 } catch (UnifiedException ex) {
-                    log.info(ex.getErrorMessage());
+                    log.info(ex.getMessage());
                 }
             });
         }
@@ -154,7 +154,7 @@ public class RedisTest {
                             RedisClient.ONE_SECOND,
                             20L);
                 } catch (UnifiedException ex) {
-                    log.info(ex.getErrorMessage(), ex.getCause());
+                    log.info(ex.getMessage(), ex.getCause());
                 }
             });
         }
