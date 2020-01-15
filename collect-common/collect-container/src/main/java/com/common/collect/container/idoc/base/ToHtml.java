@@ -95,7 +95,6 @@ public class ToHtml {
                 addLine("<tr align=\"left\">", sb);
                 String out = blank;
                 out += String.format("<td>%s</td>", "名称") +
-                        String.format("<td>%s</td>", "名称描述") +
                         String.format("<td>%s</td>", "类型") +
                         String.format("<td>%s</td>", "默认值") +
                         String.format("<td>%s</td>", "描述");
@@ -107,8 +106,7 @@ public class ToHtml {
                 i.add(1);
             }
             String out = blank;
-            out += String.format("<td>%s</td>", IDocUtil.convert2String(v.getName())) +
-                    String.format("<td>%s</td>", IDocUtil.convert2String(v.getNameDesc()));
+            out += String.format("<td>%s</td>", IDocUtil.convert2String(v.getName()));
             if (v.getArrayType() != null) {
                 out += String.format("<td>%s</td>", v.getType() + "-" + v.getArrayType());
             } else {

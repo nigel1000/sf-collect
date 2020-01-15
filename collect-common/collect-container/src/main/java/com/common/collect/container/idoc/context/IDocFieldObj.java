@@ -18,7 +18,6 @@ import java.io.Serializable;
 public class IDocFieldObj implements Serializable {
     // 名称
     private String name;
-    private String nameDesc;
     // 类型
     private String type;
     private Class typeCls;
@@ -38,7 +37,6 @@ public class IDocFieldObj implements Serializable {
         IDocFieldObj docFieldObj = new IDocFieldObj();
         docFieldObj.setValue(IDocUtil.typeDefaultValue(type));
         if (iDocField != null) {
-            docFieldObj.setNameDesc(iDocField.nameDesc());
             docFieldObj.setDesc(iDocField.desc());
             if (EmptyUtil.isNotEmpty(iDocField.value())) {
                 docFieldObj.setValue(iDocField.value());

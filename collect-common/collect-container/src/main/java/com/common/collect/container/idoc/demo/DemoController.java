@@ -18,7 +18,7 @@ public class DemoController {
     @IDocMethod(id = "1", name = "测试接口", author = "hznijianfeng", reCreate = true)
     @RequestMapping(value = "/back/door/bean/iDocDemo", method = {RequestMethod.GET, RequestMethod.POST})
     public Response<DocObject> iDocDemo(
-            @IDocField(nameDesc = "bean 名称", desc = "注意事项")
+            @IDocField(desc = "bean 名称")
             @RequestParam(value = "beanName", defaultValue = "configDao")
                     String beanName,
             DocObjectSub docObjectSub,
@@ -43,9 +43,9 @@ public class DemoController {
 
     @Data
     public static class DocObjectSub {
-        @IDocField(desc = "bool 值", nameDesc = "测试 bool", required = false)
+        @IDocField(desc = "bool 值", required = false)
         private Boolean bool;
-        @IDocField(desc = "long 值", nameDesc = "测试 long")
+        @IDocField(desc = "long 值")
         private Long longNum;
         @IDocField(value = "1234567890")
         private Integer intNum;

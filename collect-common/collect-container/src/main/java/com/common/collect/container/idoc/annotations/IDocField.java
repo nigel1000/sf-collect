@@ -12,19 +12,13 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 public @interface IDocField {
 
-    // 公共属性
-    // 名称
-    String nameDesc() default "";
-
     String value() default "";
 
     // 描述
     String desc() default "";
 
-
     // request 属性
     // 是否必须
     boolean required() default true;
-
 
 }
