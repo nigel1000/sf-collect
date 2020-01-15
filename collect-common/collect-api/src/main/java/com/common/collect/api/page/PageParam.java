@@ -1,6 +1,7 @@
 package com.common.collect.api.page;
 
 import com.common.collect.api.excps.UnifiedException;
+import com.common.collect.api.idoc.IDocFieldExclude;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -21,8 +22,11 @@ public class PageParam implements Serializable {
     private Integer limit;
     private String sortBy;
 
+    @IDocFieldExclude
     private int defaultPageNo = 1; /* 页码默认从1开始 */
+    @IDocFieldExclude
     private int defaultOffset = 0; /* mysql默认偏移量从0开始 */
+    @IDocFieldExclude
     private int defaultPageSize = 20;
 
     // 限制获取最大数量

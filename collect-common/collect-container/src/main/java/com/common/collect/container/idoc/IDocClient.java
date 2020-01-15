@@ -1,8 +1,8 @@
 package com.common.collect.container.idoc;
 
-import com.common.collect.container.idoc.annotations.IDocField;
-import com.common.collect.container.idoc.annotations.IDocFieldExclude;
-import com.common.collect.container.idoc.annotations.IDocMethod;
+import com.common.collect.api.idoc.IDocField;
+import com.common.collect.api.idoc.IDocFieldExclude;
+import com.common.collect.api.idoc.IDocMethod;
 import com.common.collect.container.idoc.context.IDocFieldObj;
 import com.common.collect.container.idoc.context.IDocFieldObjFromClassContext;
 import com.common.collect.container.idoc.context.IDocFieldType;
@@ -121,10 +121,13 @@ public class IDocClient {
             // 简单 vo 对象
             Map<String, IDocFieldObj> requests = new LinkedHashMap<>();
             getIDocFieldObjFromClass(actualArrayCls, requests, new IDocFieldObjFromClassContext(IDocFieldType.request));
-            if (EmptyUtil.isEmpty(requests)) {
-                return null;
+            if (EmptyUtil.isNotEmpty(requests)) {
+                request.setValue(requests);
+            } else {
+                if (iDocField == null) {
+                    return null;
+                }
             }
-            request.setValue(requests);
         }
         return request;
     }
@@ -169,10 +172,13 @@ public class IDocClient {
             if (iDocFieldObj.isObjectType() || iDocFieldObj.isArrayObjectType()) {
                 Map<String, IDocFieldObj> next = new LinkedHashMap<>();
                 getIDocFieldObjFromClass(actualArrayCls, next, context);
-                if (EmptyUtil.isEmpty(next)) {
-                    continue;
+                if (EmptyUtil.isNotEmpty(next)) {
+                    iDocFieldObj.setValue(next);
+                } else {
+                    if (iDocField == null) {
+                        continue;
+                    }
                 }
-                iDocFieldObj.setValue(next);
             }
             iDocFieldObjMap.put(iDocFieldObj.getName(), iDocFieldObj);
         }

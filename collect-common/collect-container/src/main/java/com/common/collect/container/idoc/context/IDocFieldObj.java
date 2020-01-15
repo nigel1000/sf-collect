@@ -1,6 +1,6 @@
 package com.common.collect.container.idoc.context;
 
-import com.common.collect.container.idoc.annotations.IDocField;
+import com.common.collect.api.idoc.IDocField;
 import com.common.collect.container.idoc.base.IDocUtil;
 import com.common.collect.util.EmptyUtil;
 import lombok.AllArgsConstructor;
@@ -24,7 +24,8 @@ public class IDocFieldObj implements Serializable {
     private String arrayType;
     private Class arrayTypeCls;
     private Integer arrayTypeCount;
-    // 默认值 可能是 map|null|IDocUtil.typeDefaultValue返回的类型
+    // 默认值
+    // type = Object || arrayType = Object 时可能是map，当map为空时并且IDocField里value不为空时是string
     private Object value;
     // 描述
     private String desc;

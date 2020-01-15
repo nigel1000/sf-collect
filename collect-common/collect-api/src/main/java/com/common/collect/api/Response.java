@@ -1,5 +1,7 @@
 package com.common.collect.api;
 
+import com.common.collect.api.idoc.IDocField;
+import com.common.collect.api.idoc.IDocFieldExclude;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -10,11 +12,15 @@ import java.util.Map;
 public class Response<T> implements Serializable {
 
     private int code;
+    @IDocField(desc = "code in [200-300] 时为 true ")
     private boolean success;
 
+    @IDocField(desc = "返回数据")
     private T result;
+    @IDocField(desc = "错误信息", value = "错误信息")
     private Object error;
 
+    @IDocFieldExclude
     private Map<String, Object> context;
 
     public Response<T> addContext(String key, Object value) {

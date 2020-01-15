@@ -1,9 +1,9 @@
 package com.common.collect.container.idoc.demo;
 
 import com.common.collect.api.Response;
-import com.common.collect.container.idoc.annotations.IDocField;
-import com.common.collect.container.idoc.annotations.IDocFieldExclude;
-import com.common.collect.container.idoc.annotations.IDocMethod;
+import com.common.collect.api.idoc.IDocField;
+import com.common.collect.api.idoc.IDocFieldExclude;
+import com.common.collect.api.idoc.IDocMethod;
 import lombok.Data;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
