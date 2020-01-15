@@ -29,38 +29,8 @@ public class IDocMethodContext implements Serializable {
     private String requestMethod;
     private boolean reCreate = true;
 
-    private Map<String, IDocFieldObj> request;
-    private Map<String, IDocFieldObj> response;
-
-    public IDocMethodContext addRequest(@NonNull IDocFieldObj value) {
-        if (request == null) {
-            request = new LinkedHashMap<>();
-        }
-        request.put(value.getName(), value);
-        return this;
-    }
-
-    public IDocMethodContext addRequest(Map<String, IDocFieldObj> value) {
-        if (EmptyUtil.isEmpty(value)) {
-            return this;
-        }
-        if (request == null) {
-            request = new LinkedHashMap<>();
-        }
-        request.putAll(value);
-        return this;
-    }
-
-    public IDocMethodContext addResponse(Map<String, IDocFieldObj> response) {
-        if (EmptyUtil.isEmpty(response)) {
-            return this;
-        }
-        if (this.response == null) {
-            this.response = new LinkedHashMap<>();
-        }
-        this.response.putAll(response);
-        return this;
-    }
+    private Map<String, IDocFieldObj> request = new LinkedHashMap<>();
+    private Map<String, IDocFieldObj> response = new LinkedHashMap<>();
 
     public static IDocMethodContext of(@NonNull IDocMethod iDocMethod, RequestMapping requestMapping) {
         IDocMethodContext context = new IDocMethodContext();
@@ -81,6 +51,27 @@ public class IDocMethodContext implements Serializable {
         }
 
         return context;
+    }
+
+    public IDocMethodContext addRequest(@NonNull IDocFieldObj value) {
+        request.put(value.getName(), value);
+        return this;
+    }
+
+    public IDocMethodContext addRequest(Map<String, IDocFieldObj> value) {
+        if (EmptyUtil.isEmpty(value)) {
+            return this;
+        }
+        request.putAll(value);
+        return this;
+    }
+
+    public IDocMethodContext addResponse(Map<String, IDocFieldObj> response) {
+        if (EmptyUtil.isEmpty(response)) {
+            return this;
+        }
+        this.response.putAll(response);
+        return this;
     }
 
     public void sortMap(Map<String, IDocFieldObj> map) {

@@ -61,9 +61,7 @@ public class ToHtml {
             return;
         }
         docFieldObjMap.forEach((k, v) -> {
-            if (v.getValue() == null) {
-                bean.put(k, new LinkedHashMap<>());
-            } else if (v.getValue() instanceof Map) {
+            if (v.getValue() instanceof Map) {
                 Map<String, Object> sub = new LinkedHashMap<>();
                 map2Json((Map<String, IDocFieldObj>) v.getValue(), sub);
                 if (v.isArrayType()) {
@@ -116,31 +114,29 @@ public class ToHtml {
             } else {
                 out += String.format("<td>%s</td>", v.getType());
             }
+
+            addLine("<tr align=\"left\">", sb);
             if (v.getValue() instanceof Map) {
-                addLine("<tr align=\"left\">", sb);
                 out += String.format("<td>%s</td>", "") +
                         String.format("<td>%s</td>", IDocUtil.convert2String(v.getDesc()));
-                if (IDocFieldType.request == v.getIDocFieldType()) {
-                    out += String.format("<td>%s</td>", v.isRequired() + "");
-                }
-                addLine(out, sb);
-                addLine("</tr>", sb);
-                int next = level + 1;
-                addLine("<tr align=\"left\">", sb);
-                map2Html((Map<String, IDocFieldObj>) v.getValue(), next, sb);
-                addLine("</tr>", sb);
             } else {
-                addLine("<tr align=\"left\">", sb);
                 if (v.isArrayType() && !v.isArrayObjectType()) {
                     out += String.format("<td>%s</td>", IDocUtil.convert2String(IDocUtil.arrayCountList(v.getValue(), v.getArrayTypeCount())));
                 } else {
                     out += String.format("<td>%s</td>", IDocUtil.convert2String(v.getValue()));
                 }
                 out += String.format("<td>%s</td>", IDocUtil.convert2String(v.getDesc()));
-                if (IDocFieldType.request == v.getIDocFieldType()) {
-                    out += String.format("<td>%s</td>", v.isRequired() + "");
-                }
-                addLine(out, sb);
+            }
+            if (IDocFieldType.request == v.getIDocFieldType()) {
+                out += String.format("<td>%s</td>", v.isRequired() + "");
+            }
+            addLine(out, sb);
+            addLine("</tr>", sb);
+
+            if (v.getValue() instanceof Map) {
+                int next = level + 1;
+                addLine("<tr align=\"left\">", sb);
+                map2Html((Map<String, IDocFieldObj>) v.getValue(), next, sb);
                 addLine("</tr>", sb);
             }
         });

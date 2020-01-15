@@ -3,7 +3,11 @@ package com.common.collect.container.idoc.context;
 import com.common.collect.container.idoc.annotations.IDocField;
 import com.common.collect.container.idoc.base.IDocUtil;
 import com.common.collect.util.EmptyUtil;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import java.io.Serializable;
 
@@ -22,7 +26,7 @@ public class IDocFieldObj implements Serializable {
     private Class arrayTypeCls;
     private Integer arrayTypeCount;
     // 默认值 可能是 map|null|IDocUtil.typeDefaultValue返回的类型
-    private Object value = null;
+    private Object value;
     // 描述
     private String desc;
     // 是否必须
@@ -30,6 +34,24 @@ public class IDocFieldObj implements Serializable {
 
     private IDocFieldType iDocFieldType;
 
+    public static IDocFieldObj of(IDocField iDocField, @NonNull Class type, @NonNull IDocFieldType iDocFieldType) {
+        IDocFieldObj docFieldObj = new IDocFieldObj();
+        docFieldObj.setValue(IDocUtil.typeDefaultValue(type));
+        if (iDocField != null) {
+            docFieldObj.setNameDesc(iDocField.nameDesc());
+            docFieldObj.setDesc(iDocField.desc());
+            if (EmptyUtil.isNotEmpty(iDocField.value())) {
+                docFieldObj.setValue(iDocField.value());
+            }
+            if (IDocFieldType.request == iDocFieldType) {
+                docFieldObj.setRequired(iDocField.required());
+            }
+        }
+        docFieldObj.setType(IDocUtil.typeMapping(type).name());
+        docFieldObj.setTypeCls(type);
+        docFieldObj.setIDocFieldType(iDocFieldType);
+        return docFieldObj;
+    }
 
     public boolean isArrayType() {
         return IDocFieldValueType.Array.name().equals(this.type);
@@ -49,24 +71,5 @@ public class IDocFieldObj implements Serializable {
         this.arrayTypeCount = arrayCount;
         this.setValue(IDocUtil.typeDefaultValue(arrayType));
 
-    }
-
-    public static IDocFieldObj of(IDocField iDocField, @NonNull Class type, @NonNull IDocFieldType iDocFieldType) {
-        IDocFieldObj docFieldObj = new IDocFieldObj();
-        docFieldObj.setValue(IDocUtil.typeDefaultValue(type));
-        if (iDocField != null) {
-            docFieldObj.setNameDesc(iDocField.nameDesc());
-            docFieldObj.setDesc(iDocField.desc());
-            if (EmptyUtil.isNotEmpty(iDocField.value())) {
-                docFieldObj.setValue(iDocField.value());
-            }
-            if (IDocFieldType.request == iDocFieldType) {
-                docFieldObj.setRequired(iDocField.required());
-            }
-        }
-        docFieldObj.setType(IDocUtil.typeMapping(type).name());
-        docFieldObj.setTypeCls(type);
-        docFieldObj.setIDocFieldType(iDocFieldType);
-        return docFieldObj;
     }
 }

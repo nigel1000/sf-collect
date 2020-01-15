@@ -20,9 +20,18 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by hznijianfeng on 2019/5/20.
@@ -104,59 +113,20 @@ public class IDocClient {
         }
         Class paramCls = parameter.getType();
         Class actualArrayCls = paramCls;
-        if (paramCls == List.class || paramCls.isArray()) {
+        if (request.isArrayType()) {
             actualArrayCls = handleArrayType(paramCls, parameter.getParameterizedType(), request);
         }
-        // 基本类型
-        if (isDirectHandleType(actualArrayCls)) {
-            request.setName(parameterName);
-            return request;
-        }
-        // 简单 vo 对象
-        Map<String, IDocFieldObj> requests = new LinkedHashMap<>();
-        // RequestBody
-//        RequestBody requestBody = parameter.getAnnotation(RequestBody.class);
-//        if (requestBody != null) {
-//            request.setRequired(requestBody.required());
-//        }
         request.setName(parameterName);
-        getIDocFieldObjFromClass(actualArrayCls, requests, new IDocFieldObjFromClassContext(IDocFieldType.request));
-        request.setValue(requests);
+        if (request.isObjectType() || request.isArrayObjectType()) {
+            // 简单 vo 对象
+            Map<String, IDocFieldObj> requests = new LinkedHashMap<>();
+            getIDocFieldObjFromClass(actualArrayCls, requests, new IDocFieldObjFromClassContext(IDocFieldType.request));
+            if (EmptyUtil.isEmpty(requests)) {
+                return null;
+            }
+            request.setValue(requests);
+        }
         return request;
-
-    }
-
-    public static Class handleArrayType(@NonNull Class cls, Type type, IDocFieldObj docFieldObj) {
-        if (cls != List.class && !cls.isArray()) {
-            return null;
-        }
-        int arrayCount = 0;
-        Class actualArrayCls = null;
-        if (cls == List.class) {
-            for (int i = 0; i < 100; i++) {
-                if (type instanceof ParameterizedType) {
-                    arrayCount++;
-                    type = ((ParameterizedType) type).getActualTypeArguments()[0];
-                } else {
-                    actualArrayCls = (Class) type;
-                    break;
-                }
-            }
-        }
-        if (cls.isArray()) {
-            actualArrayCls = cls;
-        }
-        if (actualArrayCls != null && actualArrayCls.isArray()) {
-            for (int i = 0; i < 100; i++) {
-                if (actualArrayCls.getComponentType() == null) {
-                    break;
-                }
-                actualArrayCls = actualArrayCls.getComponentType();
-                arrayCount++;
-            }
-        }
-        docFieldObj.setArrayType(actualArrayCls, arrayCount);
-        return actualArrayCls;
     }
 
     private static void getIDocFieldObjFromClass(
@@ -193,19 +163,53 @@ public class IDocClient {
             IDocFieldObj iDocFieldObj = IDocFieldObj.of(iDocField, fieldCls, context.getDocFieldType());
             iDocFieldObj.setName(field.getName());
             Class actualArrayCls = fieldCls;
-            if (fieldCls == List.class || fieldCls.isArray()) {
+            if (iDocFieldObj.isArrayType()) {
                 actualArrayCls = handleArrayType(fieldCls, fieldType, iDocFieldObj);
             }
-            if (isDirectHandleType(actualArrayCls)) {
-                iDocFieldObjMap.put(iDocFieldObj.getName(), iDocFieldObj);
-                continue;
+            if (iDocFieldObj.isObjectType() || iDocFieldObj.isArrayObjectType()) {
+                Map<String, IDocFieldObj> next = new LinkedHashMap<>();
+                getIDocFieldObjFromClass(actualArrayCls, next, context);
+                if (EmptyUtil.isEmpty(next)) {
+                    continue;
+                }
+                iDocFieldObj.setValue(next);
             }
-            Map<String, IDocFieldObj> next = new LinkedHashMap<>();
-            getIDocFieldObjFromClass(actualArrayCls, next, context);
-            iDocFieldObj.setValue(next);
             iDocFieldObjMap.put(iDocFieldObj.getName(), iDocFieldObj);
         }
         context.exit();
+    }
+
+    public static Class handleArrayType(@NonNull Class cls, Type type, IDocFieldObj docFieldObj) {
+        if (cls != List.class && !cls.isArray()) {
+            return null;
+        }
+        int arrayCount = 0;
+        Class actualArrayCls = null;
+        if (cls == List.class) {
+            for (int i = 0; i < 100; i++) {
+                if (type instanceof ParameterizedType) {
+                    arrayCount++;
+                    type = ((ParameterizedType) type).getActualTypeArguments()[0];
+                } else {
+                    actualArrayCls = (Class) type;
+                    break;
+                }
+            }
+        }
+        if (cls.isArray()) {
+            actualArrayCls = cls;
+        }
+        if (actualArrayCls != null && actualArrayCls.isArray()) {
+            for (int i = 0; i < 100; i++) {
+                if (actualArrayCls.getComponentType() == null) {
+                    break;
+                }
+                actualArrayCls = actualArrayCls.getComponentType();
+                arrayCount++;
+            }
+        }
+        docFieldObj.setArrayType(actualArrayCls, arrayCount);
+        return actualArrayCls;
     }
 
     private static boolean isDirectHandleType(@NonNull Class cls) {
