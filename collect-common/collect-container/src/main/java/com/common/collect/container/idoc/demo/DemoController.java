@@ -28,8 +28,8 @@ public class DemoController {
 
     @IDocMethod(id = "2", name = "数组测试接口", author = "hznijianfeng", reCreate = true)
     @RequestMapping(value = "/back/door/bean/arrayCount", method = {RequestMethod.GET, RequestMethod.POST})
-    public Response<List<List<String[][]>>> arrayCount(String[][] strArray, List<DocObjectSub[]> subList) {
-        return Response.ok();
+    public List<DocObjectSub> arrayCount(String[][] strArray, List<DocObjectSub[]> subList) {
+        return null;
     }
 
     @Data

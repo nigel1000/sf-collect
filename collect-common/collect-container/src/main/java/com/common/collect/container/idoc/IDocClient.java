@@ -3,10 +3,13 @@ package com.common.collect.container.idoc;
 import com.common.collect.api.idoc.IDocField;
 import com.common.collect.api.idoc.IDocFieldExclude;
 import com.common.collect.api.idoc.IDocMethod;
+import com.common.collect.container.idoc.base.GlobalConfig;
 import com.common.collect.container.idoc.base.IDocFieldType;
+import com.common.collect.container.idoc.base.IDocFieldValueType;
 import com.common.collect.container.idoc.context.IDocFieldObj;
 import com.common.collect.container.idoc.context.IDocFieldObjFromClassParam;
 import com.common.collect.container.idoc.context.IDocMethodContext;
+import com.common.collect.container.idoc.util.IDocUtil;
 import com.common.collect.util.ClassUtil;
 import com.common.collect.util.EmptyUtil;
 import lombok.Data;
@@ -26,9 +29,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,7 +61,7 @@ public class IDocClient {
             String[] parameterNames = discover.getParameterNames(method);
             for (int i = 0; i < method.getParameterCount(); i++) {
                 Parameter parameter = parameters[i];
-                IDocFieldObj request = handleParameter(parameter, parameterNames[i]);
+                IDocFieldObj request = handleRequestParam(parameter, parameterNames[i]);
                 if (request == null) {
                     continue;
                 }
@@ -72,11 +73,8 @@ public class IDocClient {
             }
             // 解析返回
             IDocFieldObjFromClassParam context = new IDocFieldObjFromClassParam(IDocFieldType.response);
-            Map<String, Type> returnTypeMap = ClassUtil.getMethodReturnGenericType(method);
-            context.setGenericTypeMap(returnTypeMap);
-            Class retCls = method.getReturnType();
-            Map<String, IDocFieldObj> responses = getIDocFieldObjFromClass(retCls, context);
-            methodContext.addResponse(responses);
+            context.setGenericTypeMap(ClassUtil.getMethodReturnGenericType(method));
+            methodContext.addResponse(handleResponse(method.getReturnType(), context));
             log.info("createIDoc finish parse method,className:{}, methodName:{}",
                     methodContext.getClassName(), methodContext.getMethodName());
             contexts.add(methodContext);
@@ -84,7 +82,29 @@ public class IDocClient {
         return contexts;
     }
 
-    private static IDocFieldObj handleParameter(
+    private static Map<String, IDocFieldObj> handleResponse(@NonNull Class cls, @NonNull IDocFieldObjFromClassParam context) {
+        if (IDocUtil.typeMapping(cls).equals(IDocFieldValueType.Object)) {
+            return getIDocFieldObjFromClass(cls, context);
+        } else {
+            IDocFieldObj fieldObj = new IDocFieldObj();
+            fieldObj.setName(GlobalConfig.directRetData);
+            fieldObj.setType(IDocUtil.typeMapping(cls));
+            fieldObj.setTypeCls(cls);
+            fieldObj.setDesc("返回数据");
+            fieldObj.setIDocFieldType(context.getDocFieldType());
+            if (IDocUtil.typeMapping(cls).equals(IDocFieldValueType.Array)) {
+                Class actualArrayCls = handleArrayType(cls, context.getGenericTypeMap().get(cls.getTypeParameters()[0].getName()), fieldObj);
+                fieldObj.setValue(getIDocFieldObjFromClass(actualArrayCls, context));
+            } else {
+                fieldObj.setValue(IDocUtil.typeDefaultValue(cls));
+            }
+            Map<String, IDocFieldObj> response = new LinkedHashMap<>();
+            response.put(GlobalConfig.directRetData, fieldObj);
+            return response;
+        }
+    }
+
+    private static IDocFieldObj handleRequestParam(
             @NonNull Parameter parameter, @NonNull String parameterName) {
         IDocFieldExclude exclude = parameter.getAnnotation(IDocFieldExclude.class);
         if (exclude != null) {
@@ -217,24 +237,6 @@ public class IDocClient {
         docFieldObj.setArrayType(actualArrayCls, arrayCount);
         return actualArrayCls;
     }
-
-    private static boolean isDirectHandleType(@NonNull Class cls) {
-        return ClassUtil.isPrimitive(cls) ||
-                cls == Object.class ||
-                cls == Map.class ||
-                cls == Boolean.class ||
-                cls == Long.class ||
-                cls == Integer.class ||
-                cls == Float.class ||
-                cls == Double.class ||
-                cls == Byte.class ||
-                cls == Short.class ||
-                cls == BigDecimal.class ||
-                cls == Character.class ||
-                cls == String.class ||
-                cls == Date.class;
-    }
-
 
     private static IDocMethodContext handleMethod(@NonNull Method method) {
         IDocMethod iDocMethod = method.getAnnotation(IDocMethod.class);

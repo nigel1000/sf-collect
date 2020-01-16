@@ -21,9 +21,9 @@ public class IDocFieldObj implements Serializable {
     // 名称
     private String name;
     // 类型
-    private String type;
+    private IDocFieldValueType type;
     private Class typeCls;
-    private String arrayType;
+    private IDocFieldValueType arrayType;
     private Class arrayTypeCls;
     private Integer arrayTypeCount;
     // 默认值
@@ -48,26 +48,26 @@ public class IDocFieldObj implements Serializable {
                 docFieldObj.setRequired(iDocField.required());
             }
         }
-        docFieldObj.setType(IDocUtil.typeMapping(type).name());
+        docFieldObj.setType(IDocUtil.typeMapping(type));
         docFieldObj.setTypeCls(type);
         docFieldObj.setIDocFieldType(iDocFieldType);
         return docFieldObj;
     }
 
     public boolean isArrayType() {
-        return IDocFieldValueType.Array.name().equals(this.type);
+        return IDocFieldValueType.Array.equals(this.type);
     }
 
     public boolean isArrayObjectType() {
-        return isArrayType() && IDocFieldValueType.Object.name().equals(this.arrayType);
+        return isArrayType() && IDocFieldValueType.Object.equals(this.arrayType);
     }
 
     public boolean isObjectType() {
-        return IDocFieldValueType.Object.name().equals(this.type);
+        return IDocFieldValueType.Object.equals(this.type);
     }
 
     public void setArrayType(@NonNull Class arrayType, Integer arrayCount) {
-        this.arrayType = IDocUtil.typeMapping(arrayType).name();
+        this.arrayType = IDocUtil.typeMapping(arrayType);
         this.arrayTypeCls = arrayType;
         this.arrayTypeCount = arrayCount;
         this.setValue(IDocUtil.typeDefaultValue(arrayType));

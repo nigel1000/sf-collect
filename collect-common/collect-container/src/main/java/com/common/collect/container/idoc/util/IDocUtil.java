@@ -1,6 +1,7 @@
 package com.common.collect.container.idoc.util;
 
 import com.common.collect.container.JsonUtil;
+import com.common.collect.container.idoc.base.GlobalConfig;
 import com.common.collect.container.idoc.base.IDocFieldValueType;
 import com.common.collect.container.idoc.context.IDocFieldObj;
 import com.common.collect.util.EmptyUtil;
@@ -121,14 +122,27 @@ public class IDocUtil {
         return obj;
     }
 
-    public static Map<String, Object> fieldFieldMapMock(Map<String, IDocFieldObj> docFieldObjMap) {
+    public static Object fieldFieldMapMock(Map<String, IDocFieldObj> docFieldObjMap) {
         Map<String, Object> bean = new LinkedHashMap<>();
         if (EmptyUtil.isEmpty(docFieldObjMap)) {
             return bean;
         }
-        docFieldObjMap.forEach((k, v) -> {
+        for (Map.Entry<String, IDocFieldObj> entry : docFieldObjMap.entrySet()) {
+            String k = entry.getKey();
+            IDocFieldObj v = entry.getValue();
+            if (v.getName().equals(GlobalConfig.directRetData)) {
+                Object sub = v.getValue();
+                if (sub instanceof Map) {
+                    sub = fieldFieldMapMock((Map<String, IDocFieldObj>) v.getValue());
+                }
+                if (v.isArrayType()) {
+                    return IDocUtil.arrayCountList(sub, v.getArrayTypeCount());
+                } else {
+                    return sub;
+                }
+            }
             if (v.getValue() instanceof Map) {
-                Map<String, Object> sub = fieldFieldMapMock((Map<String, IDocFieldObj>) v.getValue());
+                Object sub = fieldFieldMapMock((Map<String, IDocFieldObj>) v.getValue());
                 if (v.isArrayType()) {
                     bean.put(k, IDocUtil.arrayCountList(sub, v.getArrayTypeCount()));
                 } else {
@@ -141,7 +155,7 @@ public class IDocUtil {
                     bean.put(k, v.getValue());
                 }
             }
-        });
+        }
         return bean;
     }
 
