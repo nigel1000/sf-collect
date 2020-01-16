@@ -9,6 +9,7 @@ import lombok.NonNull;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -19,7 +20,9 @@ import java.util.Map;
 public class IDocMethodContext implements Serializable {
 
     private String className;
+    private Class cls;
     private String methodName;
+    private Method method;
 
     private String id;
     private String name;

@@ -40,8 +40,9 @@ public class IDocTest {
             for (IDocMethodContext context : contexts) {
                 IDocUtil.fieldFieldMapSort(context.getRequest());
                 IDocUtil.fieldFieldMapSort(context.getResponse());
-                FileUtil.createFile(path + context.getName() + ".json", false, JsonUtil.bean2jsonPretty(context).getBytes(), true);
                 FileUtil.createFile(path + context.getName() + ".md", false, ToHtml.toHtml(context).getBytes(), true);
+                context.setMethod(null);
+                FileUtil.createFile(path + context.getName() + ".json", false, JsonUtil.bean2jsonPretty(context).getBytes(), true);
             }
         }
     }

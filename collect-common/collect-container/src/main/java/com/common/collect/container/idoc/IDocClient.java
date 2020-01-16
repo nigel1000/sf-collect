@@ -3,9 +3,9 @@ package com.common.collect.container.idoc;
 import com.common.collect.api.idoc.IDocField;
 import com.common.collect.api.idoc.IDocFieldExclude;
 import com.common.collect.api.idoc.IDocMethod;
+import com.common.collect.container.idoc.base.IDocFieldType;
 import com.common.collect.container.idoc.context.IDocFieldObj;
 import com.common.collect.container.idoc.context.IDocFieldObjFromClassParam;
-import com.common.collect.container.idoc.base.IDocFieldType;
 import com.common.collect.container.idoc.context.IDocMethodContext;
 import com.common.collect.util.ClassUtil;
 import com.common.collect.util.EmptyUtil;
@@ -49,7 +49,9 @@ public class IDocClient {
                 continue;
             }
             methodContext.setClassName(cls.getSimpleName());
+            methodContext.setCls(cls);
             methodContext.setMethodName(method.getName());
+            methodContext.setMethod(method);
             log.info("createIDoc start parse method,className:{}, methodName:{}",
                     methodContext.getClassName(), methodContext.getMethodName());
             // 解析参数
