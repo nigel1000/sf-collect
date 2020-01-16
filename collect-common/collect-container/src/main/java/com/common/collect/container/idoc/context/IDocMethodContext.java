@@ -56,7 +56,7 @@ public class IDocMethodContext implements Serializable {
     }
 
     public IDocMethodContext addRequest(@NonNull IDocFieldObj value) {
-        request.put(value.getName(), value);
+        this.request.put(value.getName(), value);
         return this;
     }
 
@@ -64,7 +64,7 @@ public class IDocMethodContext implements Serializable {
         if (EmptyUtil.isEmpty(value)) {
             return this;
         }
-        request.putAll(value);
+        this.request.putAll(value);
         return this;
     }
 
@@ -73,6 +73,11 @@ public class IDocMethodContext implements Serializable {
             return this;
         }
         this.response.putAll(response);
+        return this;
+    }
+
+    public IDocMethodContext addResponse(IDocFieldObj value) {
+        this.response.put(value.getName(), value);
         return this;
     }
 

@@ -130,17 +130,6 @@ public class IDocUtil {
         for (Map.Entry<String, IDocFieldObj> entry : docFieldObjMap.entrySet()) {
             String k = entry.getKey();
             IDocFieldObj v = entry.getValue();
-            if (v.getName().equals(GlobalConfig.directRetData)) {
-                Object sub = v.getValue();
-                if (sub instanceof Map) {
-                    sub = fieldFieldMapMock((Map<String, IDocFieldObj>) v.getValue());
-                }
-                if (v.isArrayType()) {
-                    return IDocUtil.arrayCountList(sub, v.getArrayTypeCount());
-                } else {
-                    return sub;
-                }
-            }
             if (v.getValue() instanceof Map) {
                 Object sub = fieldFieldMapMock((Map<String, IDocFieldObj>) v.getValue());
                 if (v.isArrayType()) {
