@@ -33,7 +33,7 @@ public class ToHtml {
         // mock request
         addLine("<div>", sb);
         addLine("<pre>", sb);
-        addLine(JsonUtil.bean2jsonPretty(IDocUtil.map2Json(context.getRequest())), sb);
+        addLine(JsonUtil.bean2jsonPretty(IDocUtil.fieldFieldMapMock(context.getRequest())), sb);
         addLine("</pre>", sb);
         addLine("</div>", sb);
 
@@ -45,7 +45,7 @@ public class ToHtml {
         // mock response
         addLine("<div>", sb);
         addLine("<pre>", sb);
-        addLine(JsonUtil.bean2jsonPretty(IDocUtil.map2Json(context.getResponse())), sb);
+        addLine(JsonUtil.bean2jsonPretty(IDocUtil.fieldFieldMapMock(context.getResponse())), sb);
         addLine("</pre>", sb);
         addLine("</div>", sb);
 

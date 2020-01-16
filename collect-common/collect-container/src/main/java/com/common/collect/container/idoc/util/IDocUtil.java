@@ -121,14 +121,14 @@ public class IDocUtil {
         return obj;
     }
 
-    public static Map<String, Object> map2Json(Map<String, IDocFieldObj> docFieldObjMap) {
+    public static Map<String, Object> fieldFieldMapMock(Map<String, IDocFieldObj> docFieldObjMap) {
         Map<String, Object> bean = new LinkedHashMap<>();
         if (EmptyUtil.isEmpty(docFieldObjMap)) {
             return bean;
         }
         docFieldObjMap.forEach((k, v) -> {
             if (v.getValue() instanceof Map) {
-                Map<String, Object> sub = map2Json((Map<String, IDocFieldObj>) v.getValue());
+                Map<String, Object> sub = fieldFieldMapMock((Map<String, IDocFieldObj>) v.getValue());
                 if (v.isArrayType()) {
                     bean.put(k, IDocUtil.arrayCountList(sub, v.getArrayTypeCount()));
                 } else {
@@ -143,6 +143,51 @@ public class IDocUtil {
             }
         });
         return bean;
+    }
+
+    public static void fieldFieldMapSort(Map<String, IDocFieldObj> map) {
+        if (EmptyUtil.isEmpty(map)) {
+            return;
+        }
+        Map<String, IDocFieldObj> baseMap = new LinkedHashMap<>();
+
+        Map<String, IDocFieldObj> objStringMap = new LinkedHashMap<>();
+        Map<String, IDocFieldObj> objMap = new LinkedHashMap<>();
+
+        Map<String, IDocFieldObj> arrayBaseMap = new LinkedHashMap<>();
+        Map<String, IDocFieldObj> arrayObjStringMap = new LinkedHashMap<>();
+        Map<String, IDocFieldObj> arrayObjMap = new LinkedHashMap<>();
+        map.forEach((k, v) -> {
+            if (v.getValue() instanceof Map) {
+                fieldFieldMapSort((Map<String, IDocFieldObj>) v.getValue());
+            }
+            if (v.isObjectType()) {
+                if (v.getValue() instanceof String) {
+                    objStringMap.put(k, v);
+                } else if (v.getValue() instanceof Map) {
+                    objMap.put(k, v);
+                }
+            } else if (v.isArrayType()) {
+                if (v.isArrayObjectType()) {
+                    if (v.getValue() instanceof String) {
+                        arrayObjStringMap.put(k, v);
+                    } else if (v.getValue() instanceof Map) {
+                        arrayObjMap.put(k, v);
+                    }
+                } else {
+                    arrayBaseMap.put(k, v);
+                }
+            } else {
+                baseMap.put(k, v);
+            }
+        });
+        map.clear();
+        map.putAll(baseMap);
+        map.putAll(objStringMap);
+        map.putAll(objMap);
+        map.putAll(arrayObjStringMap);
+        map.putAll(arrayBaseMap);
+        map.putAll(arrayObjMap);
     }
 
 }
