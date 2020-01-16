@@ -2,7 +2,7 @@ package collect.container.idoc;
 
 import com.common.collect.container.JsonUtil;
 import com.common.collect.container.idoc.IDocClient;
-import com.common.collect.container.idoc.base.ToHtml;
+import com.common.collect.container.idoc.view.ToHtml;
 import com.common.collect.container.idoc.context.IDocMethodContext;
 import com.common.collect.util.ClassUtil;
 import com.common.collect.util.EmptyUtil;

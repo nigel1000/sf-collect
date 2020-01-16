@@ -1,4 +1,4 @@
-package com.common.collect.container.idoc.context;
+package com.common.collect.container.idoc.base;
 
 public enum IDocFieldType {
     request,

@@ -4,8 +4,8 @@ import com.common.collect.api.idoc.IDocField;
 import com.common.collect.api.idoc.IDocFieldExclude;
 import com.common.collect.api.idoc.IDocMethod;
 import com.common.collect.container.idoc.context.IDocFieldObj;
-import com.common.collect.container.idoc.context.IDocFieldObjFromClassContext;
-import com.common.collect.container.idoc.context.IDocFieldType;
+import com.common.collect.container.idoc.context.IDocFieldObjFromClassParam;
+import com.common.collect.container.idoc.base.IDocFieldType;
 import com.common.collect.container.idoc.context.IDocMethodContext;
 import com.common.collect.util.ClassUtil;
 import com.common.collect.util.EmptyUtil;
@@ -69,12 +69,11 @@ public class IDocClient {
                 }
             }
             // 解析返回
-            IDocFieldObjFromClassContext context = new IDocFieldObjFromClassContext(IDocFieldType.response);
+            IDocFieldObjFromClassParam context = new IDocFieldObjFromClassParam(IDocFieldType.response);
             Map<String, Type> returnTypeMap = ClassUtil.getMethodReturnGenericType(method);
             context.setGenericTypeMap(returnTypeMap);
             Class retCls = method.getReturnType();
-            Map<String, IDocFieldObj> responses = new LinkedHashMap<>();
-            getIDocFieldObjFromClass(retCls, responses, context);
+            Map<String, IDocFieldObj> responses = getIDocFieldObjFromClass(retCls, context);
             methodContext.addResponse(responses);
             log.info("createIDoc finish parse method,className:{}, methodName:{}",
                     methodContext.getClassName(), methodContext.getMethodName());
@@ -119,8 +118,7 @@ public class IDocClient {
         request.setName(parameterName);
         if (request.isObjectType() || request.isArrayObjectType()) {
             // 简单 vo 对象
-            Map<String, IDocFieldObj> requests = new LinkedHashMap<>();
-            getIDocFieldObjFromClass(actualArrayCls, requests, new IDocFieldObjFromClassContext(IDocFieldType.request));
+            Map<String, IDocFieldObj> requests = getIDocFieldObjFromClass(actualArrayCls, new IDocFieldObjFromClassParam(IDocFieldType.request));
             if (EmptyUtil.isNotEmpty(requests)) {
                 request.setValue(requests);
             } else {
@@ -132,11 +130,11 @@ public class IDocClient {
         return request;
     }
 
-    private static void getIDocFieldObjFromClass(
+    private static Map<String, IDocFieldObj> getIDocFieldObjFromClass(
             @NonNull Class cls,
-            @NonNull Map<String, IDocFieldObj> iDocFieldObjMap,
-            @NonNull IDocFieldObjFromClassContext context) {
+            @NonNull IDocFieldObjFromClassParam context) {
         context.enter(cls);
+        Map<String, IDocFieldObj> iDocFieldObjMap = new LinkedHashMap<>();
         Field[] fields = ClassUtil.getFields(cls);
         for (Field field : fields) {
             if (Modifier.isStatic(field.getModifiers())) {
@@ -170,8 +168,7 @@ public class IDocClient {
                 actualArrayCls = handleArrayType(fieldCls, fieldType, iDocFieldObj);
             }
             if (iDocFieldObj.isObjectType() || iDocFieldObj.isArrayObjectType()) {
-                Map<String, IDocFieldObj> next = new LinkedHashMap<>();
-                getIDocFieldObjFromClass(actualArrayCls, next, context);
+                Map<String, IDocFieldObj> next = getIDocFieldObjFromClass(actualArrayCls, context);
                 if (EmptyUtil.isNotEmpty(next)) {
                     iDocFieldObj.setValue(next);
                 } else {
@@ -183,6 +180,7 @@ public class IDocClient {
             iDocFieldObjMap.put(iDocFieldObj.getName(), iDocFieldObj);
         }
         context.exit();
+        return iDocFieldObjMap;
     }
 
     public static Class handleArrayType(@NonNull Class cls, Type type, IDocFieldObj docFieldObj) {

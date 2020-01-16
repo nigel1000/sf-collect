@@ -2,6 +2,7 @@ package com.common.collect.container.idoc.context;
 
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.JsonUtil;
+import com.common.collect.container.idoc.base.IDocFieldType;
 import com.common.collect.util.EmptyUtil;
 import lombok.Data;
 import lombok.NonNull;
@@ -13,13 +14,13 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-public class IDocFieldObjFromClassContext {
+public class IDocFieldObjFromClassParam {
 
     private IDocFieldType docFieldType;
     private List<String> traceCurrentClass = new ArrayList<>();
     private Map<String, Type> genericTypeMap = new LinkedHashMap<>();
 
-    public IDocFieldObjFromClassContext(IDocFieldType docFieldType) {
+    public IDocFieldObjFromClassParam(IDocFieldType docFieldType) {
         this.docFieldType = docFieldType;
     }
 

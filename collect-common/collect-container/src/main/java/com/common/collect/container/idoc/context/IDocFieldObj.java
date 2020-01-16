@@ -1,7 +1,9 @@
 package com.common.collect.container.idoc.context;
 
 import com.common.collect.api.idoc.IDocField;
-import com.common.collect.container.idoc.base.IDocUtil;
+import com.common.collect.container.idoc.base.IDocFieldType;
+import com.common.collect.container.idoc.base.IDocFieldValueType;
+import com.common.collect.container.idoc.util.IDocUtil;
 import com.common.collect.util.EmptyUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
