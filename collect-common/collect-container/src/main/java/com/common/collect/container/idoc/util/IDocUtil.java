@@ -2,12 +2,15 @@ package com.common.collect.container.idoc.util;
 
 import com.common.collect.container.JsonUtil;
 import com.common.collect.container.idoc.base.IDocFieldValueType;
+import com.common.collect.container.idoc.context.IDocFieldObj;
+import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.IdUtil;
 import lombok.NonNull;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -116,6 +119,30 @@ public class IDocUtil {
             obj = Arrays.asList(obj, obj);
         }
         return obj;
+    }
+
+    public static Map<String, Object> map2Json(Map<String, IDocFieldObj> docFieldObjMap) {
+        Map<String, Object> bean = new LinkedHashMap<>();
+        if (EmptyUtil.isEmpty(docFieldObjMap)) {
+            return bean;
+        }
+        docFieldObjMap.forEach((k, v) -> {
+            if (v.getValue() instanceof Map) {
+                Map<String, Object> sub = map2Json((Map<String, IDocFieldObj>) v.getValue());
+                if (v.isArrayType()) {
+                    bean.put(k, IDocUtil.arrayCountList(sub, v.getArrayTypeCount()));
+                } else {
+                    bean.put(k, sub);
+                }
+            } else {
+                if (v.isArrayType()) {
+                    bean.put(k, IDocUtil.arrayCountList(v.getValue(), v.getArrayTypeCount()));
+                } else {
+                    bean.put(k, v.getValue());
+                }
+            }
+        });
+        return bean;
     }
 
 }

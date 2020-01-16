@@ -2,14 +2,12 @@ package com.common.collect.container.idoc.view;
 
 import com.common.collect.container.JsonUtil;
 import com.common.collect.container.idoc.base.IDocFieldType;
-import com.common.collect.container.idoc.util.IDocUtil;
 import com.common.collect.container.idoc.context.IDocFieldObj;
 import com.common.collect.container.idoc.context.IDocMethodContext;
-import com.common.collect.util.EmptyUtil;
+import com.common.collect.container.idoc.util.IDocUtil;
 import lombok.NonNull;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +17,8 @@ public class ToHtml {
         StringBuilder sb = new StringBuilder();
 
         addHtmlHead(sb);
-        addLine("文档链接：http://localhost:8181/doc/id/" + context.getId() + "<br>", sb);
+
+        addLine("文档 id：" + context.getId() + "<br>", sb);
         addLine("文档名称：" + context.getName() + "<br>", sb);
         addLine("文档作者：" + context.getAuthor() + "<br>", sb);
         addLine("文档对应代码：" + context.getClassName() + "#" + context.getMethodName() + "<br>", sb);
@@ -31,12 +30,10 @@ public class ToHtml {
         map2Html(context.getRequest(), 0, sb);
         addLine("</table>", sb);
 
-
+        // mock request
         addLine("<div>", sb);
         addLine("<pre>", sb);
-        Map<String, Object> bean = new LinkedHashMap<>();
-        map2Json(context.getRequest(), bean);
-        addLine(JsonUtil.bean2jsonPretty(bean), sb);
+        addLine(JsonUtil.bean2jsonPretty(IDocUtil.map2Json(context.getRequest())), sb);
         addLine("</pre>", sb);
         addLine("</div>", sb);
 
@@ -45,39 +42,15 @@ public class ToHtml {
         map2Html(context.getResponse(), 0, sb);
         addLine("</table>", sb);
 
+        // mock response
         addLine("<div>", sb);
         addLine("<pre>", sb);
-        bean = new LinkedHashMap<>();
-        map2Json(context.getResponse(), bean);
-        addLine(JsonUtil.bean2jsonPretty(bean), sb);
+        addLine(JsonUtil.bean2jsonPretty(IDocUtil.map2Json(context.getResponse())), sb);
         addLine("</pre>", sb);
         addLine("</div>", sb);
 
         addHtmlTail(sb);
         return sb.toString();
-    }
-
-    private static void map2Json(Map<String, IDocFieldObj> docFieldObjMap, @NonNull Map<String, Object> bean) {
-        if (EmptyUtil.isEmpty(docFieldObjMap)) {
-            return;
-        }
-        docFieldObjMap.forEach((k, v) -> {
-            if (v.getValue() instanceof Map) {
-                Map<String, Object> sub = new LinkedHashMap<>();
-                map2Json((Map<String, IDocFieldObj>) v.getValue(), sub);
-                if (v.isArrayType()) {
-                    bean.put(k, IDocUtil.arrayCountList(sub, v.getArrayTypeCount()));
-                } else {
-                    bean.put(k, sub);
-                }
-            } else {
-                if (v.isArrayType()) {
-                    bean.put(k, IDocUtil.arrayCountList(v.getValue(), v.getArrayTypeCount()));
-                } else {
-                    bean.put(k, v.getValue());
-                }
-            }
-        });
     }
 
     private static void map2Html(Map<String, IDocFieldObj> map, int level, StringBuilder sb) {
@@ -141,7 +114,7 @@ public class ToHtml {
         });
     }
 
-    private static void addLine(String line, StringBuilder sb) {
+    private static void addLine(String line, @NonNull StringBuilder sb) {
         if (line == null) {
             line = "";
         }
@@ -150,17 +123,17 @@ public class ToHtml {
     }
 
     private static void addHtmlHead(StringBuilder sb) {
-        sb.append("<!DOCTYPE html>\n");
-        sb.append("<head>\n");
-        sb.append("<title>接口页面</title>\n");
-        sb.append("<meta charset=\"utf-8\">\n");
-        sb.append("</head>\n");
-        sb.append("<body>\n");
+        addLine("<!DOCTYPE html>", sb);
+        addLine("<head>", sb);
+        addLine("<title>接口定义详细</title>", sb);
+        addLine("<meta charset=\"utf-8\">", sb);
+        addLine("</head>", sb);
+        addLine("<body>", sb);
     }
 
     private static void addHtmlTail(StringBuilder sb) {
-        sb.append("</body>\n");
-        sb.append("</html>\n");
+        addLine("</body>", sb);
+        addLine("</html>", sb);
     }
 
 }

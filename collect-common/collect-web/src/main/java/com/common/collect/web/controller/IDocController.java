@@ -2,8 +2,8 @@ package com.common.collect.web.controller;
 
 import com.common.collect.container.WebUtil;
 import com.common.collect.container.idoc.IDocClient;
-import com.common.collect.container.idoc.view.ToHtml;
 import com.common.collect.container.idoc.context.IDocMethodContext;
+import com.common.collect.container.idoc.view.ToHtml;
 import com.common.collect.util.ClassUtil;
 import com.common.collect.util.StringUtil;
 import org.springframework.stereotype.Controller;
@@ -26,7 +26,7 @@ public class IDocController {
         StringBuilder sb = new StringBuilder();
         sb.append("<!DOCTYPE html>\n");
         sb.append("<head>\n");
-        sb.append("<title>api doc</title>\n");
+        sb.append("<title>api 文档列表</title>\n");
         sb.append("<meta charset=\"utf-8\">\n");
         sb.append("</head>\n");
         sb.append("<body>\n");

@@ -2,7 +2,6 @@ package com.common.collect.container.idoc.context;
 
 import com.common.collect.api.idoc.IDocMethod;
 import com.common.collect.container.idoc.base.GlobalConfig;
-import com.common.collect.container.idoc.base.IDocFieldValueType;
 import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.StringUtil;
 import lombok.Data;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Created by nijianfeng on 2020/1/11.
@@ -80,27 +78,43 @@ public class IDocMethodContext implements Serializable {
             return;
         }
         Map<String, IDocFieldObj> baseMap = new LinkedHashMap<>();
+
+        Map<String, IDocFieldObj> objStringMap = new LinkedHashMap<>();
         Map<String, IDocFieldObj> objMap = new LinkedHashMap<>();
+
+        Map<String, IDocFieldObj> arrayBaseMap = new LinkedHashMap<>();
+        Map<String, IDocFieldObj> arrayObjStringMap = new LinkedHashMap<>();
         Map<String, IDocFieldObj> arrayObjMap = new LinkedHashMap<>();
         map.forEach((k, v) -> {
-            if (Objects.equals(v.getType(), IDocFieldValueType.Object.name())) {
-                if (v.getValue() instanceof Map) {
-                    sortMap((Map<String, IDocFieldObj>) v.getValue());
+            if (v.getValue() instanceof Map) {
+                sortMap((Map<String, IDocFieldObj>) v.getValue());
+            }
+            if (v.isObjectType()) {
+                if (v.getValue() instanceof String) {
+                    objStringMap.put(k, v);
+                } else if (v.getValue() instanceof Map) {
+                    objMap.put(k, v);
                 }
-                objMap.put(k, v);
-            } else if (Objects.equals(v.getType(), IDocFieldValueType.Array.name()) &&
-                    Objects.equals(v.getArrayType(), IDocFieldValueType.Object.name())) {
-                if (v.getValue() instanceof Map) {
-                    sortMap((Map<String, IDocFieldObj>) v.getValue());
+            } else if (v.isArrayType()) {
+                if (v.isArrayObjectType()) {
+                    if (v.getValue() instanceof String) {
+                        arrayObjStringMap.put(k, v);
+                    } else if (v.getValue() instanceof Map) {
+                        arrayObjMap.put(k, v);
+                    }
+                } else {
+                    arrayBaseMap.put(k, v);
                 }
-                arrayObjMap.put(k, v);
             } else {
                 baseMap.put(k, v);
             }
         });
         map.clear();
         map.putAll(baseMap);
+        map.putAll(objStringMap);
         map.putAll(objMap);
+        map.putAll(arrayObjStringMap);
+        map.putAll(arrayBaseMap);
         map.putAll(arrayObjMap);
     }
 
