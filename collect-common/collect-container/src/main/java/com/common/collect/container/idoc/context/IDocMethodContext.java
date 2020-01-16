@@ -76,7 +76,7 @@ public class IDocMethodContext implements Serializable {
         return this;
     }
 
-    public IDocMethodContext addResponse(IDocFieldObj value) {
+    public IDocMethodContext addResponse(@NonNull IDocFieldObj value) {
         this.response.put(value.getName(), value);
         return this;
     }
