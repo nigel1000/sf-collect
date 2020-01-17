@@ -8,6 +8,7 @@ public class GlobalConfig {
     // 是否重新创建
     public static Boolean reCreate;
 
-    public static String directRetData = "result";
+    public static String directReturnKey = "asdfghjklqwertyuiop";
+    public static String directReturnKeyShow = "result";
 
 }

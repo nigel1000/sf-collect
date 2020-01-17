@@ -2,9 +2,9 @@ package collect.container.idoc;
 
 import com.common.collect.container.JsonUtil;
 import com.common.collect.container.idoc.IDocClient;
+import com.common.collect.container.idoc.context.IDocMethodContext;
 import com.common.collect.container.idoc.util.IDocUtil;
 import com.common.collect.container.idoc.view.ToHtml;
-import com.common.collect.container.idoc.context.IDocMethodContext;
 import com.common.collect.util.ClassUtil;
 import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.FileUtil;
@@ -40,9 +40,9 @@ public class IDocTest {
             for (IDocMethodContext context : contexts) {
                 IDocUtil.fieldFieldMapSort(context.getRequest());
                 IDocUtil.fieldFieldMapSort(context.getResponse());
-                FileUtil.createFile(path + context.getName() + ".md", false, ToHtml.toHtml(context).getBytes(), true);
+                FileUtil.createFile(path + context.getId() + "-" + context.getName() + ".md", false, ToHtml.toHtml(context).getBytes(), true);
                 context.setMethod(null);
-                FileUtil.createFile(path + context.getName() + ".json", false, JsonUtil.bean2jsonPretty(context).getBytes(), true);
+                FileUtil.createFile(path + context.getId() + "-" + context.getName() + ".json", false, JsonUtil.bean2jsonPretty(context).getBytes(), true);
             }
         }
     }

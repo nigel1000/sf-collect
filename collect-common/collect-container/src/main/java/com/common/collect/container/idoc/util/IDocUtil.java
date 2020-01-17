@@ -2,6 +2,7 @@ package com.common.collect.container.idoc.util;
 
 import com.common.collect.container.JsonUtil;
 import com.common.collect.container.idoc.base.GlobalConfig;
+import com.common.collect.container.idoc.base.IDocFieldType;
 import com.common.collect.container.idoc.base.IDocFieldValueType;
 import com.common.collect.container.idoc.context.IDocFieldObj;
 import com.common.collect.util.EmptyUtil;
@@ -108,10 +109,12 @@ public class IDocUtil {
         } else if (typeDefaultValue(str.getClass()) == null) {
             // list
             return JsonUtil.bean2json(str);
-        } else {
-            // typeDefaultValue 返回的
-            return String.valueOf(str);
+        } else if (str instanceof String) {
+            if (GlobalConfig.directReturnKey.equals(str)) {
+                return GlobalConfig.directReturnKeyShow;
+            }
         }
+        return String.valueOf(str);
     }
 
     public static List arrayCountList(Object value, int count) {
@@ -126,6 +129,22 @@ public class IDocUtil {
         Map<String, Object> bean = new LinkedHashMap<>();
         if (EmptyUtil.isEmpty(docFieldObjMap)) {
             return bean;
+        }
+        IDocFieldObj fieldObj = docFieldObjMap.get(GlobalConfig.directReturnKey);
+        if (fieldObj != null && fieldObj.getIDocFieldType().equals(IDocFieldType.response)) {
+            if (fieldObj.isObjectType()) {
+                docFieldObjMap = new LinkedHashMap<>();
+                docFieldObjMap.putAll((Map<String, IDocFieldObj>) fieldObj.getValue());
+            } else if (fieldObj.isArrayType()) {
+                if (fieldObj.isArrayObjectType()) {
+                    Object sub = fieldFieldMapMock((Map<String, IDocFieldObj>) fieldObj.getValue());
+                    return IDocUtil.arrayCountList(sub, fieldObj.getArrayTypeCount());
+                } else {
+                    return IDocUtil.arrayCountList(fieldObj.getValue(), fieldObj.getArrayTypeCount());
+                }
+            } else {
+                return fieldObj.getValue();
+            }
         }
         for (Map.Entry<String, IDocFieldObj> entry : docFieldObjMap.entrySet()) {
             String k = entry.getKey();

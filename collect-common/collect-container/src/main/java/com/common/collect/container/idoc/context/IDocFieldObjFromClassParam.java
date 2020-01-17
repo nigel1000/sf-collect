@@ -3,10 +3,15 @@ package com.common.collect.container.idoc.context;
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.JsonUtil;
 import com.common.collect.container.idoc.base.IDocFieldType;
+import com.common.collect.container.idoc.base.IDocFieldValueType;
+import com.common.collect.container.idoc.util.IDocUtil;
 import com.common.collect.util.EmptyUtil;
 import lombok.Data;
 import lombok.NonNull;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -41,6 +46,20 @@ public class IDocFieldObjFromClassParam {
             return;
         }
         traceCurrentClass.remove(traceCurrentClass.size() - 1);
+    }
+
+    public boolean canHandle(@NonNull Class cls) {
+        if (!IDocUtil.typeMapping(cls).equals(IDocFieldValueType.Object)) {
+            return false;
+        }
+        if (cls == HttpServletRequest.class ||
+                cls == HttpServletResponse.class ||
+                cls == MultipartFile.class ||
+                cls == Object.class ||
+                cls == Map.class) {
+            return false;
+        }
+        return true;
     }
 
 }

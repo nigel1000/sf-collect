@@ -19,10 +19,7 @@ import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ValueConstants;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -65,7 +62,7 @@ public class IDocClient {
                 if (request == null) {
                     continue;
                 }
-                if (request.isObjectType()) {
+                if (request.isObjectType() && request.getValue() instanceof Map) {
                     methodContext.addRequest((Map<String, IDocFieldObj>) request.getValue());
                 } else {
                     methodContext.addRequest(request);
@@ -87,19 +84,25 @@ public class IDocClient {
             return getIDocFieldObjFromClass(cls, context);
         } else {
             IDocFieldObj fieldObj = new IDocFieldObj();
-            fieldObj.setName(GlobalConfig.directRetData);
+            fieldObj.setName(GlobalConfig.directReturnKey);
             fieldObj.setType(IDocUtil.typeMapping(cls));
             fieldObj.setTypeCls(cls);
             fieldObj.setDesc("返回数据");
             fieldObj.setIDocFieldType(context.getDocFieldType());
             if (IDocUtil.typeMapping(cls).equals(IDocFieldValueType.Array)) {
                 Class actualArrayCls = handleArrayType(cls, context.getGenericTypeMap().get(cls.getTypeParameters()[0].getName()), fieldObj);
-                fieldObj.setValue(getIDocFieldObjFromClass(actualArrayCls, context));
+                if (fieldObj.isArrayObjectType()) {
+                    Map<String, IDocFieldObj> arrayObject = getIDocFieldObjFromClass(actualArrayCls, context);
+                    if (EmptyUtil.isEmpty(arrayObject)) {
+                        return new LinkedHashMap<>();
+                    }
+                    fieldObj.setValue(arrayObject);
+                }
             } else {
                 fieldObj.setValue(IDocUtil.typeDefaultValue(cls));
             }
             Map<String, IDocFieldObj> response = new LinkedHashMap<>();
-            response.put(GlobalConfig.directRetData, fieldObj);
+            response.put(GlobalConfig.directReturnKey, fieldObj);
             return response;
         }
     }
@@ -108,11 +111,6 @@ public class IDocClient {
             @NonNull Parameter parameter, @NonNull String parameterName) {
         IDocFieldExclude exclude = parameter.getAnnotation(IDocFieldExclude.class);
         if (exclude != null) {
-            return null;
-        }
-        if (parameter.getType() == HttpServletRequest.class ||
-                parameter.getType() == HttpServletResponse.class ||
-                parameter.getType() == MultipartFile.class) {
             return null;
         }
         // IDocField
@@ -155,6 +153,9 @@ public class IDocClient {
     private static Map<String, IDocFieldObj> getIDocFieldObjFromClass(
             @NonNull Class cls,
             @NonNull IDocFieldObjFromClassParam context) {
+        if (!context.canHandle(cls)) {
+            return new LinkedHashMap<>();
+        }
         context.enter(cls);
         Map<String, IDocFieldObj> iDocFieldObjMap = new LinkedHashMap<>();
         Field[] fields = ClassUtil.getFields(cls);
