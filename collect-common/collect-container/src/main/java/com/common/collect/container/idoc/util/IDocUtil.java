@@ -134,23 +134,23 @@ public class IDocUtil {
         if (docFieldObjMap.size() == 1 && fieldObj != null && fieldObj.getIDocFieldType().equals(IDocFieldType.response)) {
             if (fieldObj.isObjectType()) {
                 docFieldObjMap = new LinkedHashMap<>();
-                docFieldObjMap.putAll((Map<String, IDocFieldObj>) fieldObj.getValue());
+                docFieldObjMap.putAll((Map<String, IDocFieldObj>) fieldObj.getDefValue());
             } else if (fieldObj.isArrayType()) {
                 if (fieldObj.isArrayObjectType()) {
-                    Object sub = fieldFieldMapMock((Map<String, IDocFieldObj>) fieldObj.getValue());
+                    Object sub = fieldFieldMapMock((Map<String, IDocFieldObj>) fieldObj.getDefValue());
                     return IDocUtil.arrayCountList(sub, fieldObj.getArrayTypeCount());
                 } else {
-                    return IDocUtil.arrayCountList(fieldObj.getValue(), fieldObj.getArrayTypeCount());
+                    return IDocUtil.arrayCountList(fieldObj.getDefValue(), fieldObj.getArrayTypeCount());
                 }
             } else {
-                return fieldObj.getValue();
+                return fieldObj.getDefValue();
             }
         }
         for (Map.Entry<String, IDocFieldObj> entry : docFieldObjMap.entrySet()) {
             String k = convert2String(entry.getKey());
             IDocFieldObj v = entry.getValue();
-            if (v.getValue() instanceof Map) {
-                Object sub = fieldFieldMapMock((Map<String, IDocFieldObj>) v.getValue());
+            if (v.getDefValue() instanceof Map) {
+                Object sub = fieldFieldMapMock((Map<String, IDocFieldObj>) v.getDefValue());
                 if (v.isArrayType()) {
                     bean.put(k, IDocUtil.arrayCountList(sub, v.getArrayTypeCount()));
                 } else {
@@ -158,9 +158,9 @@ public class IDocUtil {
                 }
             } else {
                 if (v.isArrayType()) {
-                    bean.put(k, IDocUtil.arrayCountList(v.getValue(), v.getArrayTypeCount()));
+                    bean.put(k, IDocUtil.arrayCountList(v.getDefValue(), v.getArrayTypeCount()));
                 } else {
-                    bean.put(k, v.getValue());
+                    bean.put(k, v.getDefValue());
                 }
             }
         }
@@ -180,20 +180,20 @@ public class IDocUtil {
         Map<String, IDocFieldObj> arrayObjStringMap = new LinkedHashMap<>();
         Map<String, IDocFieldObj> arrayObjMap = new LinkedHashMap<>();
         map.forEach((k, v) -> {
-            if (v.getValue() instanceof Map) {
-                fieldFieldMapSort((Map<String, IDocFieldObj>) v.getValue());
+            if (v.getDefValue() instanceof Map) {
+                fieldFieldMapSort((Map<String, IDocFieldObj>) v.getDefValue());
             }
             if (v.isObjectType()) {
-                if (v.getValue() instanceof String) {
+                if (v.getDefValue() instanceof String) {
                     objStringMap.put(k, v);
-                } else if (v.getValue() instanceof Map) {
+                } else if (v.getDefValue() instanceof Map) {
                     objMap.put(k, v);
                 }
             } else if (v.isArrayType()) {
                 if (v.isArrayObjectType()) {
-                    if (v.getValue() instanceof String) {
+                    if (v.getDefValue() instanceof String) {
                         arrayObjStringMap.put(k, v);
-                    } else if (v.getValue() instanceof Map) {
+                    } else if (v.getDefValue() instanceof Map) {
                         arrayObjMap.put(k, v);
                     }
                 } else {

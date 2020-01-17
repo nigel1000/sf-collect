@@ -27,8 +27,7 @@ public class IDocFieldObj implements Serializable {
     private Class<?> arrayTypeCls;
     private Integer arrayTypeCount;
     // 默认值
-    // type = Object || arrayType = Object 时可能是map，当map为空时并且IDocField里value不为空时是string
-    private Object value;
+    private Object defValue;
     // 描述
     private String desc;
     // 是否必须
@@ -38,11 +37,11 @@ public class IDocFieldObj implements Serializable {
 
     public static IDocFieldObj of(IDocField iDocField, @NonNull Class type, @NonNull IDocFieldType iDocFieldType) {
         IDocFieldObj docFieldObj = new IDocFieldObj();
-        docFieldObj.setValue(IDocUtil.typeDefaultValue(type));
+        docFieldObj.setDefValue(IDocUtil.typeDefaultValue(type));
         if (iDocField != null) {
             docFieldObj.setDesc(iDocField.desc());
             if (EmptyUtil.isNotEmpty(iDocField.value())) {
-                docFieldObj.setValue(iDocField.value());
+                docFieldObj.setDefValue(iDocField.value());
             }
             if (IDocFieldType.request == iDocFieldType) {
                 docFieldObj.setRequired(iDocField.required());
@@ -70,7 +69,7 @@ public class IDocFieldObj implements Serializable {
         this.arrayType = IDocUtil.typeMapping(arrayType);
         this.arrayTypeCls = arrayType;
         this.arrayTypeCount = arrayCount;
-        this.setValue(IDocUtil.typeDefaultValue(arrayType));
+        this.setDefValue(IDocUtil.typeDefaultValue(arrayType));
 
     }
 }

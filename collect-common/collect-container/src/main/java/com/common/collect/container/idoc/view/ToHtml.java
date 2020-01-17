@@ -88,14 +88,14 @@ public class ToHtml {
             }
 
             addLine("<tr align=\"left\">", sb);
-            if (v.getValue() instanceof Map) {
+            if (v.getDefValue() instanceof Map) {
                 out += String.format("<td>%s</td>", "") +
                         String.format("<td>%s</td>", IDocUtil.convert2String(v.getDesc()));
             } else {
                 if (v.isArrayType() && !v.isArrayObjectType()) {
-                    out += String.format("<td>%s</td>", IDocUtil.convert2String(IDocUtil.arrayCountList(v.getValue(), v.getArrayTypeCount())));
+                    out += String.format("<td>%s</td>", IDocUtil.convert2String(IDocUtil.arrayCountList(v.getDefValue(), v.getArrayTypeCount())));
                 } else {
-                    out += String.format("<td>%s</td>", IDocUtil.convert2String(v.getValue()));
+                    out += String.format("<td>%s</td>", IDocUtil.convert2String(v.getDefValue()));
                 }
                 out += String.format("<td>%s</td>", IDocUtil.convert2String(v.getDesc()));
             }
@@ -105,10 +105,10 @@ public class ToHtml {
             addLine(out, sb);
             addLine("</tr>", sb);
 
-            if (v.getValue() instanceof Map) {
+            if (v.getDefValue() instanceof Map) {
                 int next = level + 1;
                 addLine("<tr align=\"left\">", sb);
-                map2Html((Map<String, IDocFieldObj>) v.getValue(), next, sb);
+                map2Html((Map<String, IDocFieldObj>) v.getDefValue(), next, sb);
                 addLine("</tr>", sb);
             }
         });

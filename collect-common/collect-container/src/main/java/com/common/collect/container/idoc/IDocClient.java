@@ -62,8 +62,8 @@ public class IDocClient {
                 if (request == null) {
                     continue;
                 }
-                if (request.isObjectType() && request.getValue() instanceof Map) {
-                    methodContext.addRequest((Map<String, IDocFieldObj>) request.getValue());
+                if (request.isObjectType() && request.getDefValue() instanceof Map) {
+                    methodContext.addRequest((Map<String, IDocFieldObj>) request.getDefValue());
                 } else {
                     methodContext.addRequest(request);
                 }
@@ -91,7 +91,7 @@ public class IDocClient {
             if (EmptyUtil.isEmpty(obj)) {
                 return null;
             }
-            fieldObj.setValue(obj);
+            fieldObj.setDefValue(obj);
             return fieldObj;
         } else {
             if (fieldObj.isArrayType()) {
@@ -101,10 +101,10 @@ public class IDocClient {
                     if (EmptyUtil.isEmpty(arrayObject)) {
                         return null;
                     }
-                    fieldObj.setValue(arrayObject);
+                    fieldObj.setDefValue(arrayObject);
                 }
             } else {
-                fieldObj.setValue(IDocUtil.typeDefaultValue(cls));
+                fieldObj.setDefValue(IDocUtil.typeDefaultValue(cls));
             }
             return fieldObj;
         }
@@ -123,7 +123,7 @@ public class IDocClient {
         RequestParam requestParam = parameter.getAnnotation(RequestParam.class);
         if (requestParam != null) {
             if (!ValueConstants.DEFAULT_NONE.equals(requestParam.defaultValue())) {
-                request.setValue(requestParam.defaultValue());
+                request.setDefValue(requestParam.defaultValue());
             }
             request.setRequired(requestParam.required());
             if (EmptyUtil.isEmpty(requestParam.name())) {
@@ -143,7 +143,7 @@ public class IDocClient {
             // 简单 vo 对象
             Map<String, IDocFieldObj> requests = getIDocFieldObjFromClass(actualArrayCls, new IDocFieldObjFromClassParam(IDocFieldType.request));
             if (EmptyUtil.isNotEmpty(requests)) {
-                request.setValue(requests);
+                request.setDefValue(requests);
             } else {
                 if (iDocField == null) {
                     return null;
@@ -196,7 +196,7 @@ public class IDocClient {
             if (iDocFieldObj.isObjectType() || iDocFieldObj.isArrayObjectType()) {
                 Map<String, IDocFieldObj> next = getIDocFieldObjFromClass(actualArrayCls, context);
                 if (EmptyUtil.isNotEmpty(next)) {
-                    iDocFieldObj.setValue(next);
+                    iDocFieldObj.setDefValue(next);
                 } else {
                     if (iDocField == null) {
                         continue;

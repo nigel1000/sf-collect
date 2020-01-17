@@ -90,7 +90,7 @@ public class IDocMethodContext implements Serializable {
     public void parseObjectResponse() {
         IDocFieldObj obj = this.response.get(GlobalConfig.directReturnKey);
         if (obj != null && obj.isObjectType()) {
-            this.response = (Map<String, IDocFieldObj>) obj.getValue();
+            this.response = (Map<String, IDocFieldObj>) obj.getDefValue();
         }
     }
 
