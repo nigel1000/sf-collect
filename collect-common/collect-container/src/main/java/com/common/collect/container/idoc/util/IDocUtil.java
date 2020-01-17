@@ -1,18 +1,16 @@
 package com.common.collect.container.idoc.util;
 
 import com.common.collect.container.JsonUtil;
-import com.common.collect.container.idoc.base.GlobalConfig;
-import com.common.collect.container.idoc.base.IDocFieldType;
 import com.common.collect.container.idoc.base.IDocFieldValueType;
-import com.common.collect.container.idoc.context.IDocFieldObj;
-import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.IdUtil;
 import lombok.NonNull;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -58,6 +56,13 @@ public class IDocUtil {
         if (cls == List.class ||
                 cls.isArray()) {
             return IDocFieldValueType.Array;
+        }
+        if (cls == HttpServletRequest.class ||
+                cls == HttpServletResponse.class ||
+                cls == MultipartFile.class ||
+                cls == Object.class ||
+                cls == Map.class) {
+            return IDocFieldValueType.UnKnow;
         }
         return IDocFieldValueType.Object;
     }
@@ -109,10 +114,6 @@ public class IDocUtil {
         } else if (typeDefaultValue(str.getClass()) == null) {
             // list
             return JsonUtil.bean2json(str);
-        } else if (str instanceof String) {
-            if (GlobalConfig.directReturnKey.equals(str)) {
-                return GlobalConfig.directReturnKeyShow;
-            }
         }
         return String.valueOf(str);
     }
@@ -123,93 +124,6 @@ public class IDocUtil {
             obj = Arrays.asList(obj, obj);
         }
         return obj;
-    }
-
-    public static Object fieldFieldMapMock(Map<String, IDocFieldObj> docFieldObjMap) {
-        Map<String, Object> bean = new LinkedHashMap<>();
-        if (EmptyUtil.isEmpty(docFieldObjMap)) {
-            return bean;
-        }
-        IDocFieldObj fieldObj = docFieldObjMap.get(GlobalConfig.directReturnKey);
-        if (docFieldObjMap.size() == 1 && fieldObj != null && fieldObj.getIDocFieldType().equals(IDocFieldType.response)) {
-            if (fieldObj.isObjectType()) {
-                docFieldObjMap = new LinkedHashMap<>();
-                docFieldObjMap.putAll((Map<String, IDocFieldObj>) fieldObj.getDefValue());
-            } else if (fieldObj.isArrayType()) {
-                if (fieldObj.isArrayObjectType()) {
-                    Object sub = fieldFieldMapMock((Map<String, IDocFieldObj>) fieldObj.getDefValue());
-                    return IDocUtil.arrayCountList(sub, fieldObj.getArrayTypeCount());
-                } else {
-                    return IDocUtil.arrayCountList(fieldObj.getDefValue(), fieldObj.getArrayTypeCount());
-                }
-            } else {
-                return fieldObj.getDefValue();
-            }
-        }
-        for (Map.Entry<String, IDocFieldObj> entry : docFieldObjMap.entrySet()) {
-            String k = convert2String(entry.getKey());
-            IDocFieldObj v = entry.getValue();
-            if (v.getDefValue() instanceof Map) {
-                Object sub = fieldFieldMapMock((Map<String, IDocFieldObj>) v.getDefValue());
-                if (v.isArrayType()) {
-                    bean.put(k, IDocUtil.arrayCountList(sub, v.getArrayTypeCount()));
-                } else {
-                    bean.put(k, sub);
-                }
-            } else {
-                if (v.isArrayType()) {
-                    bean.put(k, IDocUtil.arrayCountList(v.getDefValue(), v.getArrayTypeCount()));
-                } else {
-                    bean.put(k, v.getDefValue());
-                }
-            }
-        }
-        return bean;
-    }
-
-    public static void fieldFieldMapSort(Map<String, IDocFieldObj> map) {
-        if (EmptyUtil.isEmpty(map)) {
-            return;
-        }
-        Map<String, IDocFieldObj> baseMap = new LinkedHashMap<>();
-
-        Map<String, IDocFieldObj> objStringMap = new LinkedHashMap<>();
-        Map<String, IDocFieldObj> objMap = new LinkedHashMap<>();
-
-        Map<String, IDocFieldObj> arrayBaseMap = new LinkedHashMap<>();
-        Map<String, IDocFieldObj> arrayObjStringMap = new LinkedHashMap<>();
-        Map<String, IDocFieldObj> arrayObjMap = new LinkedHashMap<>();
-        map.forEach((k, v) -> {
-            if (v.getDefValue() instanceof Map) {
-                fieldFieldMapSort((Map<String, IDocFieldObj>) v.getDefValue());
-            }
-            if (v.isObjectType()) {
-                if (v.getDefValue() instanceof String) {
-                    objStringMap.put(k, v);
-                } else if (v.getDefValue() instanceof Map) {
-                    objMap.put(k, v);
-                }
-            } else if (v.isArrayType()) {
-                if (v.isArrayObjectType()) {
-                    if (v.getDefValue() instanceof String) {
-                        arrayObjStringMap.put(k, v);
-                    } else if (v.getDefValue() instanceof Map) {
-                        arrayObjMap.put(k, v);
-                    }
-                } else {
-                    arrayBaseMap.put(k, v);
-                }
-            } else {
-                baseMap.put(k, v);
-            }
-        });
-        map.clear();
-        map.putAll(baseMap);
-        map.putAll(objStringMap);
-        map.putAll(objMap);
-        map.putAll(arrayObjStringMap);
-        map.putAll(arrayBaseMap);
-        map.putAll(arrayObjMap);
     }
 
 }

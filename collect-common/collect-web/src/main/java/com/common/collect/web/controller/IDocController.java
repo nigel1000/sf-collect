@@ -51,7 +51,6 @@ public class IDocController {
             List<IDocMethodContext> contexts = IDocClient.createIDoc(cls);
             for (IDocMethodContext context : contexts) {
                 if (context.getId().equals(id)) {
-                    context.parseObjectResponse();
                     WebUtil.exportHtml(response, ToHtml.toHtml(context));
                 }
             }

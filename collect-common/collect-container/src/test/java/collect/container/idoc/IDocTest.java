@@ -38,9 +38,6 @@ public class IDocTest {
         for (Class<?> cls : classList) {
             List<IDocMethodContext> contexts = IDocClient.createIDoc(cls);
             for (IDocMethodContext context : contexts) {
-                context.parseObjectResponse();
-                IDocUtil.fieldFieldMapSort(context.getRequest());
-                IDocUtil.fieldFieldMapSort(context.getResponse());
                 FileUtil.createFile(path + context.getId() + "-" + context.getName() + ".md", false, ToHtml.toHtml(context).getBytes(), true);
                 context.setMethod(null);
                 FileUtil.createFile(path + context.getId() + "-" + context.getName() + ".json", false, JsonUtil.bean2jsonPretty(context).getBytes(), true);

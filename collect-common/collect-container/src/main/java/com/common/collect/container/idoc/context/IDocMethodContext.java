@@ -18,6 +18,7 @@ import java.util.Map;
  */
 @Data
 public class IDocMethodContext implements Serializable {
+    private static final long serialVersionUID = -4485345031917709151L;
 
     private String className;
     private Class<?> cls;
@@ -87,11 +88,114 @@ public class IDocMethodContext implements Serializable {
         return this;
     }
 
-    public void parseObjectResponse() {
-        IDocFieldObj obj = this.response.get(GlobalConfig.directReturnKey);
-        if (obj != null && obj.isObjectType()) {
-            this.response = (Map<String, IDocFieldObj>) obj.getDefValue();
+    public Map<String, IDocFieldObj> getRequest() {
+        sort(request);
+        return request;
+    }
+
+    public Map<String, IDocFieldObj> getResponse() {
+        Map<String, IDocFieldObj> actualResponse = new LinkedHashMap<>(response);
+        IDocFieldObj obj = actualResponse.get(GlobalConfig.directReturnKey);
+        if (obj == null) {
+            return new LinkedHashMap<>();
         }
+        if (obj.isObjectType() && obj.isObjectValue()) {
+            actualResponse = (Map<String, IDocFieldObj>) obj.getDefValue();
+        }
+        sort(actualResponse);
+        return actualResponse;
+    }
+
+    public Object getRequestMock() {
+        sort(request);
+        Map<String, Object> bean = new LinkedHashMap<>();
+        request.forEach((k, v) -> {
+            bean.putAll(v.getDefValueMock());
+        });
+        return bean;
+    }
+
+    public Object getResponseMock() {
+        Map<String, Object> bean = new LinkedHashMap<>();
+        IDocFieldObj obj = response.get(GlobalConfig.directReturnKey);
+        if (obj == null) {
+            return bean;
+        }
+        if (obj.isBaseType() || obj.isUnKnowType()) {
+            return obj.getDefValue();
+        }
+        if (obj.isArrayType()) {
+            return obj.getDefValueMock().get(GlobalConfig.directReturnKey);
+        }
+        if (obj.isObjectType()) {
+            Map<String, IDocFieldObj> actualResponse = (Map<String, IDocFieldObj>) obj.getDefValue();
+            sort(actualResponse);
+            actualResponse.forEach((k, v) -> {
+                bean.putAll(v.getDefValueMock());
+            });
+        }
+        return bean;
+    }
+
+    public void sort(Map<String, IDocFieldObj> map) {
+        if (EmptyUtil.isEmpty(map)) {
+            return;
+        }
+        Map<String, IDocFieldObj> unKnowMap = new LinkedHashMap<>();
+
+        Map<String, IDocFieldObj> baseMap = new LinkedHashMap<>();
+
+        Map<String, IDocFieldObj> objMap = new LinkedHashMap<>();
+
+        Map<String, IDocFieldObj> arrayBaseMap = new LinkedHashMap<>();
+        Map<String, IDocFieldObj> arrayObjMap = new LinkedHashMap<>();
+
+        for (Map.Entry<String, IDocFieldObj> entry : map.entrySet()) {
+            String k = entry.getKey();
+            IDocFieldObj v = entry.getValue();
+            if (v.isUnKnowType()) {
+                unKnowMap.put(k, v);
+                continue;
+            }
+            if (v.isBaseType()) {
+                baseMap.put(k, v);
+                continue;
+            }
+            if (v.isObjectType()) {
+                if (v.isObjectValue()) {
+                    sort((Map<String, IDocFieldObj>) v.getDefValue());
+                    objMap.put(k, v);
+                    continue;
+                }
+                unKnowMap.put(k, v);
+                continue;
+            }
+            if (v.isArrayType()) {
+                if (v.isArrayBaseType()) {
+                    arrayBaseMap.put(k, v);
+                    continue;
+                }
+                if (v.isArrayUnKnowType()) {
+                    unKnowMap.put(k, v);
+                    continue;
+                }
+                if (v.isArrayObjectType()) {
+                    if (v.isObjectValue()) {
+                        sort((Map<String, IDocFieldObj>) v.getDefValue());
+                        arrayObjMap.put(k, v);
+                        continue;
+                    }
+                    unKnowMap.put(k, v);
+                    continue;
+                }
+            }
+        }
+        map.clear();
+        map.putAll(unKnowMap);
+        map.putAll(baseMap);
+        map.putAll(objMap);
+        map.putAll(arrayBaseMap);
+        map.putAll(arrayObjMap);
     }
 
 }

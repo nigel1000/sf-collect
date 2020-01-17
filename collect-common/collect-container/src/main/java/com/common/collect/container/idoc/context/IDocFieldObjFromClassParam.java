@@ -48,18 +48,4 @@ public class IDocFieldObjFromClassParam {
         traceCurrentClass.remove(traceCurrentClass.size() - 1);
     }
 
-    public boolean canHandle(@NonNull Class cls) {
-        if (!IDocUtil.typeMapping(cls).equals(IDocFieldValueType.Object)) {
-            return false;
-        }
-        if (cls == HttpServletRequest.class ||
-                cls == HttpServletResponse.class ||
-                cls == MultipartFile.class ||
-                cls == Object.class ||
-                cls == Map.class) {
-            return false;
-        }
-        return true;
-    }
-
 }

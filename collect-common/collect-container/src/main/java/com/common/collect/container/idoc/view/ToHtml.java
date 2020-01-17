@@ -1,6 +1,7 @@
 package com.common.collect.container.idoc.view;
 
 import com.common.collect.container.JsonUtil;
+import com.common.collect.container.idoc.base.GlobalConfig;
 import com.common.collect.container.idoc.base.IDocFieldType;
 import com.common.collect.container.idoc.context.IDocFieldObj;
 import com.common.collect.container.idoc.context.IDocMethodContext;
@@ -33,7 +34,7 @@ public class ToHtml {
         // mock request
         addLine("<div>", sb);
         addLine("<pre>", sb);
-        addLine(JsonUtil.bean2jsonPretty(IDocUtil.fieldFieldMapMock(context.getRequest())), sb);
+        addLine(JsonUtil.bean2jsonPretty(context.getRequestMock()), sb);
         addLine("</pre>", sb);
         addLine("</div>", sb);
 
@@ -45,7 +46,7 @@ public class ToHtml {
         // mock response
         addLine("<div>", sb);
         addLine("<pre>", sb);
-        addLine(JsonUtil.bean2jsonPretty(IDocUtil.fieldFieldMapMock(context.getResponse())), sb);
+        addLine(JsonUtil.bean2jsonPretty(context.getResponseMock()), sb);
         addLine("</pre>", sb);
         addLine("</div>", sb);
 
@@ -80,7 +81,7 @@ public class ToHtml {
                 i.add(1);
             }
             String out = blank;
-            out += String.format("<td>%s</td>", IDocUtil.convert2String(v.getName()));
+            out += String.format("<td>%s</td>", GlobalConfig.switchDirectReturnKey(v.getName()));
             if (v.getArrayType() != null) {
                 out += String.format("<td>%s</td>", v.getType() + "-" + v.getArrayType());
             } else {
