@@ -131,7 +131,7 @@ public class IDocUtil {
             return bean;
         }
         IDocFieldObj fieldObj = docFieldObjMap.get(GlobalConfig.directReturnKey);
-        if (fieldObj != null && fieldObj.getIDocFieldType().equals(IDocFieldType.response)) {
+        if (docFieldObjMap.size() == 1 && fieldObj != null && fieldObj.getIDocFieldType().equals(IDocFieldType.response)) {
             if (fieldObj.isObjectType()) {
                 docFieldObjMap = new LinkedHashMap<>();
                 docFieldObjMap.putAll((Map<String, IDocFieldObj>) fieldObj.getValue());
@@ -147,7 +147,7 @@ public class IDocUtil {
             }
         }
         for (Map.Entry<String, IDocFieldObj> entry : docFieldObjMap.entrySet()) {
-            String k = entry.getKey();
+            String k = convert2String(entry.getKey());
             IDocFieldObj v = entry.getValue();
             if (v.getValue() instanceof Map) {
                 Object sub = fieldFieldMapMock((Map<String, IDocFieldObj>) v.getValue());

@@ -20,7 +20,7 @@ import java.util.Map;
 public class IDocMethodContext implements Serializable {
 
     private String className;
-    private Class cls;
+    private Class<?> cls;
     private String methodName;
     private Method method;
 

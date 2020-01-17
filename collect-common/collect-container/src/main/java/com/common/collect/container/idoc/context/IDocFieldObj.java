@@ -22,9 +22,9 @@ public class IDocFieldObj implements Serializable {
     private String name;
     // 类型
     private IDocFieldValueType type;
-    private Class typeCls;
+    private Class<?> typeCls;
     private IDocFieldValueType arrayType;
-    private Class arrayTypeCls;
+    private Class<?> arrayTypeCls;
     private Integer arrayTypeCount;
     // 默认值
     // type = Object || arrayType = Object 时可能是map，当map为空时并且IDocField里value不为空时是string
