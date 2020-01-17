@@ -121,10 +121,7 @@ public class IDocMethodContext implements Serializable {
         if (obj == null) {
             return bean;
         }
-        if (obj.isBaseType() || obj.isUnKnowType()) {
-            return obj.getDefValue();
-        }
-        if (obj.isArrayType()) {
+        if (obj.isBaseType() || obj.isUnKnowType() || obj.isArrayType()) {
             return obj.getDefValueMock().get(GlobalConfig.directReturnKey);
         }
         if (obj.isObjectType()) {
