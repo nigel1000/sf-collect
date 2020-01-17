@@ -79,31 +79,34 @@ public class IDocClient {
         return contexts;
     }
 
-    private static Map<String, IDocFieldObj> handleResponse(@NonNull Class cls, @NonNull IDocFieldObjFromClassParam context) {
+    private static IDocFieldObj handleResponse(@NonNull Class cls, @NonNull IDocFieldObjFromClassParam context) {
+        IDocFieldObj fieldObj = new IDocFieldObj();
+        fieldObj.setName(GlobalConfig.directReturnKey);
+        fieldObj.setType(IDocUtil.typeMapping(cls));
+        fieldObj.setTypeCls(cls);
+        fieldObj.setDesc("返回数据");
+        fieldObj.setIDocFieldType(context.getDocFieldType());
         if (IDocUtil.typeMapping(cls).equals(IDocFieldValueType.Object)) {
-            return getIDocFieldObjFromClass(cls, context);
+            Map<String, IDocFieldObj> obj = getIDocFieldObjFromClass(cls, context);
+            if (EmptyUtil.isEmpty(obj)) {
+                return null;
+            }
+            fieldObj.setValue(obj);
+            return fieldObj;
         } else {
-            IDocFieldObj fieldObj = new IDocFieldObj();
-            fieldObj.setName(GlobalConfig.directReturnKey);
-            fieldObj.setType(IDocUtil.typeMapping(cls));
-            fieldObj.setTypeCls(cls);
-            fieldObj.setDesc("返回数据");
-            fieldObj.setIDocFieldType(context.getDocFieldType());
-            if (IDocUtil.typeMapping(cls).equals(IDocFieldValueType.Array)) {
+            if (fieldObj.isArrayType()) {
                 Class actualArrayCls = handleArrayType(cls, context.getGenericTypeMap().get(cls.getTypeParameters()[0].getName()), fieldObj);
                 if (fieldObj.isArrayObjectType()) {
                     Map<String, IDocFieldObj> arrayObject = getIDocFieldObjFromClass(actualArrayCls, context);
                     if (EmptyUtil.isEmpty(arrayObject)) {
-                        return new LinkedHashMap<>();
+                        return null;
                     }
                     fieldObj.setValue(arrayObject);
                 }
             } else {
                 fieldObj.setValue(IDocUtil.typeDefaultValue(cls));
             }
-            Map<String, IDocFieldObj> response = new LinkedHashMap<>();
-            response.put(GlobalConfig.directReturnKey, fieldObj);
-            return response;
+            return fieldObj;
         }
     }
 

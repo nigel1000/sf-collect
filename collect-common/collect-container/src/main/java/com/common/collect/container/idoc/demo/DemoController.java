@@ -1,5 +1,6 @@
 package com.common.collect.container.idoc.demo;
 
+import com.common.collect.api.Response;
 import com.common.collect.api.idoc.IDocField;
 import com.common.collect.api.idoc.IDocFieldExclude;
 import com.common.collect.api.idoc.IDocMethod;
@@ -55,7 +56,7 @@ public class DemoController {
 
     @IDocMethod(id = "4", name = "返回对象类型处理", author = "hznijianfeng", reCreate = true)
     @RequestMapping(value = "/back/door/idoc/response", method = {RequestMethod.GET, RequestMethod.POST})
-    public DocObject responseObjParse() {
+    public Response<DocObject> responseObjParse() {
         return null;
     }
 
