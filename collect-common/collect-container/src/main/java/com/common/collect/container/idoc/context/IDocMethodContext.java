@@ -125,11 +125,15 @@ public class IDocMethodContext implements Serializable {
             return obj.getDefValueMock().get(GlobalConfig.directReturnKey);
         }
         if (obj.isObjectType()) {
-            Map<String, IDocFieldObj> actualResponse = (Map<String, IDocFieldObj>) obj.getDefValue();
-            sort(actualResponse);
-            actualResponse.forEach((k, v) -> {
-                bean.putAll(v.getDefValueMock());
-            });
+            if (obj.isObjectValue()) {
+                Map<String, IDocFieldObj> actualResponse = (Map<String, IDocFieldObj>) obj.getDefValue();
+                sort(actualResponse);
+                actualResponse.forEach((k, v) -> {
+                    bean.putAll(v.getDefValueMock());
+                });
+                return bean;
+            }
+            return obj.getDefValueMock().get(GlobalConfig.directReturnKey);
         }
         return bean;
     }
