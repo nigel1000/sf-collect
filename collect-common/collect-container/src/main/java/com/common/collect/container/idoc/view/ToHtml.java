@@ -28,25 +28,25 @@ public class ToHtml {
 
         addLine("访问入参", sb);
         addLine("<table border=\"1\" width=\"1000\" cellspacing=\"0\" cellpadding=\"5px\">", sb);
-        map2Html(context.getRequest(), 0, sb);
+        map2Html(context.sortRequest(), 0, sb);
         addLine("</table>", sb);
 
         // mock request
         addLine("<div>", sb);
         addLine("<pre>", sb);
-        addLine(JsonUtil.bean2jsonPretty(context.getRequestMock()), sb);
+        addLine(JsonUtil.bean2jsonPretty(context.genRequestMock()), sb);
         addLine("</pre>", sb);
         addLine("</div>", sb);
 
         addLine("访问返回", sb);
         addLine("<table border=\"1\" width=\"1000\" cellspacing=\"0\" cellpadding=\"5px\" >", sb);
-        map2Html(context.getResponse(), 0, sb);
+        map2Html(context.sortResponse(), 0, sb);
         addLine("</table>", sb);
 
         // mock response
         addLine("<div>", sb);
         addLine("<pre>", sb);
-        addLine(JsonUtil.bean2jsonPretty(context.getResponseMock()), sb);
+        addLine(JsonUtil.bean2jsonPretty(context.genResponseMock()), sb);
         addLine("</pre>", sb);
         addLine("</div>", sb);
 

@@ -88,12 +88,12 @@ public class IDocMethodContext implements Serializable {
         return this;
     }
 
-    public Map<String, IDocFieldObj> getRequest() {
+    public Map<String, IDocFieldObj> sortRequest() {
         sort(request);
         return request;
     }
 
-    public Map<String, IDocFieldObj> getResponse() {
+    public Map<String, IDocFieldObj> sortResponse() {
         Map<String, IDocFieldObj> actualResponse = new LinkedHashMap<>(response);
         IDocFieldObj obj = actualResponse.get(GlobalConfig.directReturnKey);
         if (obj == null) {
@@ -106,7 +106,7 @@ public class IDocMethodContext implements Serializable {
         return actualResponse;
     }
 
-    public Object getRequestMock() {
+    public Object genRequestMock() {
         sort(request);
         Map<String, Object> bean = new LinkedHashMap<>();
         request.forEach((k, v) -> {
@@ -115,7 +115,7 @@ public class IDocMethodContext implements Serializable {
         return bean;
     }
 
-    public Object getResponseMock() {
+    public Object genResponseMock() {
         Map<String, Object> bean = new LinkedHashMap<>();
         IDocFieldObj obj = response.get(GlobalConfig.directReturnKey);
         if (obj == null) {
