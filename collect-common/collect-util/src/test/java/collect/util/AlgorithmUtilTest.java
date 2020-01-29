@@ -103,15 +103,22 @@ public class AlgorithmUtilTest {
 
         hexStr(content);
 
-//        important();
+        importantAesEn();
+        importantAesDe();
     }
 
-    public static void important() {
-        String db = "aaaa";
+    public static void importantAesEn() {
+        String content = "afsefsrgrwg11111";
+        String key = "afsefsrgrwg11111";
+        System.out.println(AlgorithmUtil.byteToHexStr(AlgorithmUtil.aesEncrypt(content.getBytes(StandardCharsets.UTF_8), key.getBytes(StandardCharsets.UTF_8))));
+    }
+
+    public static void importantAesDe() {
+        String content = "6a0d1038bdebdc3e5c209fb1bce6bc89f6c8095153b3ddcf26c538ea1ec1e2b0";
         String key = "afsefsrgrwg11111";
         // 解密
-        byte[] aesDecrypt = AlgorithmUtil.aesDecrypt(AlgorithmUtil.byteFromHexStr(db), key.getBytes(StandardCharsets.UTF_8));
-        log.info(StringUtil.format("aes 解密数据:{}", new String(aesDecrypt, StandardCharsets.UTF_8)));
+        byte[] aesDecrypt = AlgorithmUtil.aesDecrypt(AlgorithmUtil.byteFromHexStr(content), key.getBytes(StandardCharsets.UTF_8));
+        System.out.println(new String(aesDecrypt, StandardCharsets.UTF_8));
     }
 
 }
