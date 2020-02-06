@@ -4,17 +4,13 @@ import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.container.BeanUtil;
 import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.FunctionUtil;
-import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
-import redis.clients.jedis.HostAndPort;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisCluster;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisSentinelPool;
+import redis.clients.jedis.*;
 import redis.clients.util.Pool;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -74,7 +70,7 @@ public class JedisProvider {
             throw UnifiedException.gen("哨兵节点不能为空");
         }
         GenericObjectPoolConfig genericObjectPoolConfig = BeanUtil.genBean(new RedisConfig(), GenericObjectPoolConfig.class);
-        Pool<Jedis> pool = new JedisSentinelPool(masterName, Sets.newHashSet(sentinels),
+        Pool<Jedis> pool = new JedisSentinelPool(masterName, new HashSet<>(sentinels),
                 genericObjectPoolConfig, connectTimeout);
         // 关闭 客户端
         Runtime.getRuntime().addShutdownHook(new Thread(pool::close));

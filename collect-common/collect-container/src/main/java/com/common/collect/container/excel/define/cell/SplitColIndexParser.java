@@ -6,8 +6,8 @@ import com.common.collect.container.excel.define.IColIndexParser;
 import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.FunctionUtil;
 import com.common.collect.util.StringUtil;
-import com.google.common.collect.Lists;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,7 +18,7 @@ public class SplitColIndexParser implements IColIndexParser {
     @Override
     public List<Integer> parseColIndex(String colIndex) {
 
-        List<Integer> result = Lists.newArrayList();
+        List<Integer> result = new ArrayList<>();
         for (String rangeIndex : StringUtil.split2List(colIndex.trim(), ",")) {
             List<Integer> indexs = FunctionUtil.valueList(StringUtil.split2List(rangeIndex.trim(), ":"), Integer::valueOf);
             if (indexs.size() == 1) {

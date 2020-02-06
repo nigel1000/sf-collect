@@ -10,7 +10,6 @@ import com.common.collect.api.page.PageParam;
 import com.common.collect.api.page.PageResult;
 import com.common.collect.util.ConvertUtil;
 import com.common.collect.util.EmptyUtil;
-import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -36,6 +35,7 @@ import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -234,7 +234,7 @@ public abstract class AbstractElasticMapper<T> implements IElasticMapper<T>, IEl
     }
 
     protected Function<SearchResponse, List<T>> defaultResultMapping = (response) -> {
-        List<T> result = Lists.newArrayList();
+        List<T> result = new ArrayList<>();
         for (SearchHit searchHit : response.getHits()) {
             result.add(parse(toJSONString(searchHit.getSourceAsMap()), getIndexClass()));
         }

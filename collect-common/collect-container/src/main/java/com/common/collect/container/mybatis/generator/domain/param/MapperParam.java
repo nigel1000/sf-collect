@@ -2,9 +2,9 @@ package com.common.collect.container.mybatis.generator.domain.param;
 
 import com.common.collect.api.excps.UnifiedException;
 import com.common.collect.util.EmptyUtil;
-import com.google.common.collect.Lists;
 import lombok.Data;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -33,8 +33,8 @@ public class MapperParam {
     // dao class 后缀 默认Mapper
     private String daoSuffixName = "mapper";
 
-    private List<String> sqlIds = Lists.newArrayList("create", "creates", "update", "load", "loads", "delete", "deletes");
-    private List<String> insertDate2Now = Lists.newArrayList("createdAt", "updatedAt", "createAt", "updateAt");
+    private List<String> sqlIds = Arrays.asList("create", "creates", "update", "load", "loads", "delete", "deletes");
+    private List<String> insertDate2Now = Arrays.asList("createdAt", "updatedAt", "createAt", "updateAt");
 
     public MapperParam(GlobalParam globalParam) {
         this.daoPrefixPath = globalParam.getPrefixPath();

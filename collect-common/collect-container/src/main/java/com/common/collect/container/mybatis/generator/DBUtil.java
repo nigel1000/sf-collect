@@ -6,7 +6,6 @@ import com.common.collect.container.mybatis.generator.domain.db.Field;
 import com.common.collect.container.mybatis.generator.domain.db.Table;
 import com.common.collect.container.mybatis.generator.domain.param.GlobalParam;
 import com.common.collect.util.EmptyUtil;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,6 +13,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -119,7 +119,7 @@ public class DBUtil {
         try {
             PreparedStatement ps = getConnection(globalParam).prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
-            List<Field> fields = Lists.newArrayList();
+            List<Field> fields = new ArrayList<>();
             while (rs.next()) {
                 Field field = new Field();
                 field.setField(rs.getString(1));
@@ -156,7 +156,7 @@ public class DBUtil {
     }
 
     private static List<String> getTableNamesBySchema(GlobalParam globalParam) {
-        List<String> names = Lists.newArrayList();
+        List<String> names = new ArrayList<>();
         try {
             // 获取表名列表
             PreparedStatement ps = getConnection(globalParam).prepareStatement(

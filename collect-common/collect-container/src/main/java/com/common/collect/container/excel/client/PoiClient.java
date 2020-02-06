@@ -5,36 +5,16 @@ import com.common.collect.container.excel.base.ExcelConstants;
 import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.FileUtil;
 import com.common.collect.util.ValidUtil;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.NonNull;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Comment;
-import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.FormulaError;
-import org.apache.poi.ss.usermodel.HorizontalAlignment;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.VerticalAlignment;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.NumberToTextConverter;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by nijianfeng on 2019/4/12.
@@ -418,7 +398,7 @@ public class PoiClient {
     }
 
     public static List<String> getRowValueList(@NonNull Sheet sheet, int rowIndex) {
-        List<String> ret = Lists.newArrayList();
+        List<String> ret = new ArrayList<>();
         Row row = getRow(sheet, rowIndex);
         // row.getLastCellNum() 不是从0开始的
         int lastCellNum = row.getLastCellNum();

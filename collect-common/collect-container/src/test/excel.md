@@ -182,7 +182,7 @@ public @interface ExcelEntity {
 ```
 ## 使用用例
 ```java
-public class TestCellConfig implements ICellConfig {
+import java.util.Arrays;public class TestCellConfig implements ICellConfig {
 
     @Override
     public ExcelCellConfigInfo pullCellConfig(Object value, ExcelSession excelSession, ExcelParam excelParam) {
@@ -297,7 +297,7 @@ public class ExcelSessionTest {
         long time = System.currentTimeMillis();
         excelClient.fileExport(ExcelComposeEO.class, "测试", (excelExportUtil -> {
             for (int i = 0; i < 1000000; i++) {
-                excelExportUtil.exportForward(Lists.newArrayList(excelComposeEO), ExcelComposeEO.class);
+                excelExportUtil.exportForward(Arrays.asList(excelComposeEO), ExcelComposeEO.class);
             }
         }));
         // 新建 excel 100 万条数据 30秒
@@ -306,7 +306,7 @@ public class ExcelSessionTest {
         time = System.currentTimeMillis();
         excelClient.fileTplExport("ExcelExportTpl.xlsx", (excelExportUtil -> {
             for (int i = 0; i < 1000000; i++) {
-                excelExportUtil.exportForward(Lists.newArrayList(excelComposeEO), ExcelComposeEO.class);
+                excelExportUtil.exportForward(Arrays.asList(excelComposeEO), ExcelComposeEO.class);
             }
         }));
         // 用模版 100 万条数据 30秒

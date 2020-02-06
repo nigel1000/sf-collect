@@ -9,14 +9,10 @@ import com.common.collect.container.arrange.model.FunctionDefineModel;
 import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.StringUtil;
 import com.common.collect.util.ThreadLocalUtil;
-import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by hznijianfeng on 2019/7/9.
@@ -104,7 +100,7 @@ public class BizContext {
                 // 解析业务定义的input映射
                 parseBizDefineInput(arrangeModel, functionChain, bizFunctionChains);
                 // 设置功能链的路径
-                functionChain.setBizKeyRoute(Lists.newArrayList(bizKey));
+                functionChain.setBizKeyRoute(Arrays.asList(bizKey));
                 bizFunctionChains.add(functionChain);
             } else if (arrangeModel.getType().equals(BizDefineArrangeModel.TypeEnum.biz.name())) {
                 // 从当前处理中获取 BizContext 业务功能链上下文

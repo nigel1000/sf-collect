@@ -10,7 +10,6 @@ import com.common.collect.container.mybatis.generator.domain.param.MapperParam;
 import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.FileUtil;
 import com.common.collect.util.StringUtil;
-import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -62,7 +63,7 @@ public class MybatisController {
             author = "hznijianfeng";
         }
 
-        List<File> files = Lists.newArrayList();
+        List<File> files = new ArrayList<>();
         GlobalParam globalParam = new GlobalParam();
         globalParam.setDbSchema(url.substring(url.lastIndexOf("/") + 1, url.indexOf("?")));
         if (EmptyUtil.isNotEmpty(schema)) {
@@ -97,8 +98,8 @@ public class MybatisController {
             mapperParam.setMapperPrefixPath(tmpPath);
             mapperParam.setDaoPackagePath(mapperPackagePath);
             mapperParam.setDomainPackagePath(domainPackagePath);
-            mapperParam.setSqlIds(Lists.newArrayList("create", "creates", "update"));
-            mapperParam.setInsertDate2Now(Lists.newArrayList("createdAt", "updatedAt", "createAt", "updateAt",
+            mapperParam.setSqlIds(Arrays.asList("create", "creates", "update"));
+            mapperParam.setInsertDate2Now(Arrays.asList("createdAt", "updatedAt", "createAt", "updateAt",
                     "dbCreateTime", "dbUpdateTime"));
             mapperParam.validSelf();
             files.addAll(DB2Mapper.genMapper(mapperParam));

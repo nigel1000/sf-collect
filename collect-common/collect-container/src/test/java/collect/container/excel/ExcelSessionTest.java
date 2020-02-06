@@ -9,11 +9,11 @@ import com.common.collect.container.excel.ExcelSession;
 import com.common.collect.container.excel.client.ExcelClient;
 import com.common.collect.container.excel.excps.ExcelImportException;
 import com.common.collect.util.IdUtil;
-import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -71,7 +71,7 @@ public class ExcelSessionTest {
         EventModelReader eventModelReader = new EventModelReader(new FileInputStream(path + "/EventModelReader.xlsx"), handler);
         eventModelReader.setNeedReadColNum(12);
         eventModelReader.setBatchHandleSize(3);
-        eventModelReader.setParseSheetIndex(Lists.newArrayList(1, 3));
+        eventModelReader.setParseSheetIndex(Arrays.asList(1, 3));
         eventModelReader.setNeedReadRowNum(4);
         eventModelReader.processSheet();
     }
@@ -116,7 +116,7 @@ public class ExcelSessionTest {
         long time = System.currentTimeMillis();
         Consumer<ExcelExportUtil> execute = (excelExportUtil) -> {
             for (int i = 0; i < 2000; i++) {
-                excelExportUtil.exportModel(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
+                excelExportUtil.exportModel(Arrays.asList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
             }
             log.info("从0开始 lastRowNum:{} ", excelExportUtil.getLastRowNum());
         };
@@ -130,27 +130,27 @@ public class ExcelSessionTest {
         long time = System.currentTimeMillis();
         ExcelClient.fileTplExport("ExcelExportTpl.xlsx", (excelExportUtil -> {
             for (int i = 0; i < 10; i++) {
-                excelExportUtil.exportModel(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
+                excelExportUtil.exportModel(Arrays.asList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
             }
             excelExportUtil.changeSheet("changeSheet");
             for (int i = 0; i < 10; i++) {
-                excelExportUtil.exportModel(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
+                excelExportUtil.exportModel(Arrays.asList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
             }
             excelExportUtil.changeSheet(1);
             for (int i = 0; i < 10; i++) {
-                excelExportUtil.exportModel(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
+                excelExportUtil.exportModel(Arrays.asList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
             }
             excelExportUtil.changeSheet(0);
             for (int i = 0; i < 10; i++) {
-                excelExportUtil.exportModel(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
+                excelExportUtil.exportModel(Arrays.asList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
             }
             excelExportUtil.changeSheet(1);
             for (int i = 0; i < 10; i++) {
-                excelExportUtil.exportModel(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
+                excelExportUtil.exportModel(Arrays.asList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
             }
             excelExportUtil.changeSheet("changeSheet");
             for (int i = 0; i < 10; i++) {
-                excelExportUtil.exportModel(Lists.newArrayList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
+                excelExportUtil.exportModel(Arrays.asList(excelComposeEO, excelComposeEO), ExcelComposeEO.class);
             }
             log.info("从0开始 lastRowNum:{} ", excelExportUtil.getLastRowNum());
         }));

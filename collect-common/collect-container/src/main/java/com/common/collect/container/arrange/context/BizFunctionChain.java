@@ -7,7 +7,6 @@ import com.common.collect.container.arrange.enums.FunctionMethodTypeEnum;
 import com.common.collect.container.arrange.model.FunctionDefineModel;
 import com.common.collect.util.EmptyUtil;
 import com.common.collect.util.StringUtil;
-import com.google.common.collect.Lists;
 import lombok.Data;
 
 import java.lang.reflect.Method;
@@ -80,7 +79,7 @@ public class BizFunctionChain {
         List<BizFunctionChain> ret = new ArrayList<>();
         for (BizFunctionChain bizFunctionChain : from) {
             BizFunctionChain to = BeanUtil.genBean(bizFunctionChain, BizFunctionChain.class);
-            to.setBizKeyRoute(Lists.newArrayList(bizFunctionChain.getBizKeyRoute()));
+            to.setBizKeyRoute(new ArrayList<>(bizFunctionChain.getBizKeyRoute()));
             Map<String, String> inOutMap = new LinkedHashMap<>(bizFunctionChain.getInOutMap());
             to.setInOutMap(inOutMap);
             ret.add(to);
@@ -97,9 +96,7 @@ public class BizFunctionChain {
         none,
         auto,
         assign,
-        pass,
-
-        ;
+        pass,;
 
     }
 

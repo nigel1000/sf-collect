@@ -8,7 +8,6 @@ import com.common.collect.container.excel.define.ICheckImportHandler;
 import com.common.collect.container.excel.define.IConvertImportHandler;
 import com.common.collect.container.excel.excps.ExcelImportException;
 import com.common.collect.util.EmptyUtil;
-import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -19,6 +18,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -78,7 +78,7 @@ public class ExcelImportUtil extends ExcelSession {
         if (failCount > failMaxCount) {
             throw UnifiedException.gen(ExcelConstants.MODULE, "错误返回超出了限制，限制:" + failMaxCount);
         }
-        List<C> retList = Lists.newArrayList();
+        List<C> retList = new ArrayList<>();
         boolean isExcelExp = false;
         ExcelImportException excelParseException = new ExcelImportException(failCount);
         ExcelContext excelContext = ExcelContext.excelContext(targetClass);
@@ -117,7 +117,7 @@ public class ExcelImportUtil extends ExcelSession {
             }
             String title = excelContext.getExcelImportTitleMap().get(fieldName);
             List<Integer> colIndexes = excelContext.getExcelImportColIndexNumMap().get(fieldName);
-            List<Object> values = Lists.newArrayList();
+            List<Object> values = new ArrayList<>();
             for (Integer colIndex : colIndexes) {
                 Object value = null;
                 String currentValue;

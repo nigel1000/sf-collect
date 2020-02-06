@@ -7,10 +7,10 @@ import com.common.collect.container.mybatis.generator.core.DB2Mapper;
 import com.common.collect.container.mybatis.generator.domain.param.DomainParam;
 import com.common.collect.container.mybatis.generator.domain.param.GlobalParam;
 import com.common.collect.container.mybatis.generator.domain.param.MapperParam;
-import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 
+import java.util.Arrays;
 import java.util.Properties;
 
 /**
@@ -51,7 +51,7 @@ public class MybatisGenerator {
         globalParam.setDbDriver(properties.get("jdbc.mysql.driver").toString());
         globalParam.setAuthor("hznijianfeng");
         globalParam.setPrefixPath(path);
-        globalParam.setTableNames(Lists.newArrayList("flow_log"));
+        globalParam.setTableNames(Arrays.asList("flow_log"));
         globalParam.validSelf();
 
         MapperParam mapperParam = new MapperParam(globalParam);
@@ -76,7 +76,7 @@ public class MybatisGenerator {
         globalParam.setDbDriver(properties.get("jdbc.mysql.driver").toString());
         globalParam.setAuthor("hznijianfeng");
         globalParam.setPrefixPath(path);
-        globalParam.setTableNames(Lists.newArrayList("test"));
+        globalParam.setTableNames(Arrays.asList("test"));
         globalParam.validSelf();
 
         DomainParam domainParam = new DomainParam(globalParam);

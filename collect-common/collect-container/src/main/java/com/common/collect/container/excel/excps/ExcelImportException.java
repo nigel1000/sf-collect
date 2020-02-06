@@ -3,10 +3,10 @@ package com.common.collect.container.excel.excps;
 import com.common.collect.container.JsonUtil;
 import com.common.collect.container.excel.context.ExcelSheetInfo;
 import com.common.collect.util.EmptyUtil;
-import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -17,7 +17,7 @@ import java.util.List;
 public class ExcelImportException extends RuntimeException {
 
     @Getter
-    private List<ExcelSheetInfo> infoList = Lists.newArrayList();
+    private List<ExcelSheetInfo> infoList = new ArrayList<>();
 
     private int collectCount;
 

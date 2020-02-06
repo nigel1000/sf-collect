@@ -1,13 +1,9 @@
 package com.common.collect.debug.design.mode.struct;
 
-import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by nijianfeng on 2019/10/30.
@@ -26,9 +22,9 @@ public class Flyweight {
         int num = 1;
         cafeList.add(CafeShop.getCafe("Capucino"));
         cafeList.add(CafeShop.getCafe("BlackCoffee"));
-        cafeList.add(CafeShop.getCafe(Lists.newArrayList("BlackCoffee", "Capucino")));
+        cafeList.add(CafeShop.getCafe(Arrays.asList("BlackCoffee", "Capucino")));
         cafeList.add(CafeShop.getCafe("Espresso"));
-        cafeList.add(CafeShop.getCafe(Lists.newArrayList("Espresso", "BlackCoffee", "BlackCoffee")));
+        cafeList.add(CafeShop.getCafe(Arrays.asList("Espresso", "BlackCoffee", "BlackCoffee")));
         cafeList.add(CafeShop.getCafe("BlackCoffee"));
 
         for (Cafe cafe : cafeList) {

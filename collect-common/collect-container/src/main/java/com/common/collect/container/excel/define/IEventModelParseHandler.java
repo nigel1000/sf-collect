@@ -5,7 +5,6 @@ import com.common.collect.container.excel.context.EventModelContext;
 import com.common.collect.container.excel.context.ExcelContext;
 import com.common.collect.util.CollectionUtil;
 import com.common.collect.util.EmptyUtil;
-import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +46,7 @@ public interface IEventModelParseHandler {
                 continue;
             }
             List<Integer> colIndexes = excelContext.getExcelImportColIndexNumMap().get(fieldName);
-            List<Object> values = Lists.newArrayList();
+            List<Object> values = new ArrayList<>();
             for (Integer colIndex : colIndexes) {
                 Object value = null;
                 String currentValue = data.get(colIndex);

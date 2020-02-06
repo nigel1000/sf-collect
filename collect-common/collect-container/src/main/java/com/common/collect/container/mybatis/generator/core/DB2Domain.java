@@ -8,11 +8,11 @@ import com.common.collect.container.mybatis.generator.domain.param.DomainParam;
 import com.common.collect.container.mybatis.generator.domain.param.GlobalParam;
 import com.common.collect.util.ConvertUtil;
 import com.common.collect.util.FileUtil;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -24,7 +24,7 @@ import java.util.Map;
 public class DB2Domain {
 
     public static List<File> genDomain(DomainParam domainParam) {
-        List<File> files = Lists.newArrayList();
+        List<File> files = new ArrayList<>();
 
         GlobalParam globalParam = domainParam.getGlobalParam();
         Map<String, Table> tableMap = DBUtil.getTables(globalParam, domainParam.getTableNames());
@@ -38,7 +38,7 @@ public class DB2Domain {
             tplMap.put("package", domainParam.getPackagePath());
             tplMap.put("className", className);
             tplMap.put("tableComment", table.getComment());
-            List<Map<String, Object>> fieldInfos = Lists.newArrayList();
+            List<Map<String, Object>> fieldInfos = new ArrayList<>();
             for (Field field : table.getFields()) {
                 Map<String, Object> fieldInfoMap = Maps.newHashMap();
                 fieldInfoMap.put("type", DBUtil.getJavaTypeBySqlType(field.getType()));

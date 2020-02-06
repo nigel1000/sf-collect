@@ -39,6 +39,8 @@ public class DateUtilTest {
         log.info("localDateToDate:{}", DateUtil.toDate(DateUtil.toLocalDate(DateUtil.now())));
         log.info("localDateTimeToDate:{}", DateUtil.toDate(DateUtil.toLocalDateTime(DateUtil.now())));
 
+        log.info("second2Time:{}", DateUtil.second2Time(1000));
+
     }
 
 }

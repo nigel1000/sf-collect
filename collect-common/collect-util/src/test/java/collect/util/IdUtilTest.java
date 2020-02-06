@@ -3,10 +3,10 @@ package collect.util;
 import com.common.collect.util.IdUtil;
 import com.common.collect.util.log4j.Slf4jUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.testng.collections.Sets;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -42,7 +42,7 @@ public class IdUtilTest {
         log.info("done");
         log.info("cost time:{} ms", time - beginTime - 1);
         log.info("sequence 达到最大值次数:{}", out);
-        log.info("max size:{}, list size:{} , set size:{}", ms * (2 << (sequence - 1)), ids.size(), Sets.newHashSet(ids).size());
+        log.info("max size:{}, list size:{} , set size:{}", ms * (2 << (sequence - 1)), ids.size(), new HashSet<>(ids).size());
 
         Slf4jUtil.setLogLevel(null, "error");
         log.info("{}", IdUtil.timeDiy("diy"));

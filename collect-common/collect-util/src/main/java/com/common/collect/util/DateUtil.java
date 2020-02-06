@@ -3,11 +3,7 @@ package com.common.collect.util;
 import com.common.collect.api.excps.UnifiedException;
 import lombok.NonNull;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
@@ -175,6 +171,25 @@ public class DateUtil {
             return null;
         Instant instant = localDateTime.atZone(ZoneId.systemDefault()).toInstant();
         return Date.from(instant);
+    }
+
+    // 将秒数转换为日时分秒，
+    public static String second2Time(long second) {
+        long days = second / 86400;            //转换天数
+        second = second % 86400;            //剩余秒数
+        long hours = second / 3600;            //转换小时
+        second = second % 3600;                //剩余秒数
+        long minutes = second / 60;            //转换分钟
+        second = second % 60;                //剩余秒数
+        if (days > 0) {
+            return days + "天" + hours + "小时" + minutes + "分" + second + "秒";
+        } else if (hours > 0) {
+            return hours + "小时" + minutes + "分" + second + "秒";
+        } else if (minutes > 0) {
+            return minutes + "分" + second + "秒";
+        } else {
+            return second + "秒";
+        }
     }
 
 }

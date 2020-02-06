@@ -8,11 +8,11 @@ import com.common.collect.container.mybatis.generator.domain.param.GlobalParam;
 import com.common.collect.container.mybatis.generator.domain.param.MapperParam;
 import com.common.collect.util.ConvertUtil;
 import com.common.collect.util.FileUtil;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -24,7 +24,7 @@ import java.util.Map;
 public class DB2Mapper {
 
     public static List<File> genMapper(MapperParam mapperParam) {
-        List<File> files = Lists.newArrayList();
+        List<File> files = new ArrayList<>();
 
         GlobalParam globalParam = mapperParam.getGlobalParam();
         Map<String, Table> tableMap = DBUtil.getTables(globalParam, mapperParam.getTableNames());
@@ -43,7 +43,7 @@ public class DB2Mapper {
             tplMap.put("className", className);
             tplMap.put("sqlIds", mapperParam.getSqlIds());
             tplMap.put("insertDate2Now", mapperParam.getInsertDate2Now());
-            List<Map<String, Object>> fieldInfos = Lists.newArrayList();
+            List<Map<String, Object>> fieldInfos = new ArrayList<>();
             for (Field field : table.getFields()) {
                 Map<String, Object> fieldInfoMap = Maps.newHashMap();
                 fieldInfoMap.put("type", DBUtil.getJavaTypeBySqlType(field.getType()));

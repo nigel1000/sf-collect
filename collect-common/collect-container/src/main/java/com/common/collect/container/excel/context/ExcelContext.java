@@ -1,30 +1,16 @@
 package com.common.collect.container.excel.context;
 
 import com.common.collect.api.excps.UnifiedException;
-import com.common.collect.container.excel.annotations.ExcelCheck;
-import com.common.collect.container.excel.annotations.ExcelConvert;
-import com.common.collect.container.excel.annotations.ExcelEntity;
-import com.common.collect.container.excel.annotations.ExcelExport;
-import com.common.collect.container.excel.annotations.ExcelImport;
+import com.common.collect.container.excel.annotations.*;
 import com.common.collect.container.excel.base.ExcelConstants;
-import com.common.collect.container.excel.define.IBeanFactory;
-import com.common.collect.container.excel.define.ICellConfig;
-import com.common.collect.container.excel.define.ICheckImportHandler;
-import com.common.collect.container.excel.define.IColIndexParser;
-import com.common.collect.container.excel.define.IConvertExportHandler;
-import com.common.collect.container.excel.define.IConvertImportHandler;
+import com.common.collect.container.excel.define.*;
 import com.common.collect.container.excel.define.bean.SingletonBeanFactory;
 import com.common.collect.container.excel.define.check.MaxCheckImportHandler;
 import com.common.collect.container.excel.define.check.RegexCheckImportHandler;
 import com.common.collect.container.excel.define.check.RequireCheckImportHandler;
 import com.common.collect.container.excel.define.convert.ByTypeConvertExportHandler;
 import com.common.collect.container.excel.define.convert.ByTypeConvertImportHandler;
-import com.common.collect.util.ClassUtil;
-import com.common.collect.util.CollectionUtil;
-import com.common.collect.util.ConvertUtil;
-import com.common.collect.util.EmptyUtil;
-import com.common.collect.util.StringUtil;
-import com.google.common.collect.Lists;
+import com.common.collect.util.*;
 import lombok.Getter;
 
 import java.lang.reflect.Field;
@@ -245,7 +231,7 @@ public class ExcelContext {
                 excelCheckRegexMap.put(fieldName, regex);
                 excelCheckRegexTipsMap.put(fieldName, excelCheck.regexTips());
                 Class<? extends ICheckImportHandler>[] handlerCls = excelCheck.checkImportHandlers();
-                List<ICheckImportHandler> checkHandlers = Lists.newArrayList();
+                List<ICheckImportHandler> checkHandlers = new ArrayList<>();
                 for (Class<? extends ICheckImportHandler> handler : handlerCls) {
                     checkHandlers.add(beanFactory.getBean(handler));
                 }
@@ -265,10 +251,10 @@ public class ExcelContext {
 
             ExcelConvert excelConvert = field.getAnnotation(ExcelConvert.class);
             // 导入
-            List<IConvertImportHandler> convertImportHandlers = Lists.newArrayList();
+            List<IConvertImportHandler> convertImportHandlers = new ArrayList<>();
             convertImportHandlers.add(beanFactory.getBean(ByTypeConvertImportHandler.class));
             // 导出
-            List<IConvertExportHandler> convertExportHandlers = Lists.newArrayList();
+            List<IConvertExportHandler> convertExportHandlers = new ArrayList<>();
             convertExportHandlers.add(beanFactory.getBean(ByTypeConvertExportHandler.class));
             if (excelConvert != null) {
                 excelConvertMap.put(fieldName, excelConvert);
