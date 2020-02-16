@@ -50,4 +50,19 @@ public class ValidUtil {
         return Pattern.matches(regexp, str);
     }
 
+    public static boolean ge(String idStr, Integer val) {
+        try {
+            Long id = Long.valueOf(idStr);
+            if (val == null) {
+                return true;
+            }
+            if (id >= val) {
+                return true;
+            }
+            return false;
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+
 }
