@@ -33,6 +33,8 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -161,7 +163,7 @@ public abstract class AbstractElasticMapper<T> implements IElasticMapper<T>, IEl
             for (SortBuilder sortBuilder : sortBuilders) {
                 sourceBuilder.sort(sortBuilder);
             }
-//            sourceBuilder.sort(SortBuilders.fieldSort("_id").order(SortOrder.DESC));
+            sourceBuilder.sort(SortBuilders.fieldSort("_id").order(SortOrder.DESC));
         }
 
         SearchRequest searchRequest = new SearchRequest();

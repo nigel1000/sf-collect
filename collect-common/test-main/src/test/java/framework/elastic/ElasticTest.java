@@ -14,7 +14,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 public class ElasticTest {
 
     public static void main(String[] args) {
-        AbstractElasticMapper<ShopGoods> goodsElasticMapper = new AbstractElasticMapper<ShopGoods>() {
+        AbstractElasticMapper<ShopGoods> shopGoodsMapper = new AbstractElasticMapper<ShopGoods>() {
             @Override
             public RestHighLevelClient getElasticClient() {
                 ElasticClient client = new ElasticClient();
@@ -29,13 +29,17 @@ public class ElasticTest {
                 return "shop_goods_index";
             }
 
+            @Override
+            public String getType() {
+                return "shop_goods";
+            }
         };
 
         ShopGoods shopGoods = new ShopGoods(59142660L, 59142660L);
         shopGoods.setGoodsName("name");
 
-        goodsElasticMapper.index(shopGoods.docId(), null, shopGoods);
-        log.info("goodsElasticMapper.get:{}", goodsElasticMapper.get(shopGoods.docId(), null));
+        shopGoodsMapper.index(shopGoods.docId(), null, shopGoods);
+        log.info("shopGoodsMapper.get:{}", shopGoodsMapper.get(shopGoods.docId(), null));
 
         System.exit(-1);
     }
@@ -45,6 +49,9 @@ public class ElasticTest {
         private Long shopId;
         private Long goodsId;
         private String goodsName;
+
+        public ShopGoods() {
+        }
 
         public ShopGoods(Long goodsId, Long shopId) {
             this.goodsId = goodsId;
