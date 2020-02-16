@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<configuration>
+
+    <property name="app_name" value="test-main"/>
+
+    <property name="level" value="info"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%date %5level [%X{containerTraceId}] %6relative --- [%15thread] [%-40logger{40}] [%C:%L] : %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="${level}">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+</configuration>

@@ -10,12 +10,20 @@
     <version>${revision}</version>
 
     <modules>
-        <module>collect-api</module>
-        <module>collect-util</module>
-        <module>collect-debug</module>
-        <module>collect-container</module>
-        <module>collect-model</module>
-        <module>collect-web</module>
+        <module>lib-api</module>
+        <module>lib-util</module>
+        <module>lib-slf4j</module>
+        <module>model-flowlog</module>
+        <module>model-taskrecord</module>
+        <module>framework-excel</module>
+        <module>framework-trace</module>
+        <module>framework-docs</module>
+        <module>framework-elastic</module>
+        <module>framework-redis</module>
+        <module>tool-mybatis</module>
+        <module>test-main</module>
+        <module>test-web</module>
+        <module>test-debug</module>
     </modules>
     <!--变量管理-->
     <properties>
@@ -66,22 +74,57 @@
             <!--自身依赖-->
             <dependency>
                 <groupId>com.common.collect</groupId>
-                <artifactId>collect-api</artifactId>
+                <artifactId>lib-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.common.collect</groupId>
-                <artifactId>collect-util</artifactId>
+                <artifactId>lib-util</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.common.collect</groupId>
-                <artifactId>collect-container</artifactId>
+                <artifactId>lib-slf4j</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.common.collect</groupId>
-                <artifactId>collect-model</artifactId>
+                <artifactId>tool-mybatis</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.common.collect</groupId>
+                <artifactId>model-flowlog</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.common.collect</groupId>
+                <artifactId>model-taskrecord</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.common.collect</groupId>
+                <artifactId>framework-excel</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.common.collect</groupId>
+                <artifactId>framework-trace</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.common.collect</groupId>
+                <artifactId>framework-docs</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.common.collect</groupId>
+                <artifactId>framework-redis</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.common.collect</groupId>
+                <artifactId>framework-elastic</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <!-- servlet-api -->
@@ -203,6 +246,11 @@
                 <artifactId>commons-collections</artifactId>
                 <version>${commons-collections.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>1.19</version>
+            </dependency>
             <!--dubbo 依赖-->
             <dependency>
                 <groupId>com.alibaba</groupId>
@@ -236,6 +284,11 @@
                 <artifactId>mybatis-spring</artifactId>
                 <version>${mybatis-spring.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid</artifactId>
+                <version>1.0.28</version>
+            </dependency>
             <!-- redis -->
             <dependency>
                 <groupId>redis.clients</groupId>
@@ -246,6 +299,12 @@
                 <groupId>com.caucho</groupId>
                 <artifactId>hessian</artifactId>
                 <version>${hession.version}</version>
+            </dependency>
+            <!--freemarker 相关-->
+            <dependency>
+                <groupId>org.freemarker</groupId>
+                <artifactId>freemarker</artifactId>
+                <version>2.3.22</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
