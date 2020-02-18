@@ -4,8 +4,12 @@ import com.common.collect.framework.excel.EventModelReader;
 import com.common.collect.framework.excel.ExcelExportUtil;
 import com.common.collect.framework.excel.ExcelSession;
 import com.common.collect.framework.excel.client.ExcelClient;
+import com.common.collect.framework.excel.context.EventModelContext;
+import com.common.collect.framework.excel.define.IEventModelParseHandler;
 import com.common.collect.framework.excel.excps.ExcelImportException;
+import com.common.collect.lib.util.EmptyUtil;
 import com.common.collect.lib.util.FileUtil;
+import com.common.collect.lib.util.StringUtil;
 import framework.excel.base.DefaultEventModelParseHandler;
 import framework.excel.base.ExcelComposeEO;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +18,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 
@@ -29,31 +35,59 @@ public class ExcelTest {
 
     public static void main(String[] args) throws Exception {
 
-        log.info("");
-        log.info("eventModelReader ##########");
-        eventModelReader();
+//        log.info("");
+//        log.info("eventModelReader ##########");
+//        eventModelReader();
+//
+//        log.info("");
+//        log.info("sessionExcel ##########");
+//        sessionExcel();
+//
+//        log.info("");
+//        log.info("importCorrect ##########");
+//        importCorrect();
+//
+//        log.info("");
+//        log.info("importError ##########");
+//        importError();
+//
+//        log.info("");
+//        log.info("exportNew ##########");
+//        exportNew();
+//
+//        log.info("");
+//        log.info("exportTpl ##########");
+//        exportTpl();
+//
+//        log.info(" done ");
 
-        log.info("");
-        log.info("sessionExcel ##########");
-        sessionExcel();
 
-        log.info("");
-        log.info("importCorrect ##########");
-        importCorrect();
-
-        log.info("");
-        log.info("importError ##########");
-        importError();
-
-        log.info("");
-        log.info("exportNew ##########");
-        exportNew();
-
-        log.info("");
-        log.info("exportTpl ##########");
-        exportTpl();
-
-        log.info(" done ");
+        String from = "/Users/nijianfeng/Downloads/uid.xlsx";
+        log.info("from:\t" + from);
+        Set<Long> ids = new HashSet<>();
+        IEventModelParseHandler handler = new IEventModelParseHandler() {
+            @Override
+            public void handle(EventModelContext eventModelContext) {
+                List<List<String>> rows = eventModelContext.getRows();
+                if (EmptyUtil.isEmpty(rows)) {
+                    return;
+                }
+                if (eventModelContext.isSheetStart()) {
+                    rows = rows.subList(1, rows.size());
+                }
+                for (List<String> row : rows) {
+                    if (EmptyUtil.isNotBlank(row.get(0))) {
+                        ids.add(Long.valueOf(row.get(0).trim()));
+                    }
+                }
+            }
+        };
+        EventModelReader eventModelReader = new EventModelReader(new FileInputStream(from), handler);
+        eventModelReader.setNeedReadColNum(1);
+        eventModelReader.setBatchHandleSize(20);
+        eventModelReader.setParseSheetIndex(Arrays.asList(1));
+        eventModelReader.processSheet();
+        System.out.println(StringUtil.join(ids,","));
     }
 
     public static void eventModelReader() throws Exception {
