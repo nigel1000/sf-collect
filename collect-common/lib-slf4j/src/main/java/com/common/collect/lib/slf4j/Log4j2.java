@@ -16,6 +16,7 @@ class Log4j2 {
 
     public static void fillLoggerInfo(Map<String, Object> loggerMap, Map<String, String> loggerLevelMap) {
         LoggerContext loggerContext = (LoggerContext) LogManager.getContext(false);
+        loggerContext.getLogger("root");
         Collection<Logger> loggers = loggerContext.getLoggers();
         for (Logger logger : loggers) {
             String key = logger.getName();
