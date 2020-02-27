@@ -1,5 +1,6 @@
 package com.common.collect.lib.slf4j;
 
+import com.common.collect.lib.util.EmptyUtil;
 import com.common.collect.lib.util.NullUtil;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -20,8 +21,8 @@ class Log4j2 {
         Collection<Logger> loggers = loggerContext.getLoggers();
         for (Logger logger : loggers) {
             String key = logger.getName();
-            if (key == null || "".equals(key.trim())) {
-                key = "root";
+            if (EmptyUtil.isBlank(key)) {
+                continue;
             }
             loggerMap.put(key, logger);
             loggerLevelMap.put(key,
