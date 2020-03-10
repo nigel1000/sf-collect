@@ -24,7 +24,7 @@ public class PoiClient {
         return workbook.getSheetIndex(sheet);
     }
 
-    public static void setActiveSheet(@NonNull Workbook workbook, @NonNull int sheetIndex) {
+    public static void setActiveSheet(@NonNull Workbook workbook, int sheetIndex) {
         workbook.setActiveSheet(sheetIndex);
     }
 

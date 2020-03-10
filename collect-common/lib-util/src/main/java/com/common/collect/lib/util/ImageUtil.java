@@ -25,29 +25,6 @@ import java.util.List;
 @Slf4j
 public class ImageUtil {
 
-    public enum SourceFrom {
-        FILE,
-        URL,
-        INPUT_STREAM,
-        IMAGE_INPUT_STREAM
-    }
-
-    @Data
-    public static class SegmentParam implements Serializable {
-
-        private int leftWPoint;
-        private int leftHPoint;
-        private int rightWPoint;
-        private int rightHPoint;
-
-        public SegmentParam(int leftWPoint, int leftHPoint, int rightWPoint, int rightHPoint) {
-            this.leftWPoint = leftWPoint;
-            this.leftHPoint = leftHPoint;
-            this.rightWPoint = rightWPoint;
-            this.rightHPoint = rightHPoint;
-        }
-    }
-
     public static String suffix(String desc) {
         if (EmptyUtil.isEmpty(desc)) {
             return ".jpg";
@@ -193,7 +170,7 @@ public class ImageUtil {
     // 切割图片 以白色横条为准切割图片
     // ignoreBlankHeight 高度在此之下的白色不视为切割点
     // lowestHeight 上一个切割点和下一个切割点需保持的最小的距离
-    public static List<BufferedImage> segmentImage(@NonNull BufferedImage sourceImg, @NonNull int lowestHeight, @NonNull int ignoreBlankHeight) {
+    public static List<BufferedImage> segmentImage(@NonNull BufferedImage sourceImg, int lowestHeight, int ignoreBlankHeight) {
         // 转灰白
         int imgWidth = sourceImg.getWidth();
         int imgHeight = sourceImg.getHeight();
@@ -292,6 +269,29 @@ public class ImageUtil {
         ColorConvertOp op = new ColorConvertOp(cs, null);
         // 不会修改 src 的数据，返回新的 dest
         return op.filter(src, null);
+    }
+
+    public enum SourceFrom {
+        FILE,
+        URL,
+        INPUT_STREAM,
+        IMAGE_INPUT_STREAM
+    }
+
+    @Data
+    public static class SegmentParam implements Serializable {
+
+        private int leftWPoint;
+        private int leftHPoint;
+        private int rightWPoint;
+        private int rightHPoint;
+
+        public SegmentParam(int leftWPoint, int leftHPoint, int rightWPoint, int rightHPoint) {
+            this.leftWPoint = leftWPoint;
+            this.leftHPoint = leftHPoint;
+            this.rightWPoint = rightWPoint;
+            this.rightHPoint = rightHPoint;
+        }
     }
 
 }
