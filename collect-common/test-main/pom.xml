@@ -40,12 +40,10 @@
         <dependency>
             <groupId>com.common.collect</groupId>
             <artifactId>framework-redis</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.common.collect</groupId>
             <artifactId>framework-elastic</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <!-- slf4j -->
         <dependency>
