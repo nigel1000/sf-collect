@@ -21,7 +21,10 @@ import java.util.Properties;
 @Slf4j
 public class MybatisGenerator {
 
-    private static String root = Paths.get(MybatisGenerator.class.getResource("/").getPath()).getParent().getParent().toString() + "/";
+    private static String root = Paths.get(MybatisGenerator.class.getResource("/").getPath().contains(":")
+            ? MybatisGenerator.class.getResource("/").getPath().substring(1) : MybatisGenerator.class.getResource("/").getPath())
+            .getParent().getParent().toString() + "/";
+
     private static Properties properties;
 
     static {

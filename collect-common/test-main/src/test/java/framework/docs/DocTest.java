@@ -18,7 +18,9 @@ import java.util.List;
 @Slf4j
 public class DocTest {
 
-    private static String root = Paths.get(DocTest.class.getResource("/").getPath()).getParent().getParent().toString() + "/";
+    private static String root = Paths.get(DocTest.class.getResource("/").getPath().contains(":")
+            ? DocTest.class.getResource("/").getPath().substring(1) : DocTest.class.getResource("/").getPath())
+            .getParent().getParent().toString() + "/";
 
     public static void main(String[] args) {
         List<Class<?>> classList = ClassUtil.getClazzFromPackage("com.common.collect.framework.docs.demo");

@@ -15,8 +15,9 @@ import java.util.Map;
 @Slf4j
 public class HttpUtilTest {
 
-
-    private static String root = Paths.get(ZipUtilTest.class.getResource("/").getPath()).getParent().getParent().toString() + "/";
+    private static String root = Paths.get(HttpUtilTest.class.getResource("/").getPath().contains(":")
+            ? HttpUtilTest.class.getResource("/").getPath().substring(1) : HttpUtilTest.class.getResource("/").getPath())
+            .getParent().getParent().toString() + "/";
 
     public static void main(String[] args) throws Exception {
         String path = root + "logs/http/";

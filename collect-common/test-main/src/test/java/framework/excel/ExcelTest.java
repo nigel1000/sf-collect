@@ -31,7 +31,9 @@ import java.util.function.Consumer;
 @Slf4j
 public class ExcelTest {
 
-    private static String root = Paths.get(ExcelTest.class.getResource("/").getPath()).getParent().getParent().toString() + "/";
+    private static String root = Paths.get(ExcelTest.class.getResource("/").getPath().contains(":")
+            ? ExcelTest.class.getResource("/").getPath().substring(1) : ExcelTest.class.getResource("/").getPath())
+            .getParent().getParent().toString() + "/";
 
     public static void main(String[] args) throws Exception {
 
@@ -87,7 +89,7 @@ public class ExcelTest {
         eventModelReader.setBatchHandleSize(20);
         eventModelReader.setParseSheetIndex(Arrays.asList(1));
         eventModelReader.processSheet();
-        System.out.println(StringUtil.join(ids,","));
+        System.out.println(StringUtil.join(ids, ","));
     }
 
     public static void eventModelReader() throws Exception {

@@ -16,8 +16,9 @@ import java.util.Arrays;
 @Slf4j
 public class ZipUtilTest {
 
-
-    private static String root = Paths.get(ZipUtilTest.class.getResource("/").getPath()).getParent().getParent().toString() + "/";
+    private static String root = Paths.get(ZipUtilTest.class.getResource("/").getPath().contains(":")
+            ? ZipUtilTest.class.getResource("/").getPath().substring(1) : ZipUtilTest.class.getResource("/").getPath())
+            .getParent().getParent().toString() + "/";
 
     public static void main(String[] args) throws Exception {
         log.info("root:\t" + root);
