@@ -1,8 +1,8 @@
 package framework.docs;
 
-import com.common.collect.framework.docs.DocsClient;
-import com.common.collect.framework.docs.context.DocsMethodContext;
-import com.common.collect.framework.docs.view.ToHtml;
+import com.common.collect.framework.docs.DocsContext;
+import com.common.collect.framework.docs.DocsEntrance;
+import com.common.collect.framework.docs.DocsView;
 import com.common.collect.lib.util.ClassUtil;
 import com.common.collect.lib.util.EmptyUtil;
 import com.common.collect.lib.util.FileUtil;
@@ -23,19 +23,23 @@ public class DocTest {
             .getParent().getParent().toString() + "/";
 
     public static void main(String[] args) {
-        List<Class<?>> classList = ClassUtil.getClazzFromPackage("com.common.collect.framework.docs.demo");
-        if (EmptyUtil.isEmpty(classList)) {
-            return;
-        }
         String to = root + "logs/docs/";
         log.info("to:\t" + to);
         FileUtil.createFile(to, true, null, false);
+        List<Class<?>> classList = ClassUtil.getClazzFromPackage("com.common.collect.framework.docs.DocsDemo");
+        if (EmptyUtil.isEmpty(classList)) {
+            return;
+        }
+
         for (Class<?> cls : classList) {
-            List<DocsMethodContext> contexts = DocsClient.createDocs(cls);
-            for (DocsMethodContext context : contexts) {
-                FileUtil.createFile(to + context.getId() + "-" + context.getName() + ".md", false, ToHtml.toHtml(context).getBytes(), true);
-                context.setMethod(null);
-                FileUtil.createFile(to + context.getId() + "-" + context.getName() + ".json", false, JsonUtil.bean2jsonPretty(context).getBytes(), true);
+            String clsName = cls.getName();
+            DocsContext docsContext = DocsEntrance.createDocs(cls);
+            if (docsContext.hasInterfaces()) {
+                for (DocsContext.Interface anInterface : docsContext.getInterfaces()) {
+                    FileUtil.createFile(to + anInterface.getPath() + ".html", false, DocsView.htmlView(anInterface, docsContext.getDataTypes()).getBytes(), true);
+                }
+                FileUtil.createFile(to + clsName + "-datatype.json", false, JsonUtil.bean2jsonPretty(docsContext.getDataTypes()).getBytes(), true);
+                FileUtil.createFile(to + clsName + "-interface.json", false, JsonUtil.bean2jsonPretty(docsContext.getInterfaces()).getBytes(), true);
             }
         }
     }

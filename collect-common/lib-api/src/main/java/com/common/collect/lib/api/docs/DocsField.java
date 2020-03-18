@@ -12,13 +12,12 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 public @interface DocsField {
 
-    String value() default "";
-
     // 描述
     String desc() default "";
 
-    // request 属性
-    // 是否必须
-    boolean required() default true;
+    // 默认值 可覆盖 RequestParam 的 defaultValue 值
+    String defaultValue() default "";
+
+    boolean required() default false;
 
 }

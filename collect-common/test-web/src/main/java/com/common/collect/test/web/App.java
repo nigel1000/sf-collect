@@ -18,7 +18,7 @@ import org.springframework.context.annotation.PropertySource;
         "com.common.collect.test.web",
 //        "com.common.collect.model.taskrecord",
 //        "com.common.collect.model.flowlog",
-        "com.common.collect.util.spring"
+        "com.common.collect.lib.util.spring"
 })
 @EnableAutoConfiguration
 public class App {

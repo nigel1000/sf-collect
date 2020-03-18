@@ -9,13 +9,12 @@ import java.lang.annotation.Target;
  * Created by nijianfeng on 2020/1/11.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD})
-public @interface DocsMethod {
+@Target({ElementType.TYPE})
+public @interface DocsDataType {
 
-    // 接口名称
-    String name();
-
-    // 作者和描述
-    String desc();
+    // 模型名称
+    String name() default "";
+    // 类型描述
+    String desc() default "";
 
 }

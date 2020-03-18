@@ -1,8 +1,8 @@
 package com.common.collect.test.web.controller;
 
-import com.common.collect.framework.docs.DocsClient;
-import com.common.collect.framework.docs.context.DocsMethodContext;
-import com.common.collect.framework.docs.view.ToHtml;
+import com.common.collect.framework.docs.DocsContext;
+import com.common.collect.framework.docs.DocsEntrance;
+import com.common.collect.framework.docs.DocsView;
 import com.common.collect.lib.util.ClassUtil;
 import com.common.collect.lib.util.StringUtil;
 import com.common.collect.lib.util.WebUtil;
@@ -20,7 +20,7 @@ import java.util.List;
 @RequestMapping("/back/door/docs")
 public class DocsController {
 
-    // http://localhost:8181/back/door/docs/list?pkg=com.common.collect.framework.docs.demo
+    // http://localhost:8181/back/door/docs/list?pkg=com.common.collect.framework.docs.DocsDemo
     @RequestMapping(value = "/list", method = {RequestMethod.GET})
     public void list(HttpServletResponse response, String pkg) {
         List<Class<?>> classList = ClassUtil.getClazzFromPackage(pkg);
@@ -32,11 +32,11 @@ public class DocsController {
         sb.append("</head>\n");
         sb.append("<body>\n");
         for (Class<?> cls : classList) {
-            List<DocsMethodContext> contexts = DocsClient.createDocs(cls);
-            for (DocsMethodContext context : contexts) {
+            DocsContext docsContext = DocsEntrance.createDocs(cls);
+            for (DocsContext.Interface anInterface : docsContext.getInterfaces()) {
                 sb.append("<br>");
-                String show = context.getId() + "-" + context.getName();
-                sb.append(StringUtil.format("<a href=/back/door/docs/show?pkg={}&id={}>{}</a>", pkg, context.getId(), show));
+                String show = anInterface.getName() + "-" + anInterface.getClassName();
+                sb.append(StringUtil.format("<a href=/back/door/docs/show?pkg={}&path={}>{}</a>", pkg, anInterface.getPath(), show));
             }
         }
         sb.append("</body>\n");
@@ -45,13 +45,13 @@ public class DocsController {
     }
 
     @RequestMapping(value = "/show", method = {RequestMethod.GET})
-    public void show(HttpServletResponse response, String pkg, String id) {
+    public void show(HttpServletResponse response, String pkg, String path) {
         List<Class<?>> classList = ClassUtil.getClazzFromPackage(pkg);
         for (Class<?> cls : classList) {
-            List<DocsMethodContext> contexts = DocsClient.createDocs(cls);
-            for (DocsMethodContext context : contexts) {
-                if (context.getId().equals(id)) {
-                    WebUtil.exportHtml(response, ToHtml.toHtml(context));
+            DocsContext docsContext = DocsEntrance.createDocs(cls);
+            for (DocsContext.Interface anInterface : docsContext.getInterfaces()) {
+                if (anInterface.getPath().equals(path)) {
+                    WebUtil.exportHtml(response, DocsView.htmlView(anInterface, docsContext.getDataTypes()));
                 }
             }
         }

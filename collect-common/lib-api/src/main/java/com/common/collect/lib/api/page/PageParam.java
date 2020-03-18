@@ -1,5 +1,6 @@
 package com.common.collect.lib.api.page;
 
+import com.common.collect.lib.api.docs.DocsDataType;
 import com.common.collect.lib.api.docs.DocsFieldExclude;
 import com.common.collect.lib.api.excps.UnifiedException;
 import lombok.Data;
@@ -13,6 +14,7 @@ import java.io.Serializable;
 
 @NoArgsConstructor
 @Data
+@DocsDataType(desc = "分页入参模型")
 public class PageParam implements Serializable {
     private static final long serialVersionUID = 4340348427537645063L;
 
@@ -30,6 +32,7 @@ public class PageParam implements Serializable {
     private int defaultPageSize = 20;
 
     // 限制获取最大数量
+    @DocsFieldExclude
     private Long maxTotal = Long.MAX_VALUE;
 
     public static PageParam valueOfByLimit(int offset, int limit) throws RuntimeException {
