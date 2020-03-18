@@ -1,7 +1,10 @@
 package lib.util;
 
+import com.common.collect.lib.api.Response;
 import com.common.collect.lib.util.ClassUtil;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
@@ -19,15 +22,28 @@ public class ClassUtilTest {
         System.out.println(ClassUtil.getSuperClassGenericType(CallableTest.class, 0));
         System.out.println(ClassUtil.getSuperClassGenericType(CallableTest.class, 1));
 
-        System.out.println(ClassUtil.getSuperInterfaceGenericType(CallableTest.class, Callable.class,0));
+        System.out.println(ClassUtil.getSuperInterfaceGenericType(CallableTest.class, Callable.class, 0));
 
-        System.out.println(ClassUtil.getSuperInterfaceGenericType(CallableTest.class, Supplier.class,0));
+        System.out.println(ClassUtil.getSuperInterfaceGenericType(CallableTest.class, Supplier.class, 0));
 
         System.out.println(ClassUtil.getSuperInterfaceGenericType(CallableTest.class, Function.class, 0));
-        System.out.println(ClassUtil.getSuperInterfaceGenericType(CallableTest.class, Function.class,1));
+        System.out.println(ClassUtil.getSuperInterfaceGenericType(CallableTest.class, Function.class, 1));
 
         System.out.println(ClassUtil.getClazzFromPackage("com.common.collect.slf4j"));
 
+        for (Method method : ClassUtil.getMethods(ClassUtilTest.class)) {
+            if (method.getName().equals("test")) {
+                System.out.println(ClassUtil.getMethodReturnGenericType(method));
+                Parameter[] parameters = method.getParameters();
+                for (int i = 0; i < parameters.length; i++) {
+                    System.out.println(ClassUtil.getMethodParameterGenericType(method, i));
+                }
+            }
+        }
+    }
+
+    public Response<Integer> test(List<Integer[]> list, String[][] strArray, String str) {
+        return null;
     }
 
     private static class CallableTest

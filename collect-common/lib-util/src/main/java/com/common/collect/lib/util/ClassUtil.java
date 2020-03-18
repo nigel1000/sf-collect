@@ -192,6 +192,25 @@ public class ClassUtil {
         return returnTypeMap;
     }
 
+    public static Map<String, Type> getMethodParameterGenericType(@NonNull Method method, int index) {
+        Type[] parameterTypes = method.getGenericParameterTypes();
+        Map<String, Type> parameterTypeMap = new HashMap<>();
+        for (int i = 0; i < parameterTypes.length; i++) {
+            if (index != i) {
+                continue;
+            }
+            Type parameterType = parameterTypes[i];
+            if (parameterType instanceof ParameterizedType) {
+                Type[] actualTypes = ((ParameterizedType) parameterType).getActualTypeArguments();
+                TypeVariable[] typeVariables = method.getParameterTypes()[i].getTypeParameters();
+                for (int j = 0; j < actualTypes.length; j++) {
+                    parameterTypeMap.put(typeVariables[j].getTypeName(), actualTypes[j]);
+                }
+            }
+        }
+        return parameterTypeMap;
+    }
+
 
     /**
      * 获得包下面的所有的class
