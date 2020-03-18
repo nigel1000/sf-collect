@@ -8,6 +8,7 @@ import java.lang.reflect.Parameter;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -19,36 +20,28 @@ public class ClassUtilTest {
 
     public static void main(String[] args) {
 
-        System.out.println(ClassUtil.getSuperClassGenericType(CallableTest.class, 0));
-        System.out.println(ClassUtil.getSuperClassGenericType(CallableTest.class, 1));
-
-        System.out.println(ClassUtil.getSuperInterfaceGenericType(CallableTest.class, Callable.class, 0));
-
-        System.out.println(ClassUtil.getSuperInterfaceGenericType(CallableTest.class, Supplier.class, 0));
-
-        System.out.println(ClassUtil.getSuperInterfaceGenericType(CallableTest.class, Function.class, 0));
-        System.out.println(ClassUtil.getSuperInterfaceGenericType(CallableTest.class, Function.class, 1));
-
-        System.out.println(ClassUtil.getClazzFromPackage("com.common.collect.slf4j"));
 
         for (Method method : ClassUtil.getMethods(ClassUtilTest.class)) {
             if (method.getName().equals("test")) {
-                System.out.println(ClassUtil.getMethodReturnGenericType(method));
+                System.out.println(ClassUtil.getMethodReturnGenericTypeMap(method));
                 Parameter[] parameters = method.getParameters();
                 for (int i = 0; i < parameters.length; i++) {
-                    System.out.println(ClassUtil.getMethodParameterGenericType(method, i));
+                    System.out.println(ClassUtil.getMethodParameterGenericTypeMap(method, i));
                 }
             }
         }
+        System.out.println(ClassUtil.getSuperInterfaceGenericTypeMap(CallableTest.class));
+        System.out.println(ClassUtil.getSuperClassGenericTypeMap(CallableTest.class));
+        System.out.println(ClassUtil.getClazzFromPackage("com.common.collect.lib.api.docs"));
     }
 
-    public Response<Integer> test(List<Integer[]> list, String[][] strArray, String str) {
+    public Response<Integer> test(List<Integer[]> list, Map<String, Long> map) {
         return null;
     }
 
     private static class CallableTest
             extends HashMap<List<Double>, BigDecimal>
-            implements Runnable, Callable<Object>, Supplier<Integer>, Function<Double, Float> {
+            implements Runnable, Callable<Object>, Supplier<List<Integer>>, Function<Double, Float> {
         @Override
         public Object call() {
             return null;
@@ -60,7 +53,7 @@ public class ClassUtilTest {
         }
 
         @Override
-        public Integer get() {
+        public List<Integer> get() {
             return null;
         }
 

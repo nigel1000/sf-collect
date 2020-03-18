@@ -47,12 +47,22 @@ import java.util.function.Function;
 @Slf4j
 public abstract class AbstractElasticMapper<T> implements IElasticMapper<T>, IElasticConfig {
 
+    protected NameFilter name2UnderLineFilter = (object, name, value) -> ConvertUtil.camel2Underline(name);
+    protected NameFilter name2CamelCaseFilter = (object, name, value) -> ConvertUtil.underline2Camel(name);
+    protected ValueFilter valueFilter = (object, name, value) -> value;
     @Setter
     @Getter
     private boolean mapUnderLineCamelCaseConvert = true;
+    protected Function<SearchResponse, List<T>> defaultResultMapping = (response) -> {
+        List<T> result = new ArrayList<>();
+        for (SearchHit searchHit : response.getHits()) {
+            result.add(parse(toJSONString(searchHit.getSourceAsMap()), getIndexClass()));
+        }
+        return result;
+    };
 
     public Class<T> getIndexClass() {
-        return ClassUtil.getSuperClassGenericType(this.getClass(), 0);
+        return ClassUtil.getSuperClassGenericTypeMap(this.getClass()).get(0);
     }
 
     // 父子操作 api
@@ -187,7 +197,6 @@ public abstract class AbstractElasticMapper<T> implements IElasticMapper<T>, IEl
         }
     }
 
-
     protected String toJSONString(Object object) {
         SerializeFilter[] serializeFilters = null;
         if (mapUnderLineCamelCaseConvert) {
@@ -205,19 +214,5 @@ public abstract class AbstractElasticMapper<T> implements IElasticMapper<T>, IEl
                 JSON.toJSONString(JSON.parse(text), serializeFilters, SerializerFeature.DisableCircularReferenceDetect),
                 clazz);
     }
-
-    protected Function<SearchResponse, List<T>> defaultResultMapping = (response) -> {
-        List<T> result = new ArrayList<>();
-        for (SearchHit searchHit : response.getHits()) {
-            result.add(parse(toJSONString(searchHit.getSourceAsMap()), getIndexClass()));
-        }
-        return result;
-    };
-
-    protected NameFilter name2UnderLineFilter = (object, name, value) -> ConvertUtil.camel2Underline(name);
-
-    protected NameFilter name2CamelCaseFilter = (object, name, value) -> ConvertUtil.underline2Camel(name);
-
-    protected ValueFilter valueFilter = (object, name, value) -> value;
 
 }

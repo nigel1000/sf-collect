@@ -67,7 +67,7 @@ public class DocsClient {
             }
             // 解析返回
             DocsFieldObjFromClassParam context = new DocsFieldObjFromClassParam(DocsFieldType.response);
-            context.setGenericTypeMap(ClassUtil.getMethodReturnGenericType(method));
+            context.setGenericTypeMap(ClassUtil.getMethodReturnGenericTypeMap(method));
             methodContext.addResponse(handleResponse(method.getReturnType(), context));
             log.info("createDocs finish parse method,className:{}, methodName:{}",
                     methodContext.getClassName(), methodContext.getMethodName());

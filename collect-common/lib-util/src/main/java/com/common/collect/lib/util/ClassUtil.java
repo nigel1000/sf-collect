@@ -5,11 +5,19 @@ import lombok.NonNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -134,65 +142,70 @@ public class ClassUtil {
         return null;
     }
 
-    // 获取泛型类型
-    public static Class getGenericTypeClass(Type parameterizedType, int index) {
-        if (parameterizedType == null) {
-            return null;
-        } else if (parameterizedType instanceof Class) {
-            return (Class) parameterizedType;
-        } else if (parameterizedType instanceof ParameterizedType) {
-            Type type = getGenericType((ParameterizedType) parameterizedType, index);
-            if (type instanceof Class) {
-                return (Class) type;
-            } else if (type instanceof ParameterizedType) {
-                return (Class) ((ParameterizedType) type).getRawType();
-            }
-            return null;
-        } else {
-            return null;
-        }
-    }
-
-    public static Type getGenericType(ParameterizedType parameterizedType, int index) {
-        return parameterizedType.getActualTypeArguments()[index];
-    }
-
-    public static Class getSuperClassGenericType(@NonNull Class clazz, int index) {
+    public static Map<Integer, Class> getSuperClassGenericTypeMap(@NonNull Class clazz) {
+        Map<Integer, Class> classMap = new HashMap<>();
         Type type = clazz.getGenericSuperclass();
-        return getGenericTypeClass(type, index);
+        if (type instanceof Class) {
+            return classMap;
+        }
+        ParameterizedType parameterizedType = ((ParameterizedType) type);
+        Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+        for (int i = 0; i < actualTypeArguments.length; i++) {
+            if (actualTypeArguments[i] instanceof Class) {
+                classMap.put(i, (Class) actualTypeArguments[i]);
+            } else if (actualTypeArguments[i] instanceof ParameterizedType) {
+                classMap.put(i, (Class) ((ParameterizedType) actualTypeArguments[i]).getRawType());
+            }
+        }
+        return classMap;
     }
 
-    public static Class getSuperInterfaceGenericType(@NonNull Class clazz, @NonNull Class superInterface, int index) {
+    public static Map<String, List<Class>> getSuperInterfaceGenericTypeMap(@NonNull Class clazz) {
+        Map<String, List<Class>> interfaceClassMap = new HashMap<>();
         Type[] types = clazz.getGenericInterfaces();
         for (Type type : types) {
-            if (type instanceof ParameterizedType && ((ParameterizedType) type).getRawType() == superInterface) {
-                return getGenericTypeClass(type, index);
+            if (type instanceof Class) {
+                continue;
+            }
+            ParameterizedType parameterizedType = ((ParameterizedType) type);
+            Class in = (Class) parameterizedType.getRawType();
+            List<Class> classes = new ArrayList<>();
+            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+            for (int i = 0; i < actualTypeArguments.length; i++) {
+                if (actualTypeArguments[i] instanceof Class) {
+                    classes.add((Class) actualTypeArguments[i]);
+                } else if (actualTypeArguments[i] instanceof ParameterizedType) {
+                    classes.add((Class) ((ParameterizedType) actualTypeArguments[i]).getRawType());
+                }
+            }
+            if (EmptyUtil.isNotEmpty(classes)) {
+                interfaceClassMap.put(in.getName(), classes);
             }
         }
-        return null;
-    }
-
-    public static Class getFieldGenericType(@NonNull Field field, int index) {
-        Type type = field.getGenericType();
-        return getGenericTypeClass(type, index);
+        return interfaceClassMap;
     }
 
     // K -> String V -> Long
-    public static Map<String, Type> getMethodReturnGenericType(@NonNull Method method) {
+    public static Map<String, Type> getParameterizedTypeMap(@NonNull ParameterizedType parameterizedType) {
+        Map<String, Type> parameterTypeMap = new HashMap<>();
+        Type[] actualTypes = parameterizedType.getActualTypeArguments();
+        TypeVariable[] typeVariables = ((Class) parameterizedType.getRawType()).getTypeParameters();
+        for (int j = 0; j < actualTypes.length; j++) {
+            parameterTypeMap.put(typeVariables[j].getTypeName(), actualTypes[j]);
+        }
+        return parameterTypeMap;
+    }
+
+    public static Map<String, Type> getMethodReturnGenericTypeMap(@NonNull Method method) {
         Type returnType = method.getGenericReturnType();
         Map<String, Type> returnTypeMap = new HashMap<>();
         if (returnType instanceof ParameterizedType) {
-            // 获取返回值泛型参数类型 数组 --- 如： Map<K,V>
-            Type[] actualTypes = ((ParameterizedType) returnType).getActualTypeArguments();
-            TypeVariable[] typeVariables = method.getReturnType().getTypeParameters();
-            for (int i = 0; i < actualTypes.length; i++) {
-                returnTypeMap.put(typeVariables[i].getTypeName(), actualTypes[i]);
-            }
+            returnTypeMap.putAll(getParameterizedTypeMap((ParameterizedType) returnType));
         }
         return returnTypeMap;
     }
 
-    public static Map<String, Type> getMethodParameterGenericType(@NonNull Method method, int index) {
+    public static Map<String, Type> getMethodParameterGenericTypeMap(@NonNull Method method, int index) {
         Type[] parameterTypes = method.getGenericParameterTypes();
         Map<String, Type> parameterTypeMap = new HashMap<>();
         for (int i = 0; i < parameterTypes.length; i++) {
@@ -201,16 +214,11 @@ public class ClassUtil {
             }
             Type parameterType = parameterTypes[i];
             if (parameterType instanceof ParameterizedType) {
-                Type[] actualTypes = ((ParameterizedType) parameterType).getActualTypeArguments();
-                TypeVariable[] typeVariables = method.getParameterTypes()[i].getTypeParameters();
-                for (int j = 0; j < actualTypes.length; j++) {
-                    parameterTypeMap.put(typeVariables[j].getTypeName(), actualTypes[j]);
-                }
+                parameterTypeMap.putAll(getParameterizedTypeMap((ParameterizedType) parameterType));
             }
         }
         return parameterTypeMap;
     }
-
 
     /**
      * 获得包下面的所有的class
