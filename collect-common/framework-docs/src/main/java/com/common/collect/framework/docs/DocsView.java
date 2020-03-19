@@ -5,6 +5,7 @@ import com.common.collect.lib.util.FunctionUtil;
 import com.common.collect.lib.util.fastjson.JsonUtil;
 import lombok.NonNull;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,33 +27,57 @@ public class DocsView {
 
         addLine("访问入参", sb);
         addLine("<table border=\"1\" width=\"1000\" cellspacing=\"0\" cellpadding=\"5px\">", sb);
-        map2Html(anInterface.getParams().getInputs(), dataTypeMap, true, 0, sb);
+        parameter2HtmlTable(anInterface.getParams().getInputs(), dataTypeMap, true, 0, sb);
         addLine("</table>", sb);
 
-//        // mock request
-//        addLine("<div>", sb);
-//        addLine("<pre>", sb);
-//        addLine(JsonUtil.bean2jsonPretty(context.genRequestMock()), sb);
-//        addLine("</pre>", sb);
-//        addLine("</div>", sb);
+        // mock request
+        addLine("<div>", sb);
+        addLine("<pre>", sb);
+        addLine(JsonUtil.bean2jsonPretty(parameter2MockMap(anInterface.getParams().getInputs(), dataTypeMap)), sb);
+        addLine("</pre>", sb);
+        addLine("</div>", sb);
 
         addLine("访问返回", sb);
         addLine("<table border=\"1\" width=\"1000\" cellspacing=\"0\" cellpadding=\"5px\" >", sb);
-        map2Html(anInterface.getParams().getOutputs(), dataTypeMap, false, 0, sb);
+        parameter2HtmlTable(anInterface.getParams().getOutputs(), dataTypeMap, false, 0, sb);
         addLine("</table>", sb);
 
         // mock response
-//        addLine("<div>", sb);
-//        addLine("<pre>", sb);
-//        addLine(JsonUtil.bean2jsonPretty(context.genResponseMock()), sb);
-//        addLine("</pre>", sb);
-//        addLine("</div>", sb);
+        addLine("<div>", sb);
+        addLine("<pre>", sb);
+        addLine(JsonUtil.bean2jsonPretty(parameter2MockMap(anInterface.getParams().getOutputs(), dataTypeMap)), sb);
+        addLine("</pre>", sb);
+        addLine("</div>", sb);
 
         addHtmlTail(sb);
         return sb.toString();
     }
 
-    private static void map2Html(List<DocsContext.Parameter> parameters, @NonNull Map<String, DocsContext.DataType> dataTypeMap, boolean isInput, int level, StringBuilder sb) {
+    private static Map<String, Object> parameter2MockMap(List<DocsContext.Parameter> parameters, @NonNull Map<String, DocsContext.DataType> dataTypeMap) {
+        Map<String, Object> result = new LinkedHashMap<>();
+        if (EmptyUtil.isEmpty(parameters)) {
+            return result;
+        }
+        for (DocsContext.Parameter parameter : parameters) {
+            if (DocsContext.Parameter.TypeNameEnum.isBaseTypeName(parameter.getTypeName())) {
+                if (parameter.isArray()) {
+                    result.put(parameter.getName(), DocsTool.arrayCountList(parameter.getMockValue(), parameter.getArrayCount()));
+                } else {
+                    result.put(parameter.getName(), parameter.getMockValue());
+                }
+            } else {
+                Map<String, Object> dataTypeResult = parameter2MockMap(dataTypeMap.get(parameter.getTypeName()).getParams(), dataTypeMap);
+                if (parameter.isArray()) {
+                    result.put(parameter.getName(), DocsTool.arrayCountList(dataTypeResult, parameter.getArrayCount()));
+                } else {
+                    result.put(parameter.getName(), dataTypeResult);
+                }
+            }
+        }
+        return result;
+    }
+
+    private static void parameter2HtmlTable(List<DocsContext.Parameter> parameters, @NonNull Map<String, DocsContext.DataType> dataTypeMap, boolean isInput, int level, StringBuilder sb) {
         if (EmptyUtil.isEmpty(parameters)) {
             return;
         }
@@ -118,7 +143,7 @@ public class DocsView {
             if (!DocsContext.Parameter.TypeNameEnum.isBaseTypeName(parameter.getTypeName())) {
                 int next = level + 1;
                 addLine("<tr align=\"left\">", sb);
-                map2Html(dataTypeMap.get(parameter.getTypeName()).getParams(), dataTypeMap, isInput, next, sb);
+                parameter2HtmlTable(dataTypeMap.get(parameter.getTypeName()).getParams(), dataTypeMap, isInput, next, sb);
                 addLine("</tr>", sb);
             }
         }
