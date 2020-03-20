@@ -9,11 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Created by hznijianfeng on 2020/3/16.
@@ -32,16 +28,16 @@ public class DocsTool {
                 || cls == Byte.class || cls == byte.class
                 || cls == BigDecimal.class || cls == Date.class
         ) {
-            return DocsContext.Parameter.TypeNameEnum.Number.getName();
+            return DocsContext.Parameter.DataTypeNameEnum.Number.getName();
         }
 
         if (cls == Boolean.class || cls == boolean.class) {
-            return DocsContext.Parameter.TypeNameEnum.Boolean.getName();
+            return DocsContext.Parameter.DataTypeNameEnum.Boolean.getName();
         }
 
         if (cls == Character.class || cls == char.class || cls == String.class
         ) {
-            return DocsContext.Parameter.TypeNameEnum.String.getName();
+            return DocsContext.Parameter.DataTypeNameEnum.String.getName();
         }
         return null;
     }

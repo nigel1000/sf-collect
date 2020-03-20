@@ -59,14 +59,14 @@ public class DocsView {
             return result;
         }
         for (DocsContext.Parameter parameter : parameters) {
-            if (DocsContext.Parameter.TypeNameEnum.isBaseTypeName(parameter.getTypeName())) {
+            if (DocsContext.Parameter.DataTypeNameEnum.isBaseDataTypeName(parameter.getDataTypeName())) {
                 if (parameter.isArray()) {
                     result.put(parameter.getName(), DocsTool.arrayCountList(parameter.getMockValue(), parameter.getArrayCount()));
                 } else {
                     result.put(parameter.getName(), parameter.getMockValue());
                 }
             } else {
-                Map<String, Object> dataTypeResult = parameter2MockMap(dataTypeMap.get(parameter.getTypeName()).getParams(), dataTypeMap);
+                Map<String, Object> dataTypeResult = parameter2MockMap(dataTypeMap.get(parameter.getDataTypeName()).getParams(), dataTypeMap);
                 if (parameter.isArray()) {
                     result.put(parameter.getName(), DocsTool.arrayCountList(dataTypeResult, parameter.getArrayCount()));
                 } else {
@@ -107,11 +107,11 @@ public class DocsView {
             // 填充 名称
             out += String.format("<td>%s</td>", parameter.getName());
             // 填充 类型
-            if (DocsContext.Parameter.TypeNameEnum.isBaseTypeName(parameter.getTypeName())) {
+            if (DocsContext.Parameter.DataTypeNameEnum.isBaseDataTypeName(parameter.getDataTypeName())) {
                 if (parameter.isArray()) {
-                    out += String.format("<td>%s</td>", "array-" + parameter.getTypeName() + "-" + parameter.getArrayCount());
+                    out += String.format("<td>%s</td>", "array-" + parameter.getDataTypeName() + "-" + parameter.getArrayCount());
                 } else {
-                    out += String.format("<td>%s</td>", parameter.getTypeName());
+                    out += String.format("<td>%s</td>", parameter.getDataTypeName());
                 }
             } else {
                 if (parameter.isArray()) {
@@ -121,7 +121,7 @@ public class DocsView {
                 }
             }
             // 填充 数据模型默认值
-            if (DocsContext.Parameter.TypeNameEnum.isBaseTypeName(parameter.getTypeName())) {
+            if (DocsContext.Parameter.DataTypeNameEnum.isBaseDataTypeName(parameter.getDataTypeName())) {
                 if (parameter.isArray()) {
                     out += String.format("<td>%s</td>", JsonUtil.bean2json(DocsTool.arrayCountList(parameter.getMockValue(), parameter.getArrayCount())));
                 } else {
@@ -140,10 +140,10 @@ public class DocsView {
             addLine(out, sb);
             addLine("</tr>", sb);
 
-            if (!DocsContext.Parameter.TypeNameEnum.isBaseTypeName(parameter.getTypeName())) {
+            if (!DocsContext.Parameter.DataTypeNameEnum.isBaseDataTypeName(parameter.getDataTypeName())) {
                 int next = level + 1;
                 addLine("<tr align=\"left\">", sb);
-                parameter2HtmlTable(dataTypeMap.get(parameter.getTypeName()).getParams(), dataTypeMap, isInput, next, sb);
+                parameter2HtmlTable(dataTypeMap.get(parameter.getDataTypeName()).getParams(), dataTypeMap, isInput, next, sb);
                 addLine("</tr>", sb);
             }
         }

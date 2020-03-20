@@ -133,7 +133,7 @@ public class DocsContext {
     @Data
     public static class Parameter {
         //  该值的类型定义，比如系统类型"string", "number", "boolean", 以及 DocsDataType.name
-        private String typeName;
+        private String dataTypeName;
         // 该数据参数的名称
         private String name;
         // 该数据类型的介绍
@@ -178,20 +178,19 @@ public class DocsContext {
             return docsParameter;
         }
 
-        public boolean hasTypeName() {
-            return EmptyUtil.isNotBlank(typeName);
+        public boolean hasDataTypeName() {
+            return EmptyUtil.isNotBlank(dataTypeName);
         }
 
-        public enum TypeNameEnum {
+        public enum DataTypeNameEnum {
             Number,
             String,
             Boolean,
-            Date,
             ;
 
-            public static boolean isBaseTypeName(@NonNull String value) {
+            public static boolean isBaseDataTypeName(@NonNull String value) {
                 List<String> enums = new ArrayList<>();
-                for (TypeNameEnum typeNameEnum : TypeNameEnum.values()) {
+                for (DataTypeNameEnum typeNameEnum : DataTypeNameEnum.values()) {
                     enums.add(typeNameEnum.getName());
                 }
                 return enums.contains(value.toLowerCase());
