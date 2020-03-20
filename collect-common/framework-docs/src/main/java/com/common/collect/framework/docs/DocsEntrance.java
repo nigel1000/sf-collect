@@ -75,7 +75,7 @@ public class DocsEntrance {
 
         public void createDocsInterface() {
             docsInterface.setName(docsMethod.name());
-            docsInterface.setClassName(cls.getName() + "#" + method.getName());
+            docsInterface.setClsName(cls.getName() + "#" + method.getName());
             docsInterface.setDescription(docsMethod.desc());
             String url = "";
             RequestMethod[] method = null;
@@ -100,7 +100,7 @@ public class DocsEntrance {
             if (!docsParameter.hasDataTypeName()) {
                 return;
             }
-            if (docsParameter.isArray() || DocsContext.Parameter.DataTypeNameEnum.isBaseDataTypeName(docsParameter.getDataTypeName())) {
+            if (docsParameter.isArray() || DocsContext.Parameter.BaseDataTypeNameEnum.isBaseDataTypeName(docsParameter.getDataTypeName())) {
                 docsParameter.setName("defResultName");
                 docsInterfaceParams.addOutput(docsParameter);
             } else {
@@ -137,12 +137,12 @@ public class DocsEntrance {
                 if (!docsParameter.hasDataTypeName()) {
                     // 如果入参上是不可处理的类，但入参上有DocsField，默认typename为string
                     if (parameter.isAnnotationPresent(DocsField.class)) {
-                        docsParameter.setDataTypeName(DocsContext.Parameter.DataTypeNameEnum.String.getName());
+                        docsParameter.setDataTypeName(DocsContext.Parameter.BaseDataTypeNameEnum.String.getName());
                         docsInterfaceParams.addInput(docsParameter);
                     }
                     continue;
                 }
-                if (docsParameter.isArray() || DocsContext.Parameter.DataTypeNameEnum.isBaseDataTypeName(docsParameter.getDataTypeName())) {
+                if (docsParameter.isArray() || DocsContext.Parameter.BaseDataTypeNameEnum.isBaseDataTypeName(docsParameter.getDataTypeName())) {
                     docsInterfaceParams.addInput(docsParameter);
                 } else {
                     if (dataType != null) {
@@ -219,7 +219,7 @@ public class DocsEntrance {
                     dataType.addDocsParameter(docsParameter);
                 } else if (field.isAnnotationPresent(DocsField.class)) {
                     // 如果属性上是不可处理的类，但属性上有DocsField，默认typename为string
-                    docsParameter.setDataTypeName(DocsContext.Parameter.DataTypeNameEnum.String.getName());
+                    docsParameter.setDataTypeName(DocsContext.Parameter.BaseDataTypeNameEnum.String.getName());
                     dataType.addDocsParameter(docsParameter);
                 }
             }

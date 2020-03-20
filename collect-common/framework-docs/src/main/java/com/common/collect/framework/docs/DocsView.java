@@ -21,7 +21,7 @@ public class DocsView {
         addHtmlHead(sb);
         addLine("文档名称：" + anInterface.getName() + "<br>", sb);
         addLine("文档描述：" + anInterface.getDescription() + "<br>", sb);
-        addLine("文档对应代码：" + anInterface.getClassName() + "<br>", sb);
+        addLine("文档对应代码：" + anInterface.getClsName() + "<br>", sb);
         addLine("访问地址：" + anInterface.getPath() + "<br>", sb);
         addLine("访问方式：" + anInterface.getMethod() + "<br>", sb);
 
@@ -59,7 +59,7 @@ public class DocsView {
             return result;
         }
         for (DocsContext.Parameter parameter : parameters) {
-            if (DocsContext.Parameter.DataTypeNameEnum.isBaseDataTypeName(parameter.getDataTypeName())) {
+            if (DocsContext.Parameter.BaseDataTypeNameEnum.isBaseDataTypeName(parameter.getDataTypeName())) {
                 if (parameter.isArray()) {
                     result.put(parameter.getName(), DocsTool.arrayCountList(parameter.getMockValue(), parameter.getArrayCount()));
                 } else {
@@ -107,7 +107,7 @@ public class DocsView {
             // 填充 名称
             out += String.format("<td>%s</td>", parameter.getName());
             // 填充 类型
-            if (DocsContext.Parameter.DataTypeNameEnum.isBaseDataTypeName(parameter.getDataTypeName())) {
+            if (DocsContext.Parameter.BaseDataTypeNameEnum.isBaseDataTypeName(parameter.getDataTypeName())) {
                 if (parameter.isArray()) {
                     out += String.format("<td>%s</td>", "array-" + parameter.getDataTypeName() + "-" + parameter.getArrayCount());
                 } else {
@@ -121,7 +121,7 @@ public class DocsView {
                 }
             }
             // 填充 数据模型默认值
-            if (DocsContext.Parameter.DataTypeNameEnum.isBaseDataTypeName(parameter.getDataTypeName())) {
+            if (DocsContext.Parameter.BaseDataTypeNameEnum.isBaseDataTypeName(parameter.getDataTypeName())) {
                 if (parameter.isArray()) {
                     out += String.format("<td>%s</td>", JsonUtil.bean2json(DocsTool.arrayCountList(parameter.getMockValue(), parameter.getArrayCount())));
                 } else {
@@ -140,7 +140,7 @@ public class DocsView {
             addLine(out, sb);
             addLine("</tr>", sb);
 
-            if (!DocsContext.Parameter.DataTypeNameEnum.isBaseDataTypeName(parameter.getDataTypeName())) {
+            if (!DocsContext.Parameter.BaseDataTypeNameEnum.isBaseDataTypeName(parameter.getDataTypeName())) {
                 int next = level + 1;
                 addLine("<tr align=\"left\">", sb);
                 parameter2HtmlTable(dataTypeMap.get(parameter.getDataTypeName()).getParams(), dataTypeMap, isInput, next, sb);

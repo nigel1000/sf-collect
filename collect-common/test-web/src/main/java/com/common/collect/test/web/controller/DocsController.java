@@ -35,7 +35,7 @@ public class DocsController {
             DocsContext docsContext = DocsEntrance.createDocs(cls);
             for (DocsContext.Interface anInterface : docsContext.getInterfaces()) {
                 sb.append("<br>");
-                String show = anInterface.getName() + "-" + anInterface.getClassName();
+                String show = anInterface.getName() + "-" + anInterface.getClsName();
                 sb.append(StringUtil.format("<a href=/back/door/docs/show?pkg={}&path={}>{}</a>", pkg, anInterface.getPath(), show));
             }
         }

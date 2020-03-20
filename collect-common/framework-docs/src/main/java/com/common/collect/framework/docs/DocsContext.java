@@ -109,7 +109,7 @@ public class DocsContext {
         // 该接口的名称
         private String name;
         // 该接口的代码映射
-        private String className;
+        private String clsName;
         // 该接口的介绍
         private String description;
         // 接口方法
@@ -182,7 +182,7 @@ public class DocsContext {
             return EmptyUtil.isNotBlank(dataTypeName);
         }
 
-        public enum DataTypeNameEnum {
+        public enum BaseDataTypeNameEnum {
             Number,
             String,
             Boolean,
@@ -190,7 +190,7 @@ public class DocsContext {
 
             public static boolean isBaseDataTypeName(@NonNull String value) {
                 List<String> enums = new ArrayList<>();
-                for (DataTypeNameEnum typeNameEnum : DataTypeNameEnum.values()) {
+                for (BaseDataTypeNameEnum typeNameEnum : BaseDataTypeNameEnum.values()) {
                     enums.add(typeNameEnum.getName());
                 }
                 return enums.contains(value.toLowerCase());
