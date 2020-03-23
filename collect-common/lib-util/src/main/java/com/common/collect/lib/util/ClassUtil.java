@@ -40,9 +40,9 @@ public class ClassUtil {
             Field hField = h.getClass().getDeclaredField("memberValues");
             //  打开权限
             hField.setAccessible(true);
-            @SuppressWarnings("rawtypes")
-            Map memberValues = (Map) hField.get(h);
             // 修改属性值
+            @SuppressWarnings("unchecked")
+            Map<String, Object> memberValues = (Map<String, Object>) hField.get(h);
             memberValues.put(fieldName, value);
         } catch (Exception ex) {
             throw UnifiedException.gen("修改 annotation 失败", ex);
@@ -66,7 +66,7 @@ public class ClassUtil {
     }
 
     public static Method[] getDeclaredMethods(Class<?> clazz) {
-        return ExceptionUtil.reThrowException(() -> clazz.getDeclaredMethods(),
+        return ExceptionUtil.reThrowException(clazz::getDeclaredMethods,
                 StringUtil.format("class:{},获取方法失败", clazz.getName()));
     }
 
