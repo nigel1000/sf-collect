@@ -1,0 +1,5 @@
+org.springframework.boot.env.EnvironmentPostProcessor=\
+    com.common.collect.test.web.postprocessor.ControllerPostProcessor
+
+org.springframework.context.ApplicationListener=\
+    com.common.collect.test.web.postprocessor.ControllerPostProcessor

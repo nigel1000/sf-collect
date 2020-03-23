@@ -5,9 +5,12 @@ import lombok.NonNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.net.JarURLConnection;
@@ -25,6 +28,26 @@ import java.util.jar.JarFile;
  * Created by nijianfeng on 2019/5/19.
  */
 public class ClassUtil {
+
+    public static void changeAnnotationField(Annotation annotation, String fieldName, Object value) {
+        if (annotation == null || EmptyUtil.isEmpty(fieldName) || value == null) {
+            return;
+        }
+        try {
+            // 获取InvocationHandler
+            InvocationHandler h = Proxy.getInvocationHandler(annotation);
+            // 获取 AnnotationInvocationHandler 的 memberValues 字段
+            Field hField = h.getClass().getDeclaredField("memberValues");
+            //  打开权限
+            hField.setAccessible(true);
+            @SuppressWarnings("rawtypes")
+            Map memberValues = (Map) hField.get(h);
+            // 修改属性值
+            memberValues.put(fieldName, value);
+        } catch (Exception ex) {
+            throw UnifiedException.gen("修改 annotation 失败", ex);
+        }
+    }
 
     public static Class<?> getClass(String clazz) {
         return ExceptionUtil.reThrowException(() -> Class.forName(clazz),
