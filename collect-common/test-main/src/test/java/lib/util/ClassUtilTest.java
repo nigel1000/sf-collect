@@ -21,7 +21,7 @@ public class ClassUtilTest {
     public static void main(String[] args) {
 
 
-        for (Method method : ClassUtil.getMethods(ClassUtilTest.class)) {
+        for (Method method : ClassUtil.getDeclaredMethods(ClassUtilTest.class)) {
             if (method.getName().equals("test")) {
                 System.out.println(ClassUtil.getMethodReturnGenericTypeMap(method));
                 Parameter[] parameters = method.getParameters();

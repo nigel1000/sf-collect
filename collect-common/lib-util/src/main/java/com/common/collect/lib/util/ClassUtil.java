@@ -65,14 +65,12 @@ public class ClassUtil {
         return (T) newInstance(getClass(clazz));
     }
 
-
-    public static Method[] getMethods(Class<?> clazz) {
+    public static Method[] getDeclaredMethods(Class<?> clazz) {
         return ExceptionUtil.reThrowException(() -> clazz.getDeclaredMethods(),
                 StringUtil.format("class:{},获取方法失败", clazz.getName()));
     }
 
-
-    public static Method getMethod(Class<?> clazz, String methodName, Class<?>... args) {
+    public static Method getDeclaredMethods(Class<?> clazz, String methodName, Class<?>... args) {
         return ExceptionUtil.reThrowException(() -> clazz.getDeclaredMethod(methodName, args),
                 StringUtil.format("class:{},method:{},获取方法失败", clazz.getName(), methodName));
     }

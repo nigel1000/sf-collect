@@ -24,9 +24,9 @@ public class FunctionMethodFactory {
         switch (functionDefineModel.getFunctionMethodTypeEnum()) {
             case inputLessEqualOne:
                 if (EmptyUtil.isEmpty(functionMethodInClazz)) {
-                    method = ClassUtil.getMethod(functionClazz.getClass(), functionMethodName);
+                    method = ClassUtil.getDeclaredMethods(functionClazz.getClass(), functionMethodName);
                 } else {
-                    method = ClassUtil.getMethod(functionClazz.getClass(), functionMethodName, ClassUtil.getClass(functionMethodInClazz));
+                    method = ClassUtil.getDeclaredMethods(functionClazz.getClass(), functionMethodName, ClassUtil.getClass(functionMethodInClazz));
                 }
                 int paramCount = method.getParameterCount();
                 if (paramCount > 1) {

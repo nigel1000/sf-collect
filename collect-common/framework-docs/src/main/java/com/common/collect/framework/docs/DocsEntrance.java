@@ -32,7 +32,7 @@ public class DocsEntrance {
     public static DocsContext createDocs(@NonNull Class<?> cls) {
         DocsContext docsContext = new DocsContext();
         RequestMapping clsRequestMapping = cls.getAnnotation(RequestMapping.class);
-        for (Method method : ClassUtil.getMethods(cls)) {
+        for (Method method : ClassUtil.getDeclaredMethods(cls)) {
             DocsMethod docsMethod = method.getAnnotation(DocsMethod.class);
             RequestMapping methodRequestMapping = method.getAnnotation(RequestMapping.class);
             if (docsMethod == null || methodRequestMapping == null) {

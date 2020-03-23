@@ -21,7 +21,7 @@ public class SpelUtilTest {
 
     public static void main(String[] args) {
         log.info("{}", SpelUtil.getMethodParamName(
-                ClassUtil.getMethod(ClassUtil.class, "getMethod", Class.class, String.class, Class[].class)));
+                ClassUtil.getDeclaredMethods(ClassUtil.class, "getMethod", Class.class, String.class, Class[].class)));
 
         Map<String, Object> variables = new HashMap<>();
         variables.put("test", "test");
