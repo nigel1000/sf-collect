@@ -3,7 +3,7 @@ package com.common.collect.test.debug.arrange.constants;
 /**
  * Created by nijianfeng on 2019/7/6.
  */
-public class Constants {
+public class ArrangeConstants {
 
     public static final String functions_define = "functions_define";
     public static final String biz_define = "biz_define";

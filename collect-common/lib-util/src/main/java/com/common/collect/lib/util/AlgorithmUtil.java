@@ -1,6 +1,6 @@
 package com.common.collect.lib.util;
 
-import com.common.collect.lib.api.Constants;
+import com.common.collect.lib.api.ApiConstants;
 import com.common.collect.lib.api.excps.UnifiedException;
 import lombok.Getter;
 import lombok.NonNull;
@@ -62,8 +62,8 @@ public class AlgorithmUtil {
         StringBuffer s = new StringBuffer(bytes.length * 2);
 
         for (byte b : bytes) {
-            s.append(Constants.HEX_LOOKUP_STRING[(b >>> 4) & 0x0f]);
-            s.append(Constants.HEX_LOOKUP_STRING[b & 0x0f]);
+            s.append(ApiConstants.HEX_LOOKUP_STRING[(b >>> 4) & 0x0f]);
+            s.append(ApiConstants.HEX_LOOKUP_STRING[b & 0x0f]);
         }
 
         return s.toString();

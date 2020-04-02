@@ -5,7 +5,7 @@ import com.common.collect.lib.util.EmptyUtil;
 import com.common.collect.lib.util.StringUtil;
 import com.common.collect.lib.util.ThreadLocalUtil;
 import com.common.collect.lib.util.fastjson.JsonUtil;
-import com.common.collect.test.debug.arrange.constants.Constants;
+import com.common.collect.test.debug.arrange.constants.ArrangeConstants;
 import com.common.collect.test.debug.arrange.model.BizDefineArrangeModel;
 import com.common.collect.test.debug.arrange.model.BizDefineModel;
 import com.common.collect.test.debug.arrange.model.FunctionDefineModel;
@@ -58,7 +58,7 @@ public class BizContext {
     private static Map<String, BizContext> initFunctionChain(Map<String, BizDefineModel> bizDefineModelMap) {
         Map<String, BizContext> ret = new LinkedHashMap<>();
         for (Map.Entry<String, BizDefineModel> entry : bizDefineModelMap.entrySet()) {
-            ThreadLocalUtil.push(Constants.thread_local_current_biz_key, new ArrayList<>());
+            ThreadLocalUtil.push(ArrangeConstants.thread_local_current_biz_key, new ArrayList<>());
             BizDefineModel bizDefineModel = entry.getValue();
             // 根据 bizDefineModel 初始化功能链
             BizContext bizContext = new BizContext();
@@ -67,7 +67,7 @@ public class BizContext {
             initFunctionChain(bizContext, bizDefineModelMap);
             ret.put(entry.getKey(), bizContext);
         }
-        ThreadLocalUtil.clear(Constants.thread_local_current_biz_key);
+        ThreadLocalUtil.clear(ArrangeConstants.thread_local_current_biz_key);
         return ret;
     }
 
@@ -78,7 +78,7 @@ public class BizContext {
         BizDefineModel bizDefineModel = bizContext.getBizDefineModel();
         String bizKey = bizContext.getBizKey();
         // 叠加当前处理的 业务 key
-        List<String> currentBizKeys = ThreadLocalUtil.pull(Constants.thread_local_current_biz_key);
+        List<String> currentBizKeys = ThreadLocalUtil.pull(ArrangeConstants.thread_local_current_biz_key);
         currentBizKeys.add(bizKey);
 
         int size = bizDefineModel.getArranges().size();
@@ -151,7 +151,7 @@ public class BizContext {
         if (functionChain.getInputTypeEnum().equals(BizFunctionChain.InputTypeEnum.auto) ||
                 functionChain.getInputTypeEnum().equals(BizFunctionChain.InputTypeEnum.assign)) {
             for (String input : arrangeModel.getInputMappings()) {
-                List<String> inOutput = StringUtil.split2List(input, Constants.input_split);
+                List<String> inOutput = StringUtil.split2List(input, ArrangeConstants.input_split);
                 if (inOutput.size() != 2) {
                     throw UnifiedException.gen(StringUtil.format("{} 的 input_mapping(lastOut->currentIn):{} 不合法", functionChain.bizKeyRoutePath(), input));
                 }

@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
  * Created by hznijianfeng on 2018/11/16.
  */
 
-public class Constants {
+public class ApiConstants {
 
     /**
      * 中文字符正则

@@ -11,7 +11,7 @@ import com.common.collect.lib.util.EmptyUtil;
 import com.common.collect.lib.util.StringUtil;
 import com.common.collect.lib.util.fastjson.JsonUtil;
 import com.common.collect.lib.util.yaml.YamlUtil;
-import com.common.collect.test.debug.arrange.constants.Constants;
+import com.common.collect.test.debug.arrange.constants.ArrangeConstants;
 import com.common.collect.test.debug.arrange.model.BizDefineModel;
 import com.common.collect.test.debug.arrange.model.FunctionDefineModel;
 import lombok.extern.slf4j.Slf4j;
@@ -37,10 +37,10 @@ public class ConfigContext {
         for (Object o : obj) {
             LinkedHashMap content = YamlUtil.parse(o);
             // 解析 function_define
-            Map<String, FunctionDefineModel> functionDefineModelMap = parseFunctionDefine((LinkedHashMap) content.get(Constants.functions_define));
+            Map<String, FunctionDefineModel> functionDefineModelMap = parseFunctionDefine((LinkedHashMap) content.get(ArrangeConstants.functions_define));
             ConfigContext.functionDefineModelMap.putAll(functionDefineModelMap);
             // 解析 biz_define
-            Map<String, BizDefineModel> bizDefineModelMap = parseBizDefine((LinkedHashMap) content.get(Constants.biz_define));
+            Map<String, BizDefineModel> bizDefineModelMap = parseBizDefine((LinkedHashMap) content.get(ArrangeConstants.biz_define));
             allBizDefineModelMap.putAll(bizDefineModelMap);
         }
         if (log.isDebugEnabled()) {
