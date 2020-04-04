@@ -35,7 +35,7 @@ public class DocsEntrance {
         }
         Map<String, DocsContext.DataType> docsDataTypes = new HashMap<>();
         for (Class<?> cls : classList) {
-            DocsContext clsDocsContext = DocsEntrance.createDocs(cls, null);
+            DocsContext clsDocsContext = DocsEntrance.createDocs(cls);
             docsContext.addDocsInterface(clsDocsContext.getInterfaces());
             docsDataTypes.putAll(FunctionUtil.keyValueMap(clsDocsContext.getDataTypes(), DocsContext.DataType::getName));
         }
@@ -43,18 +43,29 @@ public class DocsEntrance {
         return docsContext;
     }
 
-    public static DocsContext createDocs(@NonNull Method declaredMethod) {
-        return createDocs(declaredMethod.getDeclaringClass(), declaredMethod);
+    public static DocsContext createDocs(@NonNull Class<?> cls) {
+        DocsContext docsContext = new DocsContext();
+        Map<String, DocsContext.DataType> docsDataTypes = new HashMap<>();
+        for (Method method : ClassUtil.getDeclaredMethods(cls)) {
+            DocsMethod docsMethod = method.getAnnotation(DocsMethod.class);
+            RequestMapping methodRequestMapping = method.getAnnotation(RequestMapping.class);
+            if (docsMethod == null || methodRequestMapping == null) {
+                continue;
+            }
+            DocsContext methodDocsContext = createDocs(method);
+            docsContext.addDocsInterface(methodDocsContext.getInterfaces());
+            docsDataTypes.putAll(FunctionUtil.keyValueMap(methodDocsContext.getDataTypes(), DocsContext.DataType::getName));
+        }
+        docsContext.addDocsDataType(new ArrayList<>(docsDataTypes.values()));
+        return docsContext;
     }
 
-    public static DocsContext createDocs(@NonNull Class<?> cls, Method declaredMethod) {
+    public static DocsContext createDocs(@NonNull Method declaredMethod) {
         docsDataTypes.clear();
+        Class<?> cls = declaredMethod.getDeclaringClass();
         DocsContext docsContext = new DocsContext();
         RequestMapping clsRequestMapping = cls.getAnnotation(RequestMapping.class);
         for (Method method : ClassUtil.getDeclaredMethods(cls)) {
-            if (declaredMethod != null && !declaredMethod.equals(method)) {
-                continue;
-            }
             DocsMethod docsMethod = method.getAnnotation(DocsMethod.class);
             RequestMapping methodRequestMapping = method.getAnnotation(RequestMapping.class);
             if (docsMethod == null || methodRequestMapping == null) {
@@ -78,6 +89,7 @@ public class DocsEntrance {
             docsContext.addDocsInterface(paramContext.getDocsInterface());
         }
         docsContext.addDocsDataType(new ArrayList<>(docsDataTypes.values()));
+        docsDataTypes.clear();
         return docsContext;
     }
 
