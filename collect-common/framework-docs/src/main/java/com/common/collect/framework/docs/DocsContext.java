@@ -28,6 +28,12 @@ public class DocsContext {
         return this;
     }
 
+    public DocsContext addDocsInterface(Collection<Interface> docsInterfaces) {
+        interfaces.addAll(docsInterfaces);
+        return this;
+    }
+
+
     public DocsContext addDocsDataType(Collection<DataType> docDataTypes) {
         dataTypes.addAll(docDataTypes);
         return this;
@@ -81,8 +87,7 @@ public class DocsContext {
 
         @Getter
         public enum DataTypeFormatEnum {
-            Object(0),
-            ;
+            Object(0),;
 
             private int type;
 
@@ -93,9 +98,7 @@ public class DocsContext {
 
         @Getter
         public enum DataTypeTypeEnum {
-            User(0),
-
-            ;
+            User(0),;
             private int type;
 
             DataTypeTypeEnum(int type) {
@@ -125,8 +128,7 @@ public class DocsContext {
             HEAD,
             PATCH,
             PUT,
-            DELETE,
-            ;
+            DELETE,;
         }
     }
 
@@ -185,8 +187,7 @@ public class DocsContext {
         public enum BaseDataTypeNameEnum {
             Number,
             String,
-            Boolean,
-            ;
+            Boolean,;
 
             public static boolean isBaseDataTypeName(@NonNull String value) {
                 List<String> enums = new ArrayList<>();
