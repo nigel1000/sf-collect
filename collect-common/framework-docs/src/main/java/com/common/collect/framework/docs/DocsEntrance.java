@@ -25,8 +25,6 @@ import java.util.*;
 
 public class DocsEntrance {
 
-    public static Map<String, DocsContext.DataType> docsDataTypes = new HashMap<>();
-
     public static DocsContext createDocs(@NonNull String pkg) {
         DocsContext docsContext = new DocsContext();
         List<Class<?>> classList = ClassUtil.getClazzFromPackage(pkg);
@@ -61,7 +59,6 @@ public class DocsEntrance {
     }
 
     public static DocsContext createDocs(@NonNull Method declaredMethod) {
-        docsDataTypes.clear();
         Class<?> cls = declaredMethod.getDeclaringClass();
         DocsContext docsContext = new DocsContext();
         RequestMapping clsRequestMapping = cls.getAnnotation(RequestMapping.class);
@@ -86,8 +83,7 @@ public class DocsEntrance {
         paramContext.createDocsInterfaceParamOutput();
 
         docsContext.addDocsInterface(paramContext.getDocsInterface());
-        docsContext.addDocsDataType(new ArrayList<>(docsDataTypes.values()));
-        docsDataTypes.clear();
+        docsContext.addDocsDataType(new ArrayList<>(paramContext.getDocsDataTypes().values()));
         return docsContext;
     }
 
@@ -100,6 +96,7 @@ public class DocsEntrance {
         private DocsMethod docsMethod;
         private RequestMapping clsRequestMapping;
         private RequestMapping methodRequestMapping;
+        private Map<String, DocsContext.DataType> docsDataTypes = new HashMap<>();
 
         private DocsContext.Interface docsInterface = new DocsContext.Interface();
         private DocsContext.InterfaceParameter docsInterfaceParams = docsInterface.getParams();
