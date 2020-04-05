@@ -65,29 +65,27 @@ public class DocsEntrance {
         Class<?> cls = declaredMethod.getDeclaringClass();
         DocsContext docsContext = new DocsContext();
         RequestMapping clsRequestMapping = cls.getAnnotation(RequestMapping.class);
-        for (Method method : ClassUtil.getDeclaredMethods(cls)) {
-            DocsMethod docsMethod = method.getAnnotation(DocsMethod.class);
-            RequestMapping methodRequestMapping = method.getAnnotation(RequestMapping.class);
-            if (docsMethod == null || methodRequestMapping == null) {
-                continue;
-            }
-            ParamContext paramContext = new ParamContext();
-            paramContext.setCls(cls);
-            paramContext.setReturnType(method.getReturnType());
-            paramContext.setReturnGenericTypeMap(ClassUtil.getMethodReturnGenericTypeMap(method));
-            paramContext.setMethod(method);
-            paramContext.setDocsMethod(docsMethod);
-            paramContext.setClsRequestMapping(clsRequestMapping);
-            paramContext.setMethodRequestMapping(methodRequestMapping);
-            // 处理接口
-            paramContext.createDocsInterface();
-            // 处理接口入参
-            paramContext.createDocsInterfaceParamInput();
-            // 处理接口返回
-            paramContext.createDocsInterfaceParamOutput();
-
-            docsContext.addDocsInterface(paramContext.getDocsInterface());
+        DocsMethod docsMethod = declaredMethod.getAnnotation(DocsMethod.class);
+        RequestMapping methodRequestMapping = declaredMethod.getAnnotation(RequestMapping.class);
+        if (docsMethod == null || methodRequestMapping == null) {
+            return docsContext;
         }
+        ParamContext paramContext = new ParamContext();
+        paramContext.setCls(cls);
+        paramContext.setReturnType(declaredMethod.getReturnType());
+        paramContext.setReturnGenericTypeMap(ClassUtil.getMethodReturnGenericTypeMap(declaredMethod));
+        paramContext.setMethod(declaredMethod);
+        paramContext.setDocsMethod(docsMethod);
+        paramContext.setClsRequestMapping(clsRequestMapping);
+        paramContext.setMethodRequestMapping(methodRequestMapping);
+        // 处理接口
+        paramContext.createDocsInterface();
+        // 处理接口入参
+        paramContext.createDocsInterfaceParamInput();
+        // 处理接口返回
+        paramContext.createDocsInterfaceParamOutput();
+
+        docsContext.addDocsInterface(paramContext.getDocsInterface());
         docsContext.addDocsDataType(new ArrayList<>(docsDataTypes.values()));
         docsDataTypes.clear();
         return docsContext;
