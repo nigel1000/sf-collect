@@ -6,21 +6,11 @@ import lombok.NonNull;
 import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Proxy;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
+import java.lang.reflect.*;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -50,8 +40,18 @@ public class ClassUtil {
     }
 
     public static Class<?> getClass(String clazz) {
-        return ExceptionUtil.reThrowException(() -> Class.forName(clazz),
-                StringUtil.format(" {} 无法找到类定义", clazz));
+        return getClass(clazz, null);
+    }
+
+    public static Class<?> getClass(String clazz, ClassLoader classLoader) {
+        try {
+            if (classLoader == null) {
+                return Class.forName(clazz);
+            }
+            return classLoader.loadClass(clazz);
+        } catch (Exception ex) {
+            throw UnifiedException.gen(StringUtil.format(" {} 无法找到类定义", clazz, ex));
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -62,7 +62,12 @@ public class ClassUtil {
 
     @SuppressWarnings("unchecked")
     public static <T> T newInstance(String clazz) {
-        return (T) newInstance(getClass(clazz));
+        return (T) newInstance(clazz, null);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T newInstance(String clazz, ClassLoader classLoader) {
+        return (T) newInstance(getClass(clazz, classLoader));
     }
 
     public static Method[] getDeclaredMethods(Class<?> clazz) {
@@ -246,15 +251,22 @@ public class ClassUtil {
      * List包含所有class的实例
      */
     public static List<Class<?>> getClazzFromPackage(@NonNull String packageName) {
+        return getClazzFromPackage(packageName, null);
+    }
+
+    public static List<Class<?>> getClazzFromPackage(@NonNull String packageName, ClassLoader classLoader) {
+        if (classLoader == null) {
+            classLoader = Thread.currentThread().getContextClassLoader();
+        }
         List<Class<?>> clazzList = new ArrayList<>();
         // 包名对应的路径名称
         String packageDirName = packageName.replace('.', '/');
         Enumeration<URL> dirs;
         try {
-            dirs = Thread.currentThread().getContextClassLoader().getResources(packageDirName);
+            dirs = classLoader.getResources(packageDirName);
             if (!dirs.hasMoreElements()) {
                 // 可能是全路径不是目录
-                dirs = Thread.currentThread().getContextClassLoader().getResources(packageDirName + ".class");
+                dirs = classLoader.getResources(packageDirName + ".class");
             }
             while (dirs.hasMoreElements()) {
                 URL url = dirs.nextElement();
@@ -264,13 +276,13 @@ public class ClassUtil {
                     String filePath = URLDecoder.decode(url.getFile(), "UTF-8");// 获取包的物理路径
                     File file = new File(filePath);
                     if (!file.isDirectory()) {
-                        clazzList.add(Thread.currentThread().getContextClassLoader().loadClass(packageName));
+                        clazzList.add(classLoader.loadClass(packageName));
                     } else {
-                        findClassesByFile(packageName, filePath, true, clazzList);
+                        findClassesByFile(packageName, filePath, true, clazzList, classLoader);
                     }
                 } else if ("jar".equals(protocol)) {// 如果是jar包文件
                     JarFile jar = ((JarURLConnection) url.openConnection()).getJarFile();
-                    findClassesByJar(packageName, jar, clazzList);
+                    findClassesByJar(packageName, jar, clazzList, classLoader);
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
@@ -284,7 +296,7 @@ public class ClassUtil {
      * recursive 是否循环搜索子包
      */
     private static void findClassesByFile(@NonNull String packageName, @NonNull String filePath, final boolean recursive,
-                                          @NonNull List<Class<?>> classes) {
+                                          @NonNull List<Class<?>> classes, ClassLoader classLoader) {
         File dir = new File(filePath);
         if (!dir.exists() || !dir.isDirectory()) {
             return;
@@ -300,10 +312,10 @@ public class ClassUtil {
         }
         for (File file : dirFiles) {
             if (file.isDirectory()) {
-                findClassesByFile(packageName + "." + file.getName(), file.getAbsolutePath(), recursive, classes);
+                findClassesByFile(packageName + "." + file.getName(), file.getAbsolutePath(), recursive, classes, classLoader);
             } else {
                 String className = file.getName().substring(0, file.getName().length() - 6);
-                classes.add(getClass(packageName + "." + className));
+                classes.add(getClass(packageName + "." + className, classLoader));
             }
         }
     }
@@ -311,7 +323,7 @@ public class ClassUtil {
     /**
      * 扫描包路径下的所有class文件
      */
-    private static void findClassesByJar(@NonNull String packageName, @NonNull JarFile jar, @NonNull List<Class<?>> classes) {
+    private static void findClassesByJar(@NonNull String packageName, @NonNull JarFile jar, @NonNull List<Class<?>> classes, ClassLoader classLoader) {
         String pkgDir = packageName.replace(".", "/");
 
         Enumeration<JarEntry> entry = jar.entries();
@@ -327,7 +339,7 @@ public class ClassUtil {
                 // 非指定包路径， 非class文件
                 continue;
             }
-            classes.add(getClass(name.replace("/", ".").substring(0, name.length() - 6)));
+            classes.add(getClass(name.replace("/", ".").substring(0, name.length() - 6), classLoader));
         }
     }
 
