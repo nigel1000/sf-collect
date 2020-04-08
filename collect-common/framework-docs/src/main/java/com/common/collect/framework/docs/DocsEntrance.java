@@ -1,5 +1,9 @@
 package com.common.collect.framework.docs;
 
+import com.common.collect.framework.docs.model.DataTypeModel;
+import com.common.collect.framework.docs.model.InterfaceModel;
+import com.common.collect.framework.docs.model.InterfaceParameterModel;
+import com.common.collect.framework.docs.model.ParameterModel;
 import com.common.collect.lib.api.docs.DocsDataType;
 import com.common.collect.lib.api.docs.DocsField;
 import com.common.collect.lib.api.docs.DocsFieldExclude;
@@ -31,11 +35,11 @@ public class DocsEntrance {
         if (EmptyUtil.isEmpty(classList)) {
             return docsContext;
         }
-        Map<String, DocsContext.DataType> docsDataTypes = new HashMap<>();
+        Map<String, DataTypeModel> docsDataTypes = new HashMap<>();
         for (Class<?> cls : classList) {
             DocsContext clsDocsContext = DocsEntrance.createDocs(cls);
             docsContext.addDocsInterface(clsDocsContext.getInterfaces());
-            docsDataTypes.putAll(FunctionUtil.keyValueMap(clsDocsContext.getDataTypes(), DocsContext.DataType::getName));
+            docsDataTypes.putAll(FunctionUtil.keyValueMap(clsDocsContext.getDataTypes(), DataTypeModel::getName));
         }
         docsContext.addDocsDataType(new ArrayList<>(docsDataTypes.values()));
         return docsContext;
@@ -43,7 +47,7 @@ public class DocsEntrance {
 
     public static DocsContext createDocs(@NonNull Class<?> cls) {
         DocsContext docsContext = new DocsContext();
-        Map<String, DocsContext.DataType> docsDataTypes = new HashMap<>();
+        Map<String, DataTypeModel> docsDataTypes = new HashMap<>();
         for (Method method : ClassUtil.getDeclaredMethods(cls)) {
             DocsMethod docsMethod = method.getAnnotation(DocsMethod.class);
             RequestMapping methodRequestMapping = method.getAnnotation(RequestMapping.class);
@@ -52,7 +56,7 @@ public class DocsEntrance {
             }
             DocsContext methodDocsContext = createDocs(method);
             docsContext.addDocsInterface(methodDocsContext.getInterfaces());
-            docsDataTypes.putAll(FunctionUtil.keyValueMap(methodDocsContext.getDataTypes(), DocsContext.DataType::getName));
+            docsDataTypes.putAll(FunctionUtil.keyValueMap(methodDocsContext.getDataTypes(), DataTypeModel::getName));
         }
         docsContext.addDocsDataType(new ArrayList<>(docsDataTypes.values()));
         return docsContext;
@@ -96,10 +100,10 @@ public class DocsEntrance {
         private DocsMethod docsMethod;
         private RequestMapping clsRequestMapping;
         private RequestMapping methodRequestMapping;
-        private Map<String, DocsContext.DataType> docsDataTypes = new HashMap<>();
+        private Map<String, DataTypeModel> docsDataTypes = new HashMap<>();
 
-        private DocsContext.Interface docsInterface = new DocsContext.Interface();
-        private DocsContext.InterfaceParameter docsInterfaceParams = docsInterface.getParams();
+        private InterfaceModel docsInterface = new InterfaceModel();
+        private InterfaceParameterModel docsInterfaceParams = docsInterface.getParams();
 
         public void createDocsInterface() {
             docsInterface.setName(docsMethod.name());
@@ -117,18 +121,18 @@ public class DocsEntrance {
             }
             docsInterface.setPath(url);
             if (EmptyUtil.isNotEmpty(method)) {
-                docsInterface.setMethod(DocsContext.Interface.InterfaceMethodEnum.valueOf(method[0].name()).name());
+                docsInterface.setMethod(InterfaceModel.InterfaceMethodEnum.valueOf(method[0].name()).name());
             }
         }
 
         public void createDocsInterfaceParamOutput() {
-            DocsContext.Parameter docsParameter = DocsContext.Parameter.gen(returnType, null, null, null);
+            ParameterModel docsParameter = ParameterModel.gen(returnType, null, null, null);
             Class<?> actualCls = richParameterArray(returnType, returnGenericTypeMap, docsParameter);
-            DocsContext.DataType dataType = richParameterTypeName(actualCls, docsParameter);
+            DataTypeModel dataType = richParameterTypeName(actualCls, docsParameter);
             if (!docsParameter.hasDataTypeName()) {
                 return;
             }
-            if (docsParameter.isArray() || DocsContext.Parameter.BaseDataTypeNameEnum.isBaseDataTypeName(docsParameter.getDataTypeName())) {
+            if (docsParameter.isArray() || ParameterModel.BaseDataTypeNameEnum.isBaseDataTypeName(docsParameter.getDataTypeName())) {
                 docsParameter.setName("defResultName");
                 docsInterfaceParams.addOutput(docsParameter);
             } else {
@@ -155,22 +159,22 @@ public class DocsEntrance {
                 if (parameter.isAnnotationPresent(DocsFieldExclude.class) || DocsTool.clsInBlackList(cls)) {
                     continue;
                 }
-                DocsContext.Parameter docsParameter = DocsContext.Parameter.gen(
+                ParameterModel docsParameter = ParameterModel.gen(
                         cls,
                         parameter.getAnnotation(RequestParam.class),
                         parameter.getAnnotation(DocsField.class),
                         parameterNames[i]);
                 Class<?> actualCls = richParameterArray(cls, ClassUtil.getMethodParameterGenericTypeMap(method, i), docsParameter);
-                DocsContext.DataType dataType = richParameterTypeName(actualCls, docsParameter);
+                DataTypeModel dataType = richParameterTypeName(actualCls, docsParameter);
                 if (!docsParameter.hasDataTypeName()) {
                     // 如果入参上是不可处理的类，但入参上有DocsField，默认typename为string
                     if (parameter.isAnnotationPresent(DocsField.class)) {
-                        docsParameter.setDataTypeName(DocsContext.Parameter.BaseDataTypeNameEnum.String.getName());
+                        docsParameter.setDataTypeName(ParameterModel.BaseDataTypeNameEnum.String.getName());
                         docsInterfaceParams.addInput(docsParameter);
                     }
                     continue;
                 }
-                if (docsParameter.isArray() || DocsContext.Parameter.BaseDataTypeNameEnum.isBaseDataTypeName(docsParameter.getDataTypeName())) {
+                if (docsParameter.isArray() || ParameterModel.BaseDataTypeNameEnum.isBaseDataTypeName(docsParameter.getDataTypeName())) {
                     docsInterfaceParams.addInput(docsParameter);
                 } else {
                     if (dataType != null) {
@@ -180,7 +184,7 @@ public class DocsEntrance {
             }
         }
 
-        private DocsContext.DataType richParameterTypeName(@NonNull Class<?> actualCls, @NonNull DocsContext.Parameter docsParameter) {
+        private DataTypeModel richParameterTypeName(@NonNull Class<?> actualCls, @NonNull ParameterModel docsParameter) {
             if (DocsTool.clsInBlackList(actualCls) || DocsTool.isArray(actualCls)) {
                 return null;
             }
@@ -192,18 +196,18 @@ public class DocsEntrance {
                 return null;
             }
             // 对象类型
-            DocsContext.DataType dataType = createDocsDataType(actualCls);
+            DataTypeModel dataType = createDocsDataType(actualCls);
             if (dataType != null) {
                 docsParameter.setDataTypeName(dataType.getName());
             }
             return dataType;
         }
 
-        public DocsContext.DataType createDocsDataType(@NonNull Class<?> actualCls) {
+        public DataTypeModel createDocsDataType(@NonNull Class<?> actualCls) {
             if (DocsTool.clsInBlackList(actualCls) || DocsTool.isArray(actualCls) || actualCls == Object.class) {
                 return null;
             }
-            DocsContext.DataType dataType = DocsContext.DataType.gen(actualCls, actualCls.getAnnotation(DocsDataType.class));
+            DataTypeModel dataType = DataTypeModel.gen(actualCls, actualCls.getAnnotation(DocsDataType.class));
             if (docsDataTypes.get(dataType.getName()) != null) {
                 return docsDataTypes.get(dataType.getName());
             }
@@ -236,7 +240,7 @@ public class DocsEntrance {
                         ) {
                     continue;
                 }
-                DocsContext.Parameter docsParameter = DocsContext.Parameter.gen(
+                ParameterModel docsParameter = ParameterModel.gen(
                         fieldCls,
                         null,
                         field.getAnnotation(DocsField.class),
@@ -247,7 +251,7 @@ public class DocsEntrance {
                     dataType.addDocsParameter(docsParameter);
                 } else if (field.isAnnotationPresent(DocsField.class)) {
                     // 如果属性上是不可处理的类，但属性上有DocsField，默认typename为string
-                    docsParameter.setDataTypeName(DocsContext.Parameter.BaseDataTypeNameEnum.String.getName());
+                    docsParameter.setDataTypeName(ParameterModel.BaseDataTypeNameEnum.String.getName());
                     dataType.addDocsParameter(docsParameter);
                 }
             }
@@ -259,7 +263,7 @@ public class DocsEntrance {
         }
 
 
-        private Class<?> richParameterArray(@NonNull Class<?> cls, @NonNull Map<String, Type> genericTypeMap, @NonNull DocsContext.Parameter docsParameter) {
+        private Class<?> richParameterArray(@NonNull Class<?> cls, @NonNull Map<String, Type> genericTypeMap, @NonNull ParameterModel docsParameter) {
             int arrayCount = 0;
             Class actualCls = cls;
             if (actualCls == List.class) {

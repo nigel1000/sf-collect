@@ -3,6 +3,7 @@ package com.common.collect.test.web.controller;
 import com.common.collect.framework.docs.DocsContext;
 import com.common.collect.framework.docs.DocsEntrance;
 import com.common.collect.framework.docs.DocsView;
+import com.common.collect.framework.docs.model.InterfaceModel;
 import com.common.collect.lib.util.StringUtil;
 import com.common.collect.lib.util.WebUtil;
 import org.springframework.stereotype.Controller;
@@ -29,7 +30,7 @@ public class DocsController {
         sb.append("</head>\n");
         sb.append("<body>\n");
         DocsContext docsContext = DocsEntrance.createDocs(pkg);
-        for (DocsContext.Interface anInterface : docsContext.getInterfaces()) {
+        for (InterfaceModel anInterface : docsContext.getInterfaces()) {
             sb.append("<br>");
             String show = anInterface.getName() + "-" + anInterface.getClsName();
             sb.append(StringUtil.format("<a href=/back/door/docs/show?pkg={}&path={}>{}</a>", pkg, anInterface.getPath(), show));
@@ -42,7 +43,7 @@ public class DocsController {
     @RequestMapping(value = "/show", method = {RequestMethod.GET})
     public void show(HttpServletResponse response, String pkg, String path) {
         DocsContext docsContext = DocsEntrance.createDocs(pkg);
-        for (DocsContext.Interface anInterface : docsContext.getInterfaces()) {
+        for (InterfaceModel anInterface : docsContext.getInterfaces()) {
             if (anInterface.getPath().equals(path)) {
                 WebUtil.exportHtml(response, DocsView.htmlView(anInterface, docsContext.getDataTypes()));
             }

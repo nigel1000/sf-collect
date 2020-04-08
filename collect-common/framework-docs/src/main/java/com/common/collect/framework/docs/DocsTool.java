@@ -1,5 +1,6 @@
 package com.common.collect.framework.docs;
 
+import com.common.collect.framework.docs.model.ParameterModel;
 import com.common.collect.lib.util.EmptyUtil;
 import com.common.collect.lib.util.ExceptionUtil;
 import com.common.collect.lib.util.IdUtil;
@@ -28,16 +29,16 @@ public class DocsTool {
                 || cls == Byte.class || cls == byte.class
                 || cls == BigDecimal.class || cls == Date.class
         ) {
-            return DocsContext.Parameter.BaseDataTypeNameEnum.Number.getName();
+            return ParameterModel.BaseDataTypeNameEnum.Number.getName();
         }
 
         if (cls == Boolean.class || cls == boolean.class) {
-            return DocsContext.Parameter.BaseDataTypeNameEnum.Boolean.getName();
+            return ParameterModel.BaseDataTypeNameEnum.Boolean.getName();
         }
 
         if (cls == Character.class || cls == char.class || cls == String.class
         ) {
-            return DocsContext.Parameter.BaseDataTypeNameEnum.String.getName();
+            return ParameterModel.BaseDataTypeNameEnum.String.getName();
         }
         return null;
     }
