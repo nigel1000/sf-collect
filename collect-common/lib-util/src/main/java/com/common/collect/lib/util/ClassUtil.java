@@ -86,7 +86,7 @@ public class ClassUtil {
                 StringUtil.format(" class:{},method:{} 调用方法失败", target.getClass().getName(), method.getName()));
     }
 
-    public static Field[] getFields(Class<?> clazz) {
+    public static Field[] getDeclaredFields(Class<?> clazz) {
         return ExceptionUtil.reThrowException(() -> {
                     Field[] fields = clazz.getDeclaredFields();
                     for (Field field : fields) {
@@ -97,7 +97,16 @@ public class ClassUtil {
                 StringUtil.format(" class:{} 获取属性值失败", clazz.getName()));
     }
 
-    public static Field getField(Class<?> clazz, String name) {
+    public static Field[] getDeclaredFieldRecursion(Class<?> clazz) {
+        List<Field> fields = new ArrayList<>();
+        for (; clazz != Object.class; clazz = clazz.getSuperclass()) {
+            fields.addAll(Arrays.asList(getDeclaredFields(clazz)));
+        }
+        Map<String, Field> fieldMap = FunctionUtil.keyValueMap(fields, Field::getName);
+        return fieldMap.values().toArray(new Field[0]);
+    }
+
+    public static Field getDeclaredField(Class<?> clazz, String name) {
         return ExceptionUtil.reThrowException(() -> {
                     Field field = clazz.getDeclaredField(name);
                     field.setAccessible(true);
@@ -107,14 +116,14 @@ public class ClassUtil {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T getFieldValue(Object target, String name) {
-        return ExceptionUtil.reThrowException(() -> (T) getField(target.getClass(), name).get(target),
+    public static <T> T getDeclaredFieldValue(Object target, String name) {
+        return ExceptionUtil.reThrowException(() -> (T) getDeclaredField(target.getClass(), name).get(target),
                 StringUtil.format(" class:{},field:{} 获取属性值失败", target.getClass().getName(), name));
     }
 
-    public static void setFieldValue(Object target, String name, Object value) {
+    public static void setDeclaredFieldValue(Object target, String name, Object value) {
         ExceptionUtil.reThrowException(() -> {
-                    Field field = getField(target.getClass(), name);
+                    Field field = getDeclaredField(target.getClass(), name);
                     field.set(target, value);
                 },
                 StringUtil.format(" class:{},field:{} 设置属性值失败", target.getClass().getName(), name));

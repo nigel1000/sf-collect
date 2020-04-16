@@ -125,14 +125,14 @@ public class FunctionDefineModel {
         }
 
         for (String functionMethodInField : functionMethodInFields) {
-            ClassUtil.getField(paramType, functionMethodInField);
+            ClassUtil.getDeclaredField(paramType, functionMethodInField);
         }
 
         for (String functionMethodOutField : functionMethodOutFields) {
             if (functionMethodOutFromEnum.equals(FunctionMethodOutFromEnum.output)) {
-                ClassUtil.getField(returnType, functionMethodOutField);
+                ClassUtil.getDeclaredField(returnType, functionMethodOutField);
             } else if (functionMethodOutFromEnum.equals(FunctionMethodOutFromEnum.input)) {
-                ClassUtil.getField(paramType, functionMethodOutField);
+                ClassUtil.getDeclaredField(paramType, functionMethodOutField);
             }
         }
 

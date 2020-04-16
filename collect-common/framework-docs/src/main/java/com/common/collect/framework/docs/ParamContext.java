@@ -153,7 +153,7 @@ public class ParamContext {
         if (docsDataTypes.get(dataType.getName()) != null) {
             return docsDataTypes.get(dataType.getName());
         }
-        Field[] fields = ClassUtil.getFields(actualCls);
+        Field[] fields = ClassUtil.getDeclaredFieldRecursion(actualCls);
         for (Field field : fields) {
             Class<?> fieldCls = field.getType();
             if (DocsTool.clsInBlackList(fieldCls)) {

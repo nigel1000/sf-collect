@@ -58,11 +58,11 @@ public class ArrangeContext {
                         FunctionMethodOutFromEnum outFrom = bizFunctionChain.getFunctionMethodOutFromEnum();
                         if (outFrom.equals(FunctionMethodOutFromEnum.output)) {
                             if (ret != null) {
-                                paramMap.put(inField, ClassUtil.getFieldValue(ret, outField));
+                                paramMap.put(inField, ClassUtil.getDeclaredFieldValue(ret, outField));
                             }
                         } else if (outFrom.equals(FunctionMethodOutFromEnum.input)) {
                             if (arg != null) {
-                                paramMap.put(inField, ClassUtil.getFieldValue(arg, outField));
+                                paramMap.put(inField, ClassUtil.getDeclaredFieldValue(arg, outField));
                             }
                         }
                     }

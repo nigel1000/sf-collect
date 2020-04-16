@@ -39,7 +39,7 @@ public class FunctionMethodFactory {
                         throw UnifiedException.gen(StringUtil.format("{}#{} 方法没有参数，不能设置 functionMethodInFields", functionClazz.getClass().getName(), functionMethodName));
                     }
                     for (String functionMethodInField : functionMethodInFields) {
-                        ClassUtil.getField(method.getParameterTypes()[0], functionMethodInField);
+                        ClassUtil.getDeclaredField(method.getParameterTypes()[0], functionMethodInField);
                     }
                 }
                 List<String> functionMethodOutFields = functionDefineModel.getFunctionMethodOutFields();
@@ -51,9 +51,9 @@ public class FunctionMethodFactory {
                     }
                     for (String functionMethodOutField : functionMethodOutFields) {
                         if (functionMethodOutFromEnum.equals(FunctionMethodOutFromEnum.output)) {
-                            ClassUtil.getField(method.getReturnType(), functionMethodOutField);
+                            ClassUtil.getDeclaredField(method.getReturnType(), functionMethodOutField);
                         } else if (functionMethodOutFromEnum.equals(FunctionMethodOutFromEnum.input)) {
-                            ClassUtil.getField(method.getParameterTypes()[0], functionMethodOutField);
+                            ClassUtil.getDeclaredField(method.getParameterTypes()[0], functionMethodOutField);
                         }
                     }
                 }
