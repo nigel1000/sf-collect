@@ -8,6 +8,8 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by hznijianfeng on 2018/8/20.
@@ -147,4 +149,27 @@ public class FileUtil {
             }
         }
     }
+
+    public static List<File> listFilesRecursion(@NonNull File file) {
+        List<File> files = new ArrayList<>();
+        files.add(file);
+        if (file.isFile()) {
+            return files;
+        }
+        File[] currentDirFiles = file.listFiles();
+        if (EmptyUtil.isEmpty(currentDirFiles)) {
+            return files;
+        }
+        for (File currentDirFile : currentDirFiles) {
+            if (currentDirFile.isDirectory()) {
+                files.addAll(listFilesRecursion(currentDirFile));
+            } else if (currentDirFile.isFile()) {
+                files.add(currentDirFile);
+
+            }
+        }
+        return files;
+
+    }
+
 }
