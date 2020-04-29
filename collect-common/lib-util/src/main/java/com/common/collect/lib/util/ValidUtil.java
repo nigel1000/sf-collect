@@ -1,7 +1,7 @@
 package com.common.collect.lib.util;
 
 
-import com.common.collect.lib.api.Constants;
+import com.common.collect.lib.api.ApiConstants;
 
 import java.util.regex.Pattern;
 
@@ -12,7 +12,7 @@ public class ValidUtil {
         if (str == null) {
             return 0;
         }
-        return str.replaceAll(Constants.CHINESE_REG_EX, "aa").length();
+        return str.replaceAll(ApiConstants.CHINESE_REG_EX, "aa").length();
     }
 
     // 手机号码的正则表达式
