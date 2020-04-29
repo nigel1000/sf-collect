@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by hznijianfeng on 2020/4/29.
@@ -70,6 +71,32 @@ public class GitUtil {
             // git push origin --delete
             String cmd = "cmd.exe /c cd " + baseDir + " & git push origin --delete " + branchName.replace("origin/", "");
             process(cmd);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public static boolean isMerged(@NonNull String baseDir, String baseBranch, String needMergedBranch) {
+        try {
+            String cmd = "cmd.exe /c cd " + baseDir + " & git rev-parse " + needMergedBranch;
+            Process proc = process(cmd);
+            BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream(), StandardCharsets.UTF_8));
+            String needMergedBranchCommitId;
+            while ((needMergedBranchCommitId = br.readLine()) != null) {
+                br.close();
+                needMergedBranchCommitId = needMergedBranchCommitId.trim();
+                break;
+            }
+            cmd = "cmd.exe /c cd " + baseDir + " & git merge-base " + needMergedBranch + " " + baseBranch;
+            proc = process(cmd);
+            br = new BufferedReader(new InputStreamReader(proc.getInputStream(), StandardCharsets.UTF_8));
+            String commonBranchCommitId;
+            while ((commonBranchCommitId = br.readLine()) != null) {
+                br.close();
+                commonBranchCommitId = commonBranchCommitId.trim();
+                break;
+            }
+            return Objects.equals(needMergedBranchCommitId, commonBranchCommitId);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
