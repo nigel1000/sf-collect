@@ -1,5 +1,6 @@
 package com.common.collect.test.debug.git;
 
+import com.common.collect.lib.util.EmptyUtil;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
@@ -95,6 +96,9 @@ public class GitUtil {
                 br.close();
                 commonBranchCommitId = commonBranchCommitId.trim();
                 break;
+            }
+            if (EmptyUtil.isEmpty(needMergedBranch) || EmptyUtil.isEmpty(commonBranchCommitId)) {
+                return false;
             }
             return Objects.equals(needMergedBranchCommitId, commonBranchCommitId);
         } catch (Exception ex) {
