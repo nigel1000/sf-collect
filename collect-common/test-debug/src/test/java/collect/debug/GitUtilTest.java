@@ -24,7 +24,7 @@ public class GitUtilTest {
             if (remoteBranch.contains("origin/master")) {
                 continue;
             }
-            if (GitUtil.isMerged(baseDir, "origin/master", remoteBranch)) {
+            if (GitUtil.hasMergeB2A(baseDir, "origin/master", remoteBranch)) {
                 count++;
                 System.out.println(remoteBranch);
             }

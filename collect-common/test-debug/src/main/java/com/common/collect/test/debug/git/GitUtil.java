@@ -77,9 +77,9 @@ public class GitUtil {
         }
     }
 
-    public static boolean isMerged(@NonNull String baseDir, String baseBranch, String needMergedBranch) {
+    public static boolean hasMergeB2A(@NonNull String baseDir, String A, String B) {
         try {
-            String cmd = "cmd.exe /c cd " + baseDir + " & git rev-parse " + needMergedBranch;
+            String cmd = "cmd.exe /c cd " + baseDir + " & git rev-parse " + B;
             Process proc = process(cmd);
             BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream(), StandardCharsets.UTF_8));
             String needMergedBranchCommitId;
@@ -88,7 +88,7 @@ public class GitUtil {
                 needMergedBranchCommitId = needMergedBranchCommitId.trim();
                 break;
             }
-            cmd = "cmd.exe /c cd " + baseDir + " & git merge-base " + needMergedBranch + " " + baseBranch;
+            cmd = "cmd.exe /c cd " + baseDir + " & git merge-base " + B + " " + A;
             proc = process(cmd);
             br = new BufferedReader(new InputStreamReader(proc.getInputStream(), StandardCharsets.UTF_8));
             String commonBranchCommitId;
@@ -97,7 +97,7 @@ public class GitUtil {
                 commonBranchCommitId = commonBranchCommitId.trim();
                 break;
             }
-            if (EmptyUtil.isEmpty(needMergedBranch) || EmptyUtil.isEmpty(commonBranchCommitId)) {
+            if (EmptyUtil.isEmpty(B) || EmptyUtil.isEmpty(commonBranchCommitId)) {
                 return false;
             }
             return Objects.equals(needMergedBranchCommitId, commonBranchCommitId);
