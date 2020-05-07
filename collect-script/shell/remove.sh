@@ -3,20 +3,25 @@
 
 # alias rm="sh /Users/nijianfeng/Documents/projects/sf-collect/collect-script/shell/remove.sh"
 
-# 定义文件夹目录.Trash
-TRASH_DIR="/Users/nijianfeng/.Trash"
-DATE=`date "+%Y%m%d%H%M%S"`
-TARGET_DIR=$TRASH_DIR/$DATE/
-mkdir -p "$TARGET_DIR"
-RECORD_FILE=$TARGET_DIR/."操作纪录-"$DATE.txt
-touch "$RECORD_FILE"
-echo "当前目录：`pwd`" >> "$RECORD_FILE"
+# 遇到不存在的变量时报错
+set -u
+# 任何一个语句返回非真则退出bash
+set -e
+
+pwdDir=`pwd`
+trashDir="/Users/nijianfeng/.Trash"
+stamp=`date "+%Y%m%d%H%M%S"`
+recordFile=${trashDir}/${stamp}.txt
+touch ${recordFile}
+
+echo ${pwdDir} | tee -a ${recordFile}
 
 for i in $*; do
-    if [[ "$i" == -* ]];then
+    if [[ $i == -* ]];then
         continue
     fi
-    echo "move $i to $TARGET_DIR" >> "$RECORD_FILE"
+    fileName=`basename $i`
+    echo move $i to ${trashDir}/${fileName}.${stamp} | tee -a ${recordFile}
     # 将输入的参数对应文件 mv 至 .Trash 目录
-    mv "$i" "$TARGET_DIR"
+    mv $i ${trashDir}/${fileName}.${stamp}
 done
