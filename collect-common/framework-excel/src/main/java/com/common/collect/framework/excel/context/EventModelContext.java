@@ -27,4 +27,8 @@ public class EventModelContext {
     // 读取的数据
     private List<List<String>> rows;
 
+    public void incrementRowNum() {
+        sheetAlreadyReadRowNum++;
+    }
+
 }

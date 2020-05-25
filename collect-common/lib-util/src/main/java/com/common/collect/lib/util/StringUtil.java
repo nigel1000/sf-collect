@@ -62,6 +62,19 @@ public class StringUtil {
         return charList;
     }
 
+    public static boolean isNumeric(String str) {
+        if (str == null) {
+            return false;
+        }
+        int sz = str.length();
+        for (int i = 0; i < sz; i++) {
+            if (!Character.isDigit(str.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static String format(String pattern, Object... args) {
         if (pattern == null || args == null || args.length == 0) {
             return pattern;

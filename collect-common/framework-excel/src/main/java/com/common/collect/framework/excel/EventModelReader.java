@@ -21,7 +21,11 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by hznijianfeng on 2019/5/28.
@@ -218,11 +222,8 @@ public class EventModelReader {
                 isTElement = false;
             } else if ("v".equals(name)) {
                 // v => 单元格的值，如果单元格是字符串则v标签的值为该字符串在SST中的索引
-                // 将单元格内容加入 rowlist 中，在这之前先去掉字符串前后的空白符
-                if (name.equals("v")) {
-                    String value = lastContents.trim();
-                    oneRow.put(curColIndex, value);
-                }
+                String value = lastContents.trim();
+                oneRow.put(curColIndex, value);
             } else {
                 // 如果标签名称为 row ，这说明已到行尾，调用 optRows() 方法
                 if (name.equals("row")) {
