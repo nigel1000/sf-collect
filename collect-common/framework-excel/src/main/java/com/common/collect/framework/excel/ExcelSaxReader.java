@@ -37,7 +37,7 @@ import java.util.Map;
  * Created by hznijianfeng on 2019/5/28.
  */
 
-public class SaxReader extends DefaultHandler {
+public class ExcelSaxReader extends DefaultHandler {
 
     private final static int need_read_row_num_mark_code = 5267386;
     // 提供三种方式设置文件： 流，url，文件
@@ -68,7 +68,7 @@ public class SaxReader extends DefaultHandler {
     private SharedStringsTable sharedStringsTable;
     private StylesTable stylesTable;
 
-    public SaxReader(@NonNull Object excelFile, @NonNull IEventModelParseHandler bizHandler) {
+    public ExcelSaxReader(@NonNull Object excelFile, @NonNull IEventModelParseHandler bizHandler) {
         if (excelFile instanceof InputStream) {
             excelFile((InputStream) excelFile);
         } else if (excelFile instanceof String) {

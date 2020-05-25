@@ -1,7 +1,7 @@
 package framework.excel;
 
 import com.common.collect.framework.excel.EventModelReader;
-import com.common.collect.framework.excel.SaxReader;
+import com.common.collect.framework.excel.ExcelSaxReader;
 import com.common.collect.framework.excel.ExcelExportUtil;
 import com.common.collect.framework.excel.ExcelSession;
 import com.common.collect.framework.excel.client.ExcelClient;
@@ -87,14 +87,14 @@ public class ExcelTest {
 //        System.out.println(StringUtil.join(ids, ","));
 
         String url = "https://d1.music.126.net/dmusic/LTM5MDA1MA==/e490cf07f54872d578b728dfd7e22743?download=test.xlsx";
-        SaxReader saxReader = new SaxReader(url, (context)->{
+        ExcelSaxReader excelSaxReader = new ExcelSaxReader(url, (context)->{
             System.out.println(context);
         });
-        saxReader.setNeedReadColNum(7);
-        saxReader.setBatchHandleSize(1);
-        saxReader.setNeedDataFormat(true);
-        saxReader.setParseSheetIndex(Arrays.asList(1));
-        saxReader.processSheet();
+        excelSaxReader.setNeedReadColNum(7);
+        excelSaxReader.setBatchHandleSize(1);
+        excelSaxReader.setNeedDataFormat(true);
+        excelSaxReader.setParseSheetIndex(Arrays.asList(1));
+        excelSaxReader.processSheet();
     }
 
     public static void eventModelReader() throws Exception {
