@@ -57,7 +57,7 @@ public class GitUtil {
         }
     }
 
-    public static void remoteLocalBranch(@NonNull String baseDir, String branchName) {
+    public static void removeLocalBranch(@NonNull String baseDir, String branchName) {
         try {
             String cmd = "cmd.exe /c cd " + baseDir + " & git branch -D " + branchName;
             process(cmd);
@@ -66,7 +66,7 @@ public class GitUtil {
         }
     }
 
-    public static void remoteRemoteBranch(@NonNull String baseDir, String branchName) {
+    public static void removeRemoteBranch(@NonNull String baseDir, String branchName) {
         try {
             // git push origin :
             // git push origin --delete

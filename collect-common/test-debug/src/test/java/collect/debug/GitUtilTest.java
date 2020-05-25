@@ -11,7 +11,7 @@ import java.util.List;
 public class GitUtilTest {
 
     public static void main(String[] args) {
-//        GitUtil.remoteRemoteBranch("D:\\projects\\sf-collect\\collect-common", "origin/dependabot/maven/collect-common/com.fasterxml.jackson.core-jackson-databind-2.9.10.4");
+//        GitUtil.removeRemoteBranch("D:\\projects\\sf-collect\\collect-common", "origin/dependabot/maven/collect-common/com.fasterxml.jackson.core-jackson-databind-2.9.10.4");
         String baseDir = "";
 //        List<String> localBranch = GitUtil.getLocalBranches(baseDir);
 //        System.out.println("本地分支:" + localBranch.size() + "\t" + localBranch);
@@ -43,7 +43,7 @@ public class GitUtilTest {
 //            if (commitTime.before(limitTime)) {
 //                count++;
 //                System.out.println(log + "\t" + remoteBranch);
-////                GitUtil.remoteRemoteBranch(baseDir, remoteBranch);
+////                GitUtil.removeRemoteBranch(baseDir, remoteBranch);
 //            }
 //        }
 //        System.out.println(DateUtil.format(limitTime, "yyyy-MM-dd HH:mm:ss") + " 之前的分支数量：" + count);
