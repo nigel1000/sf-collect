@@ -8,6 +8,7 @@ import com.common.collect.lib.util.FileUtil;
 import com.common.collect.lib.util.IdUtil;
 import com.common.collect.lib.util.StringUtil;
 import com.common.collect.lib.util.okhttp.HttpUtil;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 import org.apache.poi.openxml4j.opc.OPCPackage;
@@ -28,15 +29,15 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by hznijianfeng on 2019/5/28.
  */
 
+@NoArgsConstructor
 public class ExcelSaxReader extends DefaultHandler {
 
     private final static int need_read_row_num_mark_code = 5267386;
@@ -146,8 +147,10 @@ public class ExcelSaxReader extends DefaultHandler {
     public void startElement(String uri, String localName, String name, Attributes attributes) {
         // c => 单元格
         if ("c".equals(name)) {
-            cellContext.curColRef = attributes.getValue("r").replaceAll("\\d", "");
-            cellContext.oneRow.put(cellContext.curColRef, "");
+            if (cellContext.preColRef != null) {
+                cellContext.preColRef = cellContext.curColRef;
+            }
+            cellContext.curColRef = attributes.getValue("r");
 
             String cellType = attributes.getValue("t");
             // 如果下一个元素是 SST 的索引，则将nextIsString标记为true
@@ -200,14 +203,15 @@ public class ExcelSaxReader extends DefaultHandler {
             cellContext.lastContents = new XSSFRichTextString(sharedStringsTable.getEntryAt(idx)).toString();
             cellContext.nextIsString = false;
         }
-
         // t元素也包含字符串
         if (cellContext.isTElement) {
+            cellContext.handleNullCol();
             // 将单元格内容加入 oneRow 中，在这之前先去掉字符串前后的空白符
             String value = cellContext.lastContents.trim();
-            cellContext.oneRow.put(cellContext.curColRef, value);
+            cellContext.addCol(value);
             cellContext.isTElement = false;
         } else if ("v".equals(name)) {
+            cellContext.handleNullCol();
             // v => 单元格的值，如果单元格是字符串则v标签的值为该字符串在SST中的索引
             String value = cellContext.lastContents.trim();
             if (EmptyUtil.isNotBlank(value) && cellContext.nextCellDataType != null) {
@@ -233,7 +237,7 @@ public class ExcelSaxReader extends DefaultHandler {
                         break;
                 }
             }
-            cellContext.oneRow.put(cellContext.curColRef, value);
+            cellContext.addCol(value);
         } else {
             // 如果标签名称为 row ，这说明已到行尾，调用 optRows() 方法
             if (name.equals("row")) {
@@ -256,6 +260,38 @@ public class ExcelSaxReader extends DefaultHandler {
                 }
             }
         }
+    }
+
+    // 计算两个单元格之间的单元格数目(同一行)
+    public int countNullCell(String ref, String preRef) {
+        //excel2007最大行数是1048576，最大列数是16384，最后一列列名是XFD
+        String xfd = ref.replaceAll("\\d+", "");
+        String xfd_1 = preRef.replaceAll("\\d+", "");
+
+        xfd = fillChar(xfd, 3, '@', true);
+        xfd_1 = fillChar(xfd_1, 3, '@', true);
+
+        char[] letter = xfd.toCharArray();
+        char[] letter_1 = xfd_1.toCharArray();
+        int res = (letter[0] - letter_1[0]) * 26 * 26 + (letter[1] - letter_1[1]) * 26 + (letter[2] - letter_1[2]);
+        return res - 1;
+    }
+
+    // 字符串的填充
+    private String fillChar(String str, int len, char let, boolean isPre) {
+        int len_1 = str.length();
+        if (len_1 < len) {
+            if (isPre) {
+                for (int i = 0; i < (len - len_1); i++) {
+                    str = let + str;
+                }
+            } else {
+                for (int i = 0; i < (len - len_1); i++) {
+                    str = str + let;
+                }
+            }
+        }
+        return str;
     }
 
     @Override
@@ -281,7 +317,9 @@ public class ExcelSaxReader extends DefaultHandler {
     }
 
     private class CellContext {
+        private String preColRef;
         private String curColRef;
+        private int curCol;
         private String lastContents;
         private boolean nextIsString;
         private boolean isTElement;
@@ -290,17 +328,44 @@ public class ExcelSaxReader extends DefaultHandler {
         private String dataFormatStr;
 
         // ColMap <A-Z, Value>
-        private Map<String, String> oneRow = new LinkedHashMap<>();
+        private List<String> oneRow = new ArrayList<>();
 
         public void finishOneRow() {
-            oneRow = new LinkedHashMap<>();
+            oneRow = new ArrayList<>();
+            curCol = 0;
+            preColRef = null;
+            curColRef = null;
+        }
+
+        public void addCol(String value) {
+            oneRow.add(curCol, value);
+            curCol++;
+        }
+
+        public void handleNullCol() {
+            if (!Objects.equals(cellContext.curColRef, cellContext.preColRef)) {
+                int len;
+                if (cellContext.preColRef == null) {
+                    if (!cellContext.curColRef.startsWith("A")) {
+                        len = countNullCell(cellContext.curColRef, "A1");
+                        len++;
+                    } else {
+                        len = 0;
+                    }
+                    cellContext.preColRef = cellContext.curColRef;
+                } else {
+                    len = countNullCell(cellContext.curColRef, cellContext.preColRef);
+                }
+                for (int i = 0; i < len; i++) {
+                    cellContext.addCol("");
+                }
+            }
         }
 
         public boolean isEmptyRow() {
             boolean isEmptyRow = true;
-            for (Map.Entry<String, String> entry : oneRow.entrySet()) {
-                String value = entry.getValue();
-                if (EmptyUtil.isNotEmpty(value)) {
+            for (String s : oneRow) {
+                if (EmptyUtil.isNotEmpty(s)) {
                     isEmptyRow = false;
                 }
             }
@@ -309,10 +374,7 @@ public class ExcelSaxReader extends DefaultHandler {
 
         // 填充空字符串
         public List<String> fetchColsWithPadding(int needColNum) {
-            List<String> cols = new LinkedList<>();
-            for (Map.Entry<String, String> entry : oneRow.entrySet()) {
-                cols.add(entry.getValue());
-            }
+            List<String> cols = new ArrayList<>(oneRow);
             if (needColNum > cols.size()) {
                 int time = needColNum - cols.size();
                 for (int i = 0; i < time; i++) {

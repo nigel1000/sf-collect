@@ -1,6 +1,5 @@
 package framework.excel;
 
-import com.common.collect.framework.excel.EventModelReader;
 import com.common.collect.framework.excel.ExcelSaxReader;
 import com.common.collect.framework.excel.ExcelExportUtil;
 import com.common.collect.framework.excel.ExcelSession;
@@ -33,8 +32,8 @@ public class ExcelTest {
     public static void main(String[] args) throws Exception {
 
 //        log.info("");
-//        log.info("eventModelReader ##########");
-//        eventModelReader();
+//        log.info("excelSaxReader ##########");
+//        excelSaxReader();
 //
 //        log.info("");
 //        log.info("sessionExcel ##########");
@@ -79,34 +78,33 @@ public class ExcelTest {
 //                }
 //            }
 //        };
-//        EventModelReader eventModelReader = new EventModelReader(new FileInputStream(from), handler);
-//        eventModelReader.setNeedReadColNum(1);
-//        eventModelReader.setBatchHandleSize(20);
-//        eventModelReader.setParseSheetIndex(Arrays.asList(1));
-//        eventModelReader.processSheet();
+//        ExcelSaxReader excelSaxReader = new ExcelSaxReader(new FileInputStream(from), handler);
+//        excelSaxReader.setNeedReadColNum(1);
+//        excelSaxReader.setBatchHandleSize(20);
+//        excelSaxReader.setParseSheetIndex(Arrays.asList(1));
+//        excelSaxReader.processSheet();
 //        System.out.println(StringUtil.join(ids, ","));
 
-        String url = "https://d1.music.126.net/dmusic/LTM5MDA1MA==/e490cf07f54872d578b728dfd7e22743?download=test.xlsx";
-        ExcelSaxReader excelSaxReader = new ExcelSaxReader(url, (context)->{
+        String url = "D:\\projects\\sf-collect\\collect-common\\test-main\\src\\test\\resources\\excel\\ExcelSaxReader.xlsx";
+        ExcelSaxReader excelSaxReader = new ExcelSaxReader(new File(url), (context)->{
             System.out.println(context);
         });
         excelSaxReader.setNeedReadColNum(7);
         excelSaxReader.setBatchHandleSize(1);
-        excelSaxReader.setNeedDataFormat(true);
         excelSaxReader.setParseSheetIndex(Arrays.asList(1));
         excelSaxReader.processSheet();
     }
 
-    public static void eventModelReader() throws Exception {
+    public static void excelSaxReader() throws Exception {
         String from = root + "src/test/resources/excel/";
         log.info("from:\t" + from);
         DefaultEventModelParseHandler handler = new DefaultEventModelParseHandler();
-        EventModelReader eventModelReader = new EventModelReader(new FileInputStream(from + "EventModelReader.xlsx"), handler);
-        eventModelReader.setNeedReadColNum(12);
-        eventModelReader.setBatchHandleSize(3);
-        eventModelReader.setParseSheetIndex(Arrays.asList(1, 3));
-        eventModelReader.setNeedReadRowNum(4);
-        eventModelReader.processSheet();
+        ExcelSaxReader excelSaxReader = new ExcelSaxReader(new FileInputStream(from + "ExcelSaxReader.xlsx"), handler);
+        excelSaxReader.setNeedReadColNum(12);
+        excelSaxReader.setBatchHandleSize(3);
+        excelSaxReader.setParseSheetIndex(Arrays.asList(1, 3));
+        excelSaxReader.setNeedReadRowNum(4);
+        excelSaxReader.processSheet();
     }
 
     public static void sessionExcel() throws Exception {
