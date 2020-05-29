@@ -347,7 +347,7 @@ public class ExcelSaxReader extends DefaultHandler {
                 int len;
                 if (cellContext.preColRef == null) {
                     if (!cellContext.curColRef.startsWith("A")) {
-                        len = countNullCell(cellContext.curColRef, "A1");
+                        len = countNullCell(cellContext.curColRef, "A");
                         len++;
                     } else {
                         len = 0;

@@ -80,7 +80,7 @@ public class HttpFileServer {
         }
 
         @Override
-        public void messageReceived(ChannelHandlerContext ctx, Object o) throws Exception {
+        protected void channelRead0(ChannelHandlerContext ctx, Object o) throws Exception {
             FullHttpRequest request = (FullHttpRequest) o;
             //首先对HTTP请求消息的解码结果进行判断，如果解码失败，直接构造HTTP 400错误返回。
             if (!request.getDecoderResult().isSuccess()) {
