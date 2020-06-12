@@ -1,6 +1,7 @@
 package com.common.collect.lib.util.jackson;
 
 import com.common.collect.lib.api.excps.UnifiedException;
+import com.common.collect.lib.util.EmptyUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
@@ -29,6 +30,9 @@ public class JsonUtil {
 
     public static String bean2json(Object obj) {
         try {
+            if (obj == null) {
+                return "";
+            }
             return objectMapper.writeValueAsString(obj);
         } catch (Exception e) {
             throw UnifiedException.gen("toJson出错：", e);
@@ -38,6 +42,9 @@ public class JsonUtil {
     // array new TypeReference<List<Integer>>()
     public static <T> T json2bean(String json, TypeReference<T> typeRef) {
         try {
+            if (EmptyUtil.isEmpty(json)) {
+                return null;
+            }
             return objectMapper.readValue(json, typeRef);
         } catch (Exception e) {
             throw UnifiedException.gen("toBean出错：", e);
@@ -46,6 +53,9 @@ public class JsonUtil {
 
     public static <T> T json2bean(String json, Class<T> clz) {
         try {
+            if (EmptyUtil.isEmpty(json)) {
+                return null;
+            }
             return objectMapper.readValue(json, clz);
         } catch (Exception e) {
             throw UnifiedException.gen("toBean出错：", e);
@@ -90,6 +100,9 @@ public class JsonUtil {
 
     public static <T> T getProperty(String json, String path, Class<T> clazz) {
         try {
+            if (EmptyUtil.isEmpty(json)) {
+                return null;
+            }
             JsonNode root = objectMapper.readTree(json);
             return parseNodeValue(findNode(root, path), clazz);
         } catch (IOException e) {
