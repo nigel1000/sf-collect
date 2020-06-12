@@ -123,6 +123,8 @@ public class ExcelSaxReader extends DefaultHandler {
                     InputSource sheetSource = new InputSource(sheet);
                     xmlReader.parse(sheetSource);
                     sheet.close();
+                    // 一个 sheet 处理完后 最后一批数据
+                    handleData();
                 } catch (UnifiedException ex) {
                     switch (ex.getErrorCode()) {
                         case need_read_row_num_mark_code:
@@ -132,10 +134,6 @@ public class ExcelSaxReader extends DefaultHandler {
                     }
                 } catch (Exception e) {
                     throw UnifiedException.gen("processSheet handle", e);
-                } finally {
-                    handleData();
-                    // 一个 sheet 处理完后
-                    eventModelContext = new EventModelContext();
                 }
             } else {
                 sheets.next();
