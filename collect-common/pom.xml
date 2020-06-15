@@ -49,7 +49,7 @@
         <commons-collections4.version>4.1</commons-collections4.version>
         <!--EXCEL 依赖-->
         <poi.version>3.17</poi.version>
-        <xercesImpl.version>2.11.0</xercesImpl.version>
+        <xercesImpl.version>2.12.0</xercesImpl.version>
         <!--数据库 依赖-->
         <mysql-connector-java.version>5.1.38</mysql-connector-java.version>
         <mybatis.version>3.4.1</mybatis.version>
