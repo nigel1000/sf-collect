@@ -5,56 +5,30 @@ import com.common.collect.lib.api.enums.CodeEnum;
 import com.common.collect.lib.api.excps.IBizException;
 import com.common.collect.lib.util.ClassUtil;
 import com.common.collect.lib.util.TraceIdUtil;
-import com.common.collect.lib.util.spring.AopUtil;
+import com.common.collect.lib.util.spring.aop.base.DiyAround;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Pointcut;
-import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 
 /**
- * Created by hznijianfeng on 2018/8/15. 加在provider上，譬如facade等
+ * Created by nijianfeng on 2020/6/25.
  */
 
-@Aspect
-@Component
-@Order(value = 0)
 @Slf4j
-public class CatchExcpAspectJ {
+public class CatchExcpAround implements DiyAround.IDiyAround {
 
-    @Pointcut("@within(com.common.collect.lib.util.spring.aop.CatchExcp)")
-    public void clazz() {
-    }
-
-    @Pointcut("@annotation(com.common.collect.lib.util.spring.aop.CatchExcp)")
-    public void method() {
-    }
-
-    @Around("clazz() || method()")
-    public Object around(final ProceedingJoinPoint point) {
-        CatchExcp catchExcp = AopUtil.getAnnotation(point, CatchExcp.class);
-        try {
-            return point.proceed();
-        } catch (Throwable ex) {
-            return excpResult(ex, point, catchExcp);
-        }
-    }
-
-    private Object excpResult(Throwable bizExcp, ProceedingJoinPoint point, CatchExcp catchExcp) {
-        String module = catchExcp.module();
-        String className = point.getTarget().getClass().getName();
-        String methodName = point.getSignature().getName();
-        Class returnType = ((MethodSignature) point.getSignature()).getReturnType();
+    @Override
+    public Object doFallback(DiyAround.DiyAroundContext diyAroundContext, Throwable bizExcp, DiyAround diyAround) {
+        String module = diyAround.module();
+        String className = diyAroundContext.getClassName();
+        String methodName = diyAroundContext.getMethodName();
+        Class returnType = diyAroundContext.getRetType();
+        Object[] args = diyAroundContext.getArgs();
         try {
             if (bizExcp instanceof IBizException) {
                 IBizException bizException = (IBizException) bizExcp;
                 if (bizExcp.getCause() != null) {
                     log.error("{} 异常。模块：{}，类名：{}，方法：{}，入参：{}，描述:{}, 上下文:{}", bizExcp.getClass().getSimpleName(),
                             module, className, methodName,
-                            point.getArgs(),
+                            args,
                             bizExcp.getMessage(), bizException.getContext(),
                             bizException);
                 }
@@ -62,13 +36,13 @@ public class CatchExcpAspectJ {
             } else if (bizExcp instanceof Exception) {
                 log.error("Exception 异常。模块：{}，类名：{}，方法：{},入参：{}",
                         module, className, methodName,
-                        point.getArgs(),
+                        args,
                         bizExcp);
                 return handleExceptionDefault(CodeEnum.FAIL.getCode(), CodeEnum.FAIL.getMsg(), returnType);
             } else {
                 log.error("Throwable 异常。模块：{}，类名：{}，方法：{},入参：{}",
                         module, className, methodName,
-                        point.getArgs(),
+                        args,
                         bizExcp);
                 return handleExceptionDefault(CodeEnum.FAIL.getCode(), CodeEnum.FAIL.getMsg(), returnType);
             }
@@ -107,5 +81,4 @@ public class CatchExcpAspectJ {
     private Object handlePrimitiveType(Class<?> returnType) {
         return ClassUtil.returnBaseDataType(returnType);
     }
-
 }

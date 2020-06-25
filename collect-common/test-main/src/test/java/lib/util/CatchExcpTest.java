@@ -3,7 +3,9 @@ package lib.util;
 import com.common.collect.lib.api.Response;
 import com.common.collect.lib.api.excps.UnifiedException;
 import com.common.collect.lib.util.TraceIdUtil;
-import com.common.collect.lib.util.spring.aop.CatchExcp;
+import com.common.collect.lib.util.spring.aop.CatchExcpAround;
+import com.common.collect.lib.util.spring.aop.EasyLogAround;
+import com.common.collect.lib.util.spring.aop.base.DiyAround;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -33,7 +35,9 @@ public class CatchExcpTest {
         log.info("sysExcp:{}", sysExcp);
     }
 
-    @CatchExcp(module = "test")
+    @DiyAround(module = "test",
+            diyAroundCls = {EasyLogAround.class, CatchExcpAround.class},
+            diyAroundWay = {DiyAround.DiyAroundWay.reflect, DiyAround.DiyAroundWay.reflect})
     @Component
     public static class DemoService {
 
