@@ -11,8 +11,10 @@ set -e
 pwdDir=`pwd`
 trashDir="/Users/nijianfeng/.Trash"
 stamp=`date "+%Y%m%d%H%M%S"`
-recordFile=${trashDir}/${stamp}.txt
+recordFile=${trashDir}/${stamp}-recordFile.txt
+recoveryFile=${trashDir}/${stamp}-recoveryFile.txt
 touch ${recordFile}
+touch ${recoveryFile}
 
 echo ${pwdDir} | tee -a ${recordFile}
 
@@ -21,7 +23,8 @@ for i in $*; do
         continue
     fi
     fileName=`basename $i`
-    echo move $i to ${trashDir}/${stamp}.${fileName} | tee -a ${recordFile}
+    echo mv $i ${trashDir}/${stamp}.${fileName} | tee -a ${recordFile}
     # 将输入的参数对应文件 mv 至 .Trash 目录
     mv $i ${trashDir}/${stamp}.${fileName}
+    echo mv ${trashDir}/${stamp}.${fileName} ${pwdDir}/$i | tee -a ${recoveryFile}
 done
