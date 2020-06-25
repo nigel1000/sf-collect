@@ -21,7 +21,7 @@ for i in $*; do
         continue
     fi
     fileName=`basename $i`
-    echo move $i to ${trashDir}/${fileName}.${stamp} | tee -a ${recordFile}
+    echo move $i to ${trashDir}/${stamp}.${fileName} | tee -a ${recordFile}
     # 将输入的参数对应文件 mv 至 .Trash 目录
-    mv $i ${trashDir}/${fileName}.${stamp}
+    mv $i ${trashDir}/${stamp}.${fileName}
 done
