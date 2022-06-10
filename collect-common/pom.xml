@@ -42,7 +42,7 @@
         <netty.version>3.7.0.Final</netty.version>
         <okhttp.version>3.10.0</okhttp.version>
         <kafka.version>1.0.0</kafka.version>
-        <dubbo.version>2.5.5</dubbo.version>
+        <dubbo.version>2.6.12</dubbo.version>
         <elastic.version>6.5.4</elastic.version>
         <commons-lang3.version>3.3.1</commons-lang3.version>
         <commons-collections.version>3.2.2</commons-collections.version>
